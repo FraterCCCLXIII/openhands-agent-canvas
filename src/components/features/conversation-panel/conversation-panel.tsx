@@ -442,7 +442,7 @@ export function ConversationPanel({
                 type="button"
                 data-testid="load-more-conversations"
                 onClick={() => fetchNextPage()}
-                className="text-xs text-neutral-400 underline hover:text-white"
+                className="text-xs text-neutral-400 hover:text-white"
               >
                 {t(I18nKey.CONVERSATION$LOAD_MORE)}
               </button>

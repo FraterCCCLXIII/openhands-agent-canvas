@@ -127,6 +127,8 @@ export function BackendSelector({
   const { mutateAsync: switchOrg, isPending: isSwitching } =
     useSwitchCloudOrganization();
   const navigate = useNavigate();
+  const settingsMatch = useMatch("/settings");
+  const settingsSubrouteMatch = useMatch("/settings/*");
   const conversationMatch = useMatch("/conversations/:conversationId");
   const automationDetailMatch = useMatch("/automations/:automationId");
   const [addBackendModalOpen, setAddBackendModalOpen] = React.useState(false);
@@ -160,6 +162,7 @@ export function BackendSelector({
 
   const activeValue = makeOptionValue(active.backend.id, active.orgId);
   const activeOption = options.find((o) => o.value === activeValue);
+  const isSettingsActive = Boolean(settingsMatch || settingsSubrouteMatch);
 
   const someCloudLoading = Object.values(cloudOrgs).some((c) => c.isLoading);
 
@@ -347,7 +350,11 @@ export function BackendSelector({
             data-testid="backend-selector-settings-link"
             aria-label={t(I18nKey.SIDEBAR$SETTINGS)}
             onClick={() => navigate("/settings")}
-            className="inline-flex items-center justify-center shrink-0 w-9 h-9 rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99] transition-colors"
+            className={
+              isSettingsActive
+                ? "inline-flex items-center justify-center shrink-0 w-9 h-9 rounded-md bg-[#1f1f1f99] text-white font-medium transition-colors"
+                : "inline-flex items-center justify-center shrink-0 w-9 h-9 rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99] transition-colors"
+            }
           >
             <Settings width={16} height={16} />
           </button>
