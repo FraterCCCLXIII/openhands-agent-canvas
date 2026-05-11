@@ -43,7 +43,6 @@ export function SettingsNavigation({
               to={renderedItem.item.to}
               label={t(renderedItem.item.text as I18nKey)}
               end
-              indent
               testId={`sidebar-settings-${renderedItem.item.to}`}
               icon={renderedItem.item.icon}
             />
