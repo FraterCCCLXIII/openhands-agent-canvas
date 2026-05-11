@@ -158,6 +158,21 @@ describe("Sidebar", () => {
     expect(sidebar?.dataset.collapsed).toBe("false");
   });
 
+  it("expands the sidebar when collapsed rail empty space is clicked", () => {
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    const sidebar = screen.getByRole("navigation").parentElement;
+    expect(sidebar?.dataset.collapsed).toBe("true");
+
+    if (!sidebar) {
+      throw new Error("Sidebar root not found");
+    }
+
+    fireEvent.click(sidebar);
+    expect(sidebar.dataset.collapsed).toBe("false");
+  });
+
   it("renders icons for every top-level nav item so they remain meaningful in the collapsed rail", () => {
     renderSidebar("/conversations");
 

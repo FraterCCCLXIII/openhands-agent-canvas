@@ -40,6 +40,7 @@ export function Sidebar() {
   } = useSettings();
   const [collapsed, setCollapsed] = useSidebarCollapsedState();
   const [settingsModalIsOpen, setSettingsModalIsOpen] = React.useState(false);
+  const [collapsedRailHovered, setCollapsedRailHovered] = React.useState(false);
   const settingsErrorStatus = getErrorStatus(settingsError);
 
   React.useEffect(() => {
@@ -74,12 +75,47 @@ export function Sidebar() {
   const collapseToggleLabel = t(
     collapsed ? I18nKey.SIDEBAR$EXPAND : I18nKey.SIDEBAR$COLLAPSE,
   );
+  const handleCollapsedRailClick = React.useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (!collapsed) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      // Keep existing behavior for explicit controls/links and only use
+      // this as a convenience hit-area for empty collapsed-rail space.
+      if (
+        target.closest(
+          "a,button,input,textarea,select,[role='button'],[role='link']",
+        )
+      ) {
+        return;
+      }
+
+      setCollapsed(false);
+    },
+    [collapsed, setCollapsed],
+  );
+  const showCollapsedExpandButton = collapsed && collapsedRailHovered;
 
   return (
     <SidebarCollapseContext.Provider value={collapsed}>
       <aside
         aria-label={t(I18nKey.SIDEBAR$NAVIGATION_LABEL)}
         data-collapsed={collapsed ? "true" : "false"}
+        onClick={handleCollapsedRailClick}
+        onMouseEnter={() => {
+          if (collapsed) {
+            setCollapsedRailHovered(true);
+          }
+        }}
+        onMouseLeave={() => {
+          setCollapsedRailHovered(false);
+        }}
         className={cn(
           "bg-base flex flex-col gap-3 transition-[width,min-width] duration-200",
           // Mobile: top bar; Desktop: vertical column. Width responds to
@@ -102,34 +138,60 @@ export function Sidebar() {
             collapsed ? "md:flex-col md:gap-2 md:px-0" : "md:pl-2 md:pr-0",
           )}
         >
-          <OpenHandsLogoButton />
-          {/* Desktop-only collapse toggle. Hidden on mobile (the sidebar
-              there is the top bar and doesn't collapse). No tooltip — the
-              chevron direction already conveys what the button does. */}
-          <button
-            type="button"
-            data-testid="sidebar-collapse-toggle"
-            aria-pressed={collapsed}
-            aria-label={collapseToggleLabel}
-            onClick={() => setCollapsed((prev) => !prev)}
-            className={cn(
-              "hidden md:inline-flex items-center justify-center shrink-0",
-              "w-7 h-7 rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
-              "transition-colors cursor-pointer",
-              collapsed
-                ? "mx-auto"
-                : // ml-auto right-aligns inside the header row; -mr-2 pulls
+          {collapsed ? (
+            <div className="relative hidden md:block mx-auto">
+              <div
+                className={cn(
+                  "transition-opacity duration-150",
+                  showCollapsedExpandButton && "opacity-0",
+                )}
+              >
+                <OpenHandsLogoButton />
+              </div>
+              <button
+                type="button"
+                data-testid="sidebar-collapse-toggle"
+                aria-pressed={collapsed}
+                aria-label={collapseToggleLabel}
+                onClick={() => setCollapsed(false)}
+                className={cn(
+                  "absolute inset-0 hidden md:inline-flex items-center justify-center",
+                  "rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
+                  "transition-colors cursor-pointer",
+                  showCollapsedExpandButton
+                    ? "opacity-100 pointer-events-auto"
+                    : "opacity-0 pointer-events-none",
+                )}
+              >
+                <ChevronRight width={18} height={18} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <OpenHandsLogoButton />
+              {/* Desktop-only collapse toggle. Hidden on mobile (the sidebar
+                  there is the top bar and doesn't collapse). No tooltip —
+                  the chevron direction already conveys what the button does. */}
+              <button
+                type="button"
+                data-testid="sidebar-collapse-toggle"
+                aria-pressed={collapsed}
+                aria-label={collapseToggleLabel}
+                onClick={() => setCollapsed(true)}
+                className={cn(
+                  "hidden md:inline-flex items-center justify-center shrink-0",
+                  "w-7 h-7 rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
+                  "transition-colors cursor-pointer",
+                  // ml-auto right-aligns inside the header row; -mr-2 pulls
                   // past the header's own pr-0 + most of the aside's pr-3 so
                   // the caret sits flush against the right edge of the rail.
                   "ml-auto md:-mr-2",
-            )}
-          >
-            {collapsed ? (
-              <ChevronRight width={18} height={18} />
-            ) : (
-              <ChevronLeft width={18} height={18} />
-            )}
-          </button>
+                )}
+              >
+                <ChevronLeft width={18} height={18} />
+              </button>
+            </>
+          )}
         </div>
 
         <div className="hidden md:block">
