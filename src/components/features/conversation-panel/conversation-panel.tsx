@@ -19,6 +19,7 @@ import {
   displayErrorToast,
   displaySuccessToast,
 } from "#/utils/custom-toast-handlers";
+import { isExecutionActive } from "#/utils/status";
 import { ConversationCard } from "./conversation-card/conversation-card";
 import { StartTaskCard } from "./start-task-card/start-task-card";
 import { ConversationCardSkeleton } from "./conversation-card/conversation-card-skeleton";
@@ -122,6 +123,13 @@ export function ConversationPanel({
 
   const { recent: recentConversations, older: olderConversations } =
     React.useMemo(() => partitionByCutoff(conversations), [conversations]);
+  const compactVisibleConversations = React.useMemo(
+    () =>
+      recentConversations.filter((conversation) =>
+        isExecutionActive(conversation.execution_status),
+      ),
+    [recentConversations],
+  );
 
   const { mutate: deleteConversation, mutateAsync: deleteConversationAsync } =
     useDeleteConversation();
@@ -411,7 +419,9 @@ export function ConversationPanel({
           ))}
 
         {/* Recent conversations (last_updated within the past hour) */}
-        {recentConversations.map(renderConversationCard)}
+        {(compact ? compactVisibleConversations : recentConversations).map(
+          renderConversationCard,
+        )}
 
         {/* Older conversations render by default; users can hide them from the
             summary's filter menu. Compact mode still omits the summary row. */}

@@ -21,6 +21,8 @@ interface DropdownProps {
   className?: string;
   footer?: React.ReactNode;
   openUpward?: boolean;
+  hideTrigger?: boolean;
+  defaultOpen?: boolean;
 }
 
 export function Dropdown({
@@ -36,6 +38,8 @@ export function Dropdown({
   className,
   footer,
   openUpward = false,
+  hideTrigger = false,
+  defaultOpen = false,
 }: DropdownProps) {
   const [inputValue, setInputValue] = useState(defaultValue?.label ?? "");
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +65,7 @@ export function Dropdown({
       state.isOpen
         ? { ...actionAndChanges.changes, isOpen: true }
         : actionAndChanges.changes,
+    initialIsOpen: defaultOpen,
     onInputValueChange: ({ inputValue: newValue }) => {
       setInputValue(newValue ?? "");
       setSearchTerm(newValue ?? "");
@@ -113,34 +118,36 @@ export function Dropdown({
 
   return (
     <div className="relative w-full" data-testid={testId}>
-      <div
-        className={cn(
-          "bg-tertiary border border-[#717888] rounded w-full p-2",
-          "flex items-center gap-2",
-          isDisabled && "cursor-not-allowed opacity-60",
-          className,
-        )}
-      >
-        {liveSelectedOption?.prefix ? (
-          <span className="flex items-center shrink-0">
-            {liveSelectedOption.prefix}
-          </span>
-        ) : null}
-        <DropdownInput
-          placeholder={placeholder}
-          isDisabled={isDisabled}
-          getInputProps={getInputPropsWithCursorFix}
-        />
-        {loading && <LoadingSpinner />}
-        {clearable && selectedItem && (
-          <ClearButton onClear={() => selectItem(null)} />
-        )}
-        <ToggleButton
-          isOpen={isOpen}
-          isDisabled={isDisabled}
-          getToggleButtonProps={getToggleButtonProps}
-        />
-      </div>
+      {!hideTrigger && (
+        <div
+          className={cn(
+            "bg-tertiary border border-[#717888] rounded w-full p-2",
+            "flex items-center gap-2",
+            isDisabled && "cursor-not-allowed opacity-60",
+            className,
+          )}
+        >
+          {liveSelectedOption?.prefix ? (
+            <span className="flex items-center shrink-0">
+              {liveSelectedOption.prefix}
+            </span>
+          ) : null}
+          <DropdownInput
+            placeholder={placeholder}
+            isDisabled={isDisabled}
+            getInputProps={getInputPropsWithCursorFix}
+          />
+          {loading && <LoadingSpinner />}
+          {clearable && selectedItem && (
+            <ClearButton onClear={() => selectItem(null)} />
+          )}
+          <ToggleButton
+            isOpen={isOpen}
+            isDisabled={isDisabled}
+            getToggleButtonProps={getToggleButtonProps}
+          />
+        </div>
+      )}
       <DropdownMenu
         isOpen={isOpen}
         filteredOptions={filteredOptions}

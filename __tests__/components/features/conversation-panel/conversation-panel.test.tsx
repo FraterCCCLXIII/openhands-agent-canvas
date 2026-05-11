@@ -173,6 +173,45 @@ describe("ConversationPanel", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("hides closed conversations in compact mode", async () => {
+    vi.spyOn(
+      AgentServerConversationService,
+      "searchConversations",
+    ).mockResolvedValue({
+      items: [
+        createMockConversation({
+          id: "running",
+          title: "Running Conversation",
+          execution_status: ExecutionStatus.RUNNING,
+        }),
+        createMockConversation({
+          id: "closed",
+          title: "Closed Conversation",
+          execution_status: ExecutionStatus.PAUSED,
+        }),
+      ],
+      next_page_id: null,
+    });
+
+    const CompactRouterStub = createRoutesStub([
+      {
+        Component: () => <ConversationPanel compact />,
+        path: "/",
+      },
+      {
+        Component: () => null,
+        path: "/conversations/:conversationId",
+      },
+    ]);
+
+    renderWithProviders(<CompactRouterStub />);
+
+    expect(
+      await screen.findByLabelText("Running Conversation"),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText("Closed Conversation")).not.toBeInTheDocument();
+  });
+
   it("should not render fetch errors in the conversation panel", async () => {
     const searchConversationsSpy = vi.spyOn(
       AgentServerConversationService,

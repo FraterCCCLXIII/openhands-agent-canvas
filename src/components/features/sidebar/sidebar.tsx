@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Server, Settings } from "lucide-react";
 import { OpenHandsLogoButton } from "#/components/shared/buttons/openhands-logo-button";
 import { SidebarNavLink } from "./sidebar-nav-link";
 import { getErrorStatus, useSettings } from "#/hooks/query/use-settings";
@@ -13,6 +13,7 @@ import { BackendSelector } from "#/components/features/backends/backend-selector
 import { SidebarConversationList } from "./sidebar-conversation-list";
 import { SidebarCollapseContext } from "./sidebar-collapse-context";
 import { useSidebarCollapsedState } from "#/hooks/use-sidebar-collapsed";
+import { useClickOutsideElement } from "#/hooks/use-click-outside-element";
 import AutomationsIcon from "#/icons/automations.svg?react";
 import SparkleIcon from "#/icons/sparkle.svg?react";
 
@@ -38,7 +39,12 @@ export function Sidebar() {
   } = useSettings();
   const [collapsed, setCollapsed] = useSidebarCollapsedState();
   const [settingsModalIsOpen, setSettingsModalIsOpen] = React.useState(false);
+  const [collapsedBackendPopoverOpen, setCollapsedBackendPopoverOpen] =
+    React.useState(false);
   const [collapsedRailHovered, setCollapsedRailHovered] = React.useState(false);
+  const collapsedBackendPopoverRef = useClickOutsideElement<HTMLDivElement>(() =>
+    setCollapsedBackendPopoverOpen(false),
+  );
   const settingsErrorStatus = getErrorStatus(settingsError);
 
   React.useEffect(() => {
@@ -134,7 +140,7 @@ export function Sidebar() {
             // Collapsed: stack the chevron beneath the logo so the 64px rail
             // doesn't need to grow to fit two controls in a row. Expanded:
             // chevron is right-aligned via ml-auto further down.
-            collapsed ? "md:flex-col md:gap-2 md:px-0" : "md:pl-2 md:pr-0",
+            collapsed ? "md:flex-col md:gap-2 md:px-0" : "md:pl-0 md:pr-0",
           )}
         >
           {collapsed ? (
@@ -181,10 +187,9 @@ export function Sidebar() {
                   "hidden md:inline-flex items-center justify-center shrink-0",
                   "w-7 h-7 rounded-md text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
                   "transition-colors cursor-pointer",
-                  // ml-auto right-aligns inside the header row; -mr-2 pulls
-                  // past the header's own pr-0 + most of the aside's pr-2 so
-                  // the caret sits flush against the right edge of the rail.
-                  "ml-auto md:-mr-2",
+                  // Keep the collapse button right-aligned while preserving a
+                  // small gutter from the rail edge.
+                  "ml-auto",
                 )}
               >
                 <ChevronLeft width={18} height={18} />
@@ -245,6 +250,54 @@ export function Sidebar() {
         </nav>
 
         <SidebarConversationList />
+
+        {collapsed && (
+          <div className="hidden md:flex md:flex-col md:items-center mt-auto gap-2 pb-2">
+            <button
+              type="button"
+              data-testid="collapsed-settings-link"
+              aria-label={t(I18nKey.SIDEBAR$SETTINGS)}
+              onClick={() => navigate("/settings")}
+              className={cn(
+                "inline-flex items-center justify-center w-10 h-10 p-0 mx-auto rounded-md transition-colors",
+                currentPath.startsWith("/settings")
+                  ? "bg-[#1f1f1f99] text-white font-medium"
+                  : "text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
+              )}
+            >
+              <Settings width={16} height={16} />
+            </button>
+            <div className="relative" ref={collapsedBackendPopoverRef}>
+              <button
+                type="button"
+                data-testid="collapsed-backend-selector-link"
+                aria-label={t(I18nKey.BACKEND$MANAGE)}
+                aria-expanded={collapsedBackendPopoverOpen}
+                onClick={() =>
+                  setCollapsedBackendPopoverOpen((isOpen) => !isOpen)
+                }
+                className={cn(
+                  "inline-flex items-center justify-center w-10 h-10 p-0 mx-auto rounded-md transition-colors",
+                  collapsedBackendPopoverOpen
+                    ? "bg-[#1f1f1f99] text-white font-medium"
+                    : "text-[#8C8C8C] hover:text-white hover:bg-[#1f1f1f99]",
+                )}
+              >
+                <Server width={16} height={16} />
+              </button>
+              {collapsedBackendPopoverOpen ? (
+                <div className="absolute bottom-0 left-full ml-2 z-40 w-[260px]">
+                  <BackendSelector
+                    hideTrigger
+                    defaultOpen
+                    openUpward
+                    onSelectOption={() => setCollapsedBackendPopoverOpen(false)}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         {/* Sidebar footer: keep backend selector pinned to the bottom with a
             visual separator above it. Hidden in collapsed mode because the

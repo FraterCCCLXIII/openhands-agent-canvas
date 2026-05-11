@@ -173,6 +173,25 @@ describe("Sidebar", () => {
     expect(sidebar.dataset.collapsed).toBe("false");
   });
 
+  it("shows collapsed server/settings action icons when sidebar is collapsed", () => {
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    expect(screen.getByTestId("collapsed-settings-link")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("collapsed-backend-selector-link"),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the backend popover from the collapsed backend icon", () => {
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    expect(screen.queryByTestId("backend-selector")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("collapsed-backend-selector-link"));
+    expect(screen.getByTestId("backend-selector")).toBeInTheDocument();
+  });
+
   it("renders icons for every top-level nav item so they remain meaningful in the collapsed rail", () => {
     renderSidebar("/conversations");
 
