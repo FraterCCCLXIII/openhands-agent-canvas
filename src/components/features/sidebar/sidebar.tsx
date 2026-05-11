@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { OpenHandsLogoButton } from "#/components/shared/buttons/openhands-logo-button";
 import { SidebarNavLink } from "./sidebar-nav-link";
 import { getErrorStatus, useSettings } from "#/hooks/query/use-settings";
@@ -13,8 +13,6 @@ import { BackendSelector } from "#/components/features/backends/backend-selector
 import { SidebarConversationList } from "./sidebar-conversation-list";
 import { SidebarCollapseContext } from "./sidebar-collapse-context";
 import { useSidebarCollapsedState } from "#/hooks/use-sidebar-collapsed";
-import { NewConversationButton } from "#/components/features/conversation-panel/new-conversation-button";
-import MessageIcon from "#/icons/message.svg?react";
 import AutomationsIcon from "#/icons/automations.svg?react";
 import SparkleIcon from "#/icons/sparkle.svg?react";
 
@@ -195,9 +193,10 @@ export function Sidebar() {
           )}
         </div>
 
-        <div className="hidden md:block">
-          <NewConversationButton compact={collapsed} />
-        </div>
+        {/*
+          Temporarily hide the dedicated New Conversation button and surface
+          creation via the first nav entry instead.
+        */}
 
         <nav
           className={cn(
@@ -209,11 +208,11 @@ export function Sidebar() {
         >
           <SidebarNavLink
             to="/conversations"
-            label={t(I18nKey.SIDEBAR$CONVERSATIONS)}
+            label="New"
             testId="sidebar-conversations-link"
             disabled={linkDisabled}
             collapsed={collapsed}
-            icon={<MessageIcon width={ICON_SIZE} height={ICON_SIZE} />}
+            icon={<Plus width={ICON_SIZE} height={ICON_SIZE} />}
           />
           <SidebarNavLink
             to="/skills"
