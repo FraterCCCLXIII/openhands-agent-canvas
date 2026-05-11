@@ -118,6 +118,7 @@ export function Sidebar() {
         }}
         className={cn(
           "bg-base flex flex-col gap-3 transition-[width,min-width] duration-200",
+          "md:border-r md:border-[#242424]",
           // Mobile: top bar; Desktop: vertical column. Width responds to
           // the collapsed state on md+ screens.
           "h-[54px] md:h-full",

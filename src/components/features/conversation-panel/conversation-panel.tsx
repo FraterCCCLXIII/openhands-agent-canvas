@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { SlidersHorizontal } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { useNavigation } from "#/context/navigation-context";
 import { usePaginatedConversations } from "#/hooks/query/use-paginated-conversations";
@@ -36,6 +37,8 @@ interface ConversationPanelProps {
 const noop = () => {};
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
+const capitalizeLabel = (label: string) =>
+  label.length > 0 ? label.charAt(0).toUpperCase() + label.slice(1) : label;
 
 const partitionByCutoff = <T extends { updated_at: string }>(
   items: readonly T[],
@@ -82,7 +85,13 @@ export function ConversationPanel({
   const [confirmDeleteOlderVisible, setConfirmDeleteOlderVisible] =
     React.useState(false);
   const [showOlderConversations, setShowOlderConversations] =
+    React.useState(true);
+  const [olderFilterMenuOpen, setOlderFilterMenuOpen] = React.useState(false);
+  const [showRepoBranchMetadata, setShowRepoBranchMetadata] =
     React.useState(false);
+  const olderFilterMenuRef = useClickOutsideElement<HTMLDivElement>(() => {
+    setOlderFilterMenuOpen(false);
+  });
   const [selectedConversationId, setSelectedConversationId] = React.useState<
     string | null
   >(null);
@@ -223,6 +232,7 @@ export function ConversationPanel({
             workspaceWorkingDir={conversation.workspace?.working_dir}
             isActive={conversation.id === currentConversationId}
             onClose={onClose}
+            showRepositoryMetadata={showRepoBranchMetadata}
           />
         );
       }
@@ -257,6 +267,7 @@ export function ConversationPanel({
             }
             isActive={conversation.id === currentConversationId}
             workspaceWorkingDir={conversation.workspace?.working_dir}
+            showRepositoryMetadata={showRepoBranchMetadata}
           />
         </NavigationLink>
       );
@@ -269,6 +280,7 @@ export function ConversationPanel({
       handleStopConversation,
       onClose,
       openContextMenuId,
+      showRepoBranchMetadata,
     ],
   );
 
@@ -331,36 +343,74 @@ export function ConversationPanel({
         {!compact && olderConversations.length > 0 && (
           <div
             data-testid="older-conversations-summary"
-            className="px-3 py-2 text-xs text-neutral-400 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-[#1f2228]"
+            className="px-3 py-2 text-neutral-400 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-[#1f2228]"
           >
-            <span>
-              {olderConversations.length}{" "}
-              {t(I18nKey.CONVERSATION$N_OLDER_CONVERSATIONS)}:
+            <span className="text-sm font-medium text-neutral-400">
+              Conversations
             </span>
-            <button
-              type="button"
-              data-testid="toggle-older-conversations"
-              onClick={() => setShowOlderConversations((value) => !value)}
-              className="underline hover:text-white"
-            >
-              {showOlderConversations
-                ? t(I18nKey.CONVERSATION$HIDE)
-                : t(I18nKey.CONVERSATION$SHOW_ALL)}
-            </button>
-            <button
-              type="button"
-              data-testid="delete-older-conversations"
-              onClick={() => setConfirmDeleteOlderVisible(true)}
-              className="underline hover:text-danger"
-            >
-              {t(I18nKey.CONVERSATION$DELETE_ALL)}
-            </button>
+            <div ref={olderFilterMenuRef} className="relative ml-auto">
+              <button
+                type="button"
+                data-testid="older-conversations-filter-toggle"
+                aria-label="Older conversations filter"
+                aria-expanded={olderFilterMenuOpen}
+                onClick={() => setOlderFilterMenuOpen((open) => !open)}
+                className="inline-flex items-center justify-center rounded-md p-1 text-neutral-400 hover:text-white hover:bg-[#1f1f1f99] transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+              </button>
+
+              {olderFilterMenuOpen && (
+                <div
+                  data-testid="older-conversations-filter-menu"
+                  className="absolute right-0 top-full mt-1 z-20 min-w-[128px] rounded-md border border-[#727987] bg-[#454545] p-1 shadow-lg"
+                >
+                  <button
+                    type="button"
+                    data-testid="toggle-older-conversations"
+                    onClick={() => {
+                      setShowOlderConversations((value) => !value);
+                      setOlderFilterMenuOpen(false);
+                    }}
+                    className="block w-full rounded px-2 py-1.5 text-left text-xs text-white hover:bg-[#5C5D62]"
+                  >
+                    {showOlderConversations
+                      ? capitalizeLabel(t(I18nKey.CONVERSATION$HIDE))
+                      : capitalizeLabel(t(I18nKey.CONVERSATION$SHOW_ALL))}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="delete-older-conversations"
+                    onClick={() => {
+                      setConfirmDeleteOlderVisible(true);
+                      setOlderFilterMenuOpen(false);
+                    }}
+                    className="block w-full rounded px-2 py-1.5 text-left text-xs text-danger hover:bg-[#5C5D62]"
+                  >
+                    {capitalizeLabel(t(I18nKey.CONVERSATION$DELETE_ALL))}
+                  </button>
+                  <div className="my-1 border-t border-[#727987]" />
+                  <button
+                    type="button"
+                    data-testid="toggle-repo-branch-metadata"
+                    onClick={() => {
+                      setShowRepoBranchMetadata((value) => !value);
+                      setOlderFilterMenuOpen(false);
+                    }}
+                    className="block w-full rounded px-2 py-1.5 text-left text-xs text-white hover:bg-[#5C5D62]"
+                  >
+                    {showRepoBranchMetadata
+                      ? "Hide Repo/Branch"
+                      : "Show Repo/Branch"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Older conversations only render when explicitly expanded via
-            "Show all". Compact mode mirrors expanded's default — recent
-            only — so the icon rail isn't packed with archive cruft. */}
+        {/* Older conversations render by default; users can hide them from the
+            summary's filter menu. Compact mode still omits the summary row. */}
         {!compact &&
           showOlderConversations &&
           olderConversations.map(renderConversationCard)}

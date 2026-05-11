@@ -26,6 +26,7 @@ interface ConversationCardProps {
   onContextMenuToggle?: (isOpen: boolean) => void;
   isActive?: boolean;
   workspaceWorkingDir?: string | null;
+  showRepositoryMetadata?: boolean;
 }
 
 export function ConversationCard({
@@ -44,6 +45,7 @@ export function ConversationCard({
   onContextMenuToggle,
   isActive = false,
   workspaceWorkingDir,
+  showRepositoryMetadata = true,
 }: ConversationCardProps) {
   const posthog = usePostHog();
   const [titleMode, setTitleMode] = React.useState<"view" | "edit">("view");
@@ -161,6 +163,7 @@ export function ConversationCard({
         createdAt={createdAt}
         executionStatus={executionStatus}
         workspaceWorkingDir={workspaceWorkingDir}
+        showRepositoryMetadata={showRepositoryMetadata}
       />
     </div>
   );
