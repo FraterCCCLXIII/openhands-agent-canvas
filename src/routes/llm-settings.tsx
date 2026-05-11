@@ -32,8 +32,8 @@ const getSchemaFieldDefaultValue = (
   schema: SettingsSchema | null | undefined,
   fieldKey: string,
 ) =>
-  schema?.sections
-    .flatMap((section) => section.fields)
+  (Array.isArray(schema?.sections) ? schema.sections : [])
+    .flatMap((section) => (Array.isArray(section.fields) ? section.fields : []))
     .find((field) => field.key === fieldKey)?.default ?? null;
 
 const KNOWN_PROVIDER_DEFAULT_BASE_URLS: Partial<Record<string, Set<string>>> = {

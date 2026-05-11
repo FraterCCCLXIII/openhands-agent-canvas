@@ -62,6 +62,31 @@ OH_AGENT_SERVER_VERSION=1.18.0 npm run dev
 
 ## Alternative development workflows
 
+### Electron shell
+
+The repo includes a lightweight Electron wrapper around the existing web app.
+
+```sh
+# Run Vite + Electron together
+npm run electron:dev
+```
+
+This starts the frontend on `http://127.0.0.1:3001` and loads that URL in Electron.
+
+For a production-style desktop run:
+
+```sh
+npm run electron:start
+```
+
+That command builds the app first (`build/client`) and then launches Electron with an internal local static server.
+
+If you already have the full stack running at `http://127.0.0.1:8000` (for example via `npm run dev`), attach Electron to it with:
+
+```sh
+npm run electron:local
+```
+
 ### Multiple local backends (shared persistence)
 
 To run a second standalone agent-server alongside `npm run dev` while sharing

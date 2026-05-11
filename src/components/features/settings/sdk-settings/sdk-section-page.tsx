@@ -230,9 +230,15 @@ export function SdkSectionPage({
   const filteredSchema = React.useMemo(() => {
     if (!schema) return null;
     const sectionSet = new Set(stableSectionKeys);
+    const schemaSections = Array.isArray(schema.sections) ? schema.sections : [];
     return {
       ...schema,
-      sections: schema.sections.filter((s) => sectionSet.has(s.key)),
+      sections: schemaSections
+        .filter((s) => sectionSet.has(s.key))
+        .map((section) => ({
+          ...section,
+          fields: Array.isArray(section.fields) ? section.fields : [],
+        })),
     };
   }, [schema, stableSectionKeys]);
 

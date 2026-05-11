@@ -30,8 +30,14 @@ const VIEW_PROMINENCES: Record<SettingsView, Set<SettingProminence>> = {
   all: new Set<SettingProminence>(["critical", "major", "minor"]),
 };
 
+function getSchemaSections(schema: SettingsSchema): SettingsSectionSchema[] {
+  return Array.isArray(schema.sections) ? schema.sections : [];
+}
+
 function getSchemaFields(schema: SettingsSchema): SettingsFieldSchema[] {
-  return schema.sections.flatMap((section) => section.fields);
+  return getSchemaSections(schema).flatMap((section) =>
+    Array.isArray(section.fields) ? section.fields : [],
+  );
 }
 
 /** Traverse a nested object using a dotted key path (e.g. "llm.model"). */
@@ -95,7 +101,7 @@ export function getConversationSettingValue(
 }
 
 function isChoiceField(field: SettingsFieldSchema): boolean {
-  return field.choices.length > 0;
+  return Array.isArray(field.choices) && field.choices.length > 0;
 }
 
 function isCriticalField(field: SettingsFieldSchema): boolean {
@@ -289,7 +295,8 @@ export function isSettingsFieldVisible(
   field: SettingsFieldSchema,
   values: SettingsFormValues,
 ): boolean {
-  return field.depends_on.every((dependency) => values[dependency] === true);
+  const dependencies = Array.isArray(field.depends_on) ? field.depends_on : [];
+  return dependencies.every((dependency) => values[dependency] === true);
 }
 
 function parseBooleanFieldValue(rawValue: string | boolean): boolean | null {
@@ -434,10 +441,10 @@ export function getVisibleSettingsSections(
   view: SettingsView,
   excludeKeys: Set<string> = SPECIALLY_RENDERED_KEYS,
 ): SettingsSectionSchema[] {
-  return schema.sections
+  return getSchemaSections(schema)
     .map((section) => ({
       ...section,
-      fields: section.fields.filter(
+      fields: (Array.isArray(section.fields) ? section.fields : []).filter(
         (field) =>
           !excludeKeys.has(field.key) &&
           isFieldVisibleInView(field, view) &&
