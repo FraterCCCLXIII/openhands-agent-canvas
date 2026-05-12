@@ -1,5 +1,4 @@
 import { ExtensionsNavigation } from "#/components/features/skills/extensions-navigation";
-import { Typography } from "#/ui/typography";
 
 export default function SkillsPluginsScreen() {
   return (
@@ -9,11 +8,11 @@ export default function SkillsPluginsScreen() {
     >
       <ExtensionsNavigation />
       <section className="flex-1 min-w-0 overflow-auto custom-scrollbar-always pr-[14px] pt-8">
-        <div className="max-w-3xl flex flex-col gap-3">
-          <Typography.H2>Plugins</Typography.H2>
-          <Typography.Text className="text-sm text-content-muted">
+        <div className="min-w-0 space-y-1 mb-4">
+          <h2 className="text-xl font-semibold leading-6 text-foreground">Plugins</h2>
+          <div className="max-w-2xl text-sm text-muted-foreground">
             Plugin configuration options will appear here.
-          </Typography.Text>
+          </div>
         </div>
       </section>
     </div>

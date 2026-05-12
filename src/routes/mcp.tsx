@@ -3,7 +3,6 @@ import { AxiosError } from "axios";
 import { ExtensionsNavigation } from "#/components/features/skills/extensions-navigation";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
-import { Typography } from "#/ui/typography";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { BackendSyncedSettingsBadge } from "#/components/features/settings/backend-synced-settings-badge";
 import { ConfirmationModal } from "#/components/shared/modals/confirmation-modal";
@@ -183,10 +182,10 @@ export default function MCPPage() {
       <ExtensionsNavigation />
       <main className="flex-1 min-w-0 overflow-auto custom-scrollbar-always pr-[14px] pt-8 pb-12">
         <div className="max-w-5xl flex flex-col gap-8">
-        <header className="flex flex-col gap-2">
+        <div className="min-w-0 space-y-1 mb-4">
           <div className="flex items-end justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <Typography.H2>{t(I18nKey.SETTINGS$MCP_TITLE)}</Typography.H2>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-semibold leading-6 text-foreground">{t(I18nKey.SETTINGS$MCP_TITLE)}</h2>
               <BackendSyncedSettingsBadge />
             </div>
             <BrandButton
@@ -198,10 +197,10 @@ export default function MCPPage() {
               {t(I18nKey.MCP$ADD_CUSTOM)}
             </BrandButton>
           </div>
-          <Typography.Paragraph className="text-sm text-tertiary-alt">
+          <div className="max-w-2xl text-sm text-muted-foreground">
             {t(I18nKey.MCP$PAGE_DESCRIPTION)}
-          </Typography.Paragraph>
-        </header>
+          </div>
+        </div>
 
         <MarketplaceSearch value={searchQuery} onChange={setSearchQuery} />
 
