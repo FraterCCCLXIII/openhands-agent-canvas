@@ -133,9 +133,7 @@ export function Dropdown({
         }
         openMenu();
       } : undefined}
-      onMouseLeave={openOnHover ? () => {
-        closeTimerRef.current = setTimeout(() => closeMenu(), 150);
-      } : undefined}
+      onMouseLeave={undefined}
     >
       {!hideTrigger && (
         <div

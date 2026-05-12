@@ -284,12 +284,6 @@ export function Sidebar() {
                 }
                 setCollapsedBackendPopoverOpen(true);
               }}
-              onMouseLeave={() => {
-                collapsedBackendCloseTimer.current = setTimeout(
-                  () => setCollapsedBackendPopoverOpen(false),
-                  150,
-                );
-              }}
             >
               <button
                 type="button"
