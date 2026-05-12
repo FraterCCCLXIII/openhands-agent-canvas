@@ -203,9 +203,7 @@ export default function MCPPage() {
         <MarketplaceSearch value={searchQuery} onChange={setSearchQuery} />
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold">
-            {t(I18nKey.MCP$INSTALLED_TITLE)}
-          </h2>
+          <h2 className="text-base font-semibold text-foreground">{t(I18nKey.MCP$INSTALLED_TITLE)}</h2>
           <InstalledServersSection
             servers={filteredInstalledServers}
             tavilyBuiltinInstalled={tavilyVisibleAfterSearch}

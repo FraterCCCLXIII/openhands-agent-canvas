@@ -34,7 +34,7 @@ export function MarketplaceSection({
       data-testid="mcp-marketplace-section"
       className="flex flex-col gap-3"
     >
-      <h2 className="text-base font-semibold">Library</h2>
+      <h2 className="text-base font-semibold text-foreground">Library</h2>
 
       {visibleEntries.length === 0 ? (
         <div
