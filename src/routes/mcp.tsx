@@ -188,7 +188,6 @@ export default function MCPPage() {
               <div className="max-w-2xl text-sm text-tertiary-light">
                 {t(I18nKey.MCP$PAGE_DESCRIPTION)}
               </div>
-              <BackendSyncedSettingsBadge />
             </div>
             <BrandButton
               type="button"
