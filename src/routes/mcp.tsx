@@ -181,9 +181,15 @@ export default function MCPPage() {
       <ExtensionsNavigation />
       <main className="flex-1 min-w-0 overflow-auto custom-scrollbar-always pr-[14px] pt-8 pb-12">
         <div className="max-w-5xl flex flex-col gap-6">
-        <div className="min-w-0 space-y-1">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold leading-6 text-foreground">{t(I18nKey.SETTINGS$MCP_TITLE)}</h2>
+        <div className="min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold leading-6 text-foreground">{t(I18nKey.SETTINGS$MCP_TITLE)}</h2>
+              <div className="max-w-2xl text-sm text-tertiary-light">
+                {t(I18nKey.MCP$PAGE_DESCRIPTION)}
+              </div>
+              <BackendSyncedSettingsBadge />
+            </div>
             <BrandButton
               type="button"
               variant="secondary"
@@ -192,9 +198,6 @@ export default function MCPPage() {
             >
               {t(I18nKey.MCP$ADD_CUSTOM)}
             </BrandButton>
-          </div>
-          <div className="max-w-2xl text-sm text-tertiary-light">
-            {t(I18nKey.MCP$PAGE_DESCRIPTION)}
           </div>
         </div>
 
