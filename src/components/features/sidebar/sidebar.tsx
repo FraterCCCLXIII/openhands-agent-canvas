@@ -273,15 +273,17 @@ export function Sidebar() {
             >
               <Settings width={16} height={16} />
             </button>
-            <div className="relative" ref={collapsedBackendPopoverRef}>
+            <div
+              className="relative"
+              ref={collapsedBackendPopoverRef}
+              onMouseEnter={() => setCollapsedBackendPopoverOpen(true)}
+              onMouseLeave={() => setCollapsedBackendPopoverOpen(false)}
+            >
               <button
                 type="button"
                 data-testid="collapsed-backend-selector-link"
                 aria-label={t(I18nKey.BACKEND$MANAGE)}
                 aria-expanded={collapsedBackendPopoverOpen}
-                onClick={() =>
-                  setCollapsedBackendPopoverOpen((isOpen) => !isOpen)
-                }
                 className={cn(
                   "relative inline-flex items-center justify-center w-10 h-10 p-0 mx-auto rounded-md transition-colors",
                   collapsedBackendPopoverOpen

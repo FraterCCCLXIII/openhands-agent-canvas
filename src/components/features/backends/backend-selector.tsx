@@ -334,6 +334,7 @@ export function BackendSelector({
             openUpward={openUpward}
             hideTrigger={hideTrigger}
             defaultOpen={defaultOpen}
+            openOnHover={!hideTrigger}
             onChange={(item) => {
               if (!item) return;
               void handleSelectBackend(item.value);

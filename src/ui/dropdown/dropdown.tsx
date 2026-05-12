@@ -23,6 +23,8 @@ interface DropdownProps {
   openUpward?: boolean;
   hideTrigger?: boolean;
   defaultOpen?: boolean;
+  /** Open the dropdown menu on hover instead of requiring a click. */
+  openOnHover?: boolean;
 }
 
 export function Dropdown({
@@ -40,6 +42,7 @@ export function Dropdown({
   openUpward = false,
   hideTrigger = false,
   defaultOpen = false,
+  openOnHover = false,
 }: DropdownProps) {
   const [inputValue, setInputValue] = useState(defaultValue?.label ?? "");
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +55,8 @@ export function Dropdown({
     isOpen,
     selectedItem,
     selectItem,
+    openMenu,
+    closeMenu,
     getToggleButtonProps,
     getMenuProps,
     getItemProps,
@@ -117,7 +122,12 @@ export function Dropdown({
     });
 
   return (
-    <div className="relative w-full" data-testid={testId}>
+    <div
+      className="relative w-full"
+      data-testid={testId}
+      onMouseEnter={openOnHover ? () => openMenu() : undefined}
+      onMouseLeave={openOnHover ? () => closeMenu() : undefined}
+    >
       {!hideTrigger && (
         <div
           className={cn(
