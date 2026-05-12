@@ -69,6 +69,7 @@ function SkillsSettingsScreen() {
     >
       <ExtensionsNavigation />
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-auto custom-scrollbar-always pr-[14px] pt-8">
+        <div className="max-w-5xl flex flex-col gap-8">
         <div className="min-w-0 space-y-1 mb-4">
           <h2 className="text-xl font-semibold leading-6 text-foreground">
             Skills
@@ -128,6 +129,7 @@ function SkillsSettingsScreen() {
           )}
         </div>
 
+        </div>
       </div>
     </div>
   );
