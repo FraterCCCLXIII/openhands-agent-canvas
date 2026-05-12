@@ -89,7 +89,7 @@ export function SkillsToolbar({
                 className={cn(
                   "rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer",
                   active
-                    ? "border-primary bg-primary/15 text-primary"
+                    ? "border-white/60 bg-white/10 text-white"
                     : "border-tertiary bg-transparent text-tertiary-light hover:border-white/40 hover:text-white",
                 )}
               >
