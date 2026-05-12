@@ -40,9 +40,9 @@ export function SkillsToolbar({
     >
       <div
         className={cn(
-          "relative flex items-center w-full md:w-1/2",
+          "relative flex items-center w-1/2",
           "rounded-lg border border-tertiary bg-base-secondary",
-          "focus-within:border-primary/60 focus-within:ring-1 focus-within:ring-primary/40",
+          "focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20",
           "transition-colors",
         )}
       >
