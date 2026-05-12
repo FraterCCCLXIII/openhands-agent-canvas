@@ -132,7 +132,7 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
           {skill.triggers.map((trigger) => (
             <span
               key={trigger}
-              className="inline-flex items-center rounded-md border border-tertiary bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 font-mono text-[11px] text-tertiary-light"
+              className="inline-flex items-center rounded-md border border-tertiary bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 text-[11px] text-tertiary-light"
             >
               {trigger}
             </span>
