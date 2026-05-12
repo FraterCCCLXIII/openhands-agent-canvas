@@ -105,11 +105,7 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
           >
             {description}
           </p>
-        ) : (
-          <p className="italic text-tertiary-light">
-            {t(I18nKey.SETTINGS$SKILLS_NO_DESCRIPTION)}
-          </p>
-        )}
+        ) : null}
         {showShowMoreButton && (
           <button
             type="button"
