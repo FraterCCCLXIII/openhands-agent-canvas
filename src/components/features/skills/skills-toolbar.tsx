@@ -36,7 +36,7 @@ export function SkillsToolbar({
   return (
     <div
       data-testid="skills-toolbar"
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-6"
     >
       <div
         className={cn(
