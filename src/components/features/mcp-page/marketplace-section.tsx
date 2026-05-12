@@ -55,7 +55,7 @@ export function MarketplaceSection({
       ) : (
         <div
           data-testid="mcp-marketplace-grid"
-          className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-3 grid-cols-1 md:grid-cols-2"
         >
           {visibleEntries.map((entry) => (
             <MarketplaceCard
