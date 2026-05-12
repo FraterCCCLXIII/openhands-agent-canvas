@@ -32,7 +32,7 @@ const ICON_SIZE = 18;
 
 export function Sidebar() {
   const { t } = useTranslation("openhands");
-  const { currentPath } = useNavigation();
+  const { currentPath, navigate } = useNavigation();
   const { data: config } = useConfig();
   const {
     data: settings,

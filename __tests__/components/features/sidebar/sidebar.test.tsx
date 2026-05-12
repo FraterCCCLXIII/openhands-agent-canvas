@@ -101,20 +101,23 @@ vi.mock("#/hooks/use-settings-nav-items", () => ({
 
 
 function renderSidebar(currentPath: string) {
+  const navigate = vi.fn();
   const value: NavigationContextValue = {
     currentPath,
     conversationId: null,
     isNavigating: false,
-    navigate: vi.fn(),
+    navigate,
   };
 
-  return render(
+  const rendered = render(
     <QueryClientProvider client={new QueryClient()}>
       <NavigationProvider value={value}>
         <Sidebar />
       </NavigationProvider>
     </QueryClientProvider>,
   );
+
+  return { ...rendered, navigate };
 }
 
 describe("Sidebar", () => {
@@ -199,6 +202,14 @@ describe("Sidebar", () => {
       screen.getByTestId("collapsed-backend-selector-link"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("backend-status-dot")).toBeInTheDocument();
+  });
+
+  it("navigates to settings when collapsed settings icon is clicked", () => {
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    const { navigate } = renderSidebar("/conversations");
+
+    fireEvent.click(screen.getByTestId("collapsed-settings-link"));
+    expect(navigate).toHaveBeenCalledWith("/settings");
   });
 
   it("opens the backend popover from the collapsed backend icon", () => {
