@@ -1,6 +1,5 @@
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { cn } from "#/utils/utils";
-import PuzzleIcon from "#/icons/puzzle.svg?react";
 import ServerProcessIcon from "#/icons/server-process.svg?react";
 
 interface ExtensionNavItem {
@@ -45,7 +44,22 @@ const EXTENSIONS_NAV_ITEMS: ExtensionNavItem[] = [
   {
     to: "/plugins",
     label: "Plugins",
-    icon: <PuzzleIcon width={16} height={16} />,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        width={16}
+        height={16}
+        aria-hidden="true"
+      >
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      </svg>
+    ),
     end: true,
   },
 ];
