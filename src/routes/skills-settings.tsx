@@ -101,11 +101,11 @@ function SkillsSettingsScreen() {
           )}
 
           {!isLoading && skills && skills.length > 0 && (
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {skills.map((skill) => (
                 <div
                   key={skill.name}
-                  className="flex flex-col gap-2 rounded-xl border border-tertiary bg-base-secondary p-4 transition-colors hover:border-primary/60 hover:bg-base-tertiary/30"
+                  className="flex flex-col gap-2 rounded-xl border border-tertiary bg-base-secondary p-4 transition-colors hover:border-white/40 hover:bg-base-tertiary/30"
                 >
                   <SettingsSwitch
                     testId={`skill-toggle-${skill.name}`}
