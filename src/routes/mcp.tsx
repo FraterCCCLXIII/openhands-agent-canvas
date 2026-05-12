@@ -184,10 +184,7 @@ export default function MCPPage() {
         <div className="max-w-5xl flex flex-col gap-8">
         <div className="min-w-0 space-y-1 mb-4">
           <div className="flex items-end justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-semibold leading-6 text-foreground">{t(I18nKey.SETTINGS$MCP_TITLE)}</h2>
-              <BackendSyncedSettingsBadge />
-            </div>
+            <h2 className="text-xl font-semibold leading-6 text-foreground">{t(I18nKey.SETTINGS$MCP_TITLE)}</h2>
             <BrandButton
               type="button"
               variant="secondary"
@@ -200,6 +197,7 @@ export default function MCPPage() {
           <div className="max-w-2xl text-sm text-tertiary-light">
             {t(I18nKey.MCP$PAGE_DESCRIPTION)}
           </div>
+          <BackendSyncedSettingsBadge />
         </div>
 
         <MarketplaceSearch value={searchQuery} onChange={setSearchQuery} />
