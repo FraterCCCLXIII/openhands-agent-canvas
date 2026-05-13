@@ -84,7 +84,75 @@ vi.mock("#/components/shared/modals/settings/settings-modal", () => ({
 }));
 
 vi.mock("#/components/features/backends/backend-selector", () => ({
-  BackendSelector: () => <div data-testid="backend-selector" />,
+  BackendSelector: ({
+    onSelectOption,
+    onOpenAddBackend,
+    onOpenManageBackends,
+  }: {
+    onSelectOption?: () => void;
+    onOpenAddBackend?: () => void;
+    onOpenManageBackends?: () => void;
+  } = {}) => (
+    <div data-testid="backend-selector">
+      {/*
+        Mimic a backend OPTION row in the dropdown menu — same role/tag the
+        real Dropdown emits. Clicking this should not bubble up to the rail
+        collapse handler.
+       */}
+      <ul>
+        <li
+          data-testid="mock-backend-option"
+          role="option"
+          aria-selected={false}
+          onClick={() => onSelectOption?.()}
+        >
+          Switch backend
+        </li>
+      </ul>
+      <button
+        type="button"
+        data-testid="mock-add-backend"
+        onClick={() => onOpenAddBackend?.()}
+      >
+        Add Backend
+      </button>
+      <button
+        type="button"
+        data-testid="mock-manage-backends"
+        onClick={() => onOpenManageBackends?.()}
+      >
+        Manage Backends
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock("#/components/features/backends/add-backend-modal", () => ({
+  AddBackendModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="add-backend-modal">
+      <button
+        type="button"
+        data-testid="add-backend-modal-close"
+        onClick={onClose}
+      >
+        Close
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock("#/components/features/backends/manage-backends-modal", () => ({
+  ManageBackendsModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="manage-backends-modal">
+      <button
+        type="button"
+        data-testid="manage-backends-modal-close"
+        onClick={onClose}
+      >
+        Close
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("#/components/features/conversation-panel/new-conversation-button", () => ({
@@ -212,13 +280,86 @@ describe("Sidebar", () => {
     expect(navigate).toHaveBeenCalledWith("/settings");
   });
 
-  it("opens the backend popover from the collapsed backend icon", () => {
+  it("opens the backend popover when hovering the collapsed backend icon", async () => {
     window.localStorage.setItem("openhands-sidebar-collapsed", "true");
     renderSidebar("/conversations");
 
     expect(screen.queryByTestId("backend-selector")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId("collapsed-backend-selector-link"));
-    expect(screen.getByTestId("backend-selector")).toBeInTheDocument();
+    const trigger = screen.getByTestId("collapsed-backend-selector-link");
+    const wrapper = trigger.parentElement;
+    if (!wrapper) throw new Error("Popover wrapper not found");
+    fireEvent.mouseEnter(wrapper);
+    expect(await screen.findByTestId("backend-selector")).toBeInTheDocument();
+  });
+
+  it("does NOT expand the sidebar when a backend option in the popover is clicked", async () => {
+    // Bug: clicking a backend <li role='option'> bubbled up to the aside's
+    // rail-collapse handler (which only bails on a/button/[role=button]),
+    // so selecting a backend would expand the sidebar mid-switch.
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    const sidebar = screen.getByRole("navigation").parentElement;
+    if (!sidebar) throw new Error("Sidebar not found");
+    expect(sidebar.dataset.collapsed).toBe("true");
+
+    const trigger = screen.getByTestId("collapsed-backend-selector-link");
+    const popoverContainer = trigger.parentElement;
+    if (!popoverContainer) throw new Error("Popover container not found");
+    fireEvent.mouseEnter(popoverContainer);
+    const option = await screen.findByTestId("mock-backend-option");
+
+    fireEvent.click(option);
+
+    // Sidebar should remain collapsed — selecting a backend should not
+    // collapse-toggle the rail.
+    expect(sidebar.dataset.collapsed).toBe("true");
+  });
+
+  it("keeps the Add Backend modal open after the popover closes", async () => {
+    // Bug: modal state lived inside BackendSelector; once the cursor moved
+    // out of the popover toward the centred modal, mouseLeave closed the
+    // popover, which unmounted BackendSelector and tore the modal down with
+    // it. Modal state must live above the popover to survive its unmount.
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    const trigger = screen.getByTestId("collapsed-backend-selector-link");
+    const popoverContainer = trigger.parentElement;
+    if (!popoverContainer) throw new Error("Popover container not found");
+    fireEvent.mouseEnter(popoverContainer);
+
+    fireEvent.click(await screen.findByTestId("mock-add-backend"));
+
+    // Cursor moves toward the modal -> popover times out and closes.
+    fireEvent.mouseLeave(popoverContainer);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+
+    expect(screen.queryByTestId("backend-selector")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("add-backend-modal")).toBeInTheDocument();
+  });
+
+  it("keeps the Manage Backends modal open after the popover closes", async () => {
+    window.localStorage.setItem("openhands-sidebar-collapsed", "true");
+    renderSidebar("/conversations");
+
+    const trigger = screen.getByTestId("collapsed-backend-selector-link");
+    const popoverContainer = trigger.parentElement;
+    if (!popoverContainer) throw new Error("Popover container not found");
+    fireEvent.mouseEnter(popoverContainer);
+
+    fireEvent.click(await screen.findByTestId("mock-manage-backends"));
+    fireEvent.mouseLeave(popoverContainer);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 200);
+    });
+
+    expect(screen.queryByTestId("backend-selector")).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId("manage-backends-modal"),
+    ).toBeInTheDocument();
   });
 
   it("renders icons for every top-level nav item so they remain meaningful in the collapsed rail", () => {
