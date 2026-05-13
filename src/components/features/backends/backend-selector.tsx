@@ -110,6 +110,17 @@ interface BackendSelectorProps {
   defaultOpen?: boolean;
   /** Callback fired after selecting a backend/org option. */
   onSelectOption?: () => void;
+  /**
+   * When provided, clicking "Add Backend" calls this instead of opening the
+   * modal internally. Use this when BackendSelector is mounted inside a
+   * short-lived popover so the modal outlives the popover.
+   */
+  onRequestAddBackend?: () => void;
+  /**
+   * When provided, clicking "Manage Backends" calls this instead of opening
+   * the modal internally.
+   */
+  onRequestManageBackends?: () => void;
 }
 
 export function BackendSelector({
@@ -117,6 +128,8 @@ export function BackendSelector({
   hideTrigger = false,
   defaultOpen = false,
   onSelectOption,
+  onRequestAddBackend,
+  onRequestManageBackends,
 }: BackendSelectorProps = {}) {
   const { t } = useTranslation("openhands");
   const { backends, active, setActive } = useActiveBackendContext();
@@ -222,12 +235,20 @@ export function BackendSelector({
   ]);
 
   const openAddBackendModal = React.useCallback(() => {
-    setAddBackendModalOpen(true);
-  }, []);
+    if (onRequestAddBackend) {
+      onRequestAddBackend();
+    } else {
+      setAddBackendModalOpen(true);
+    }
+  }, [onRequestAddBackend]);
 
   const openManageBackendsModal = React.useCallback(() => {
-    setManageBackendsModalOpen(true);
-  }, []);
+    if (onRequestManageBackends) {
+      onRequestManageBackends();
+    } else {
+      setManageBackendsModalOpen(true);
+    }
+  }, [onRequestManageBackends]);
 
   const preventDropdownMenuClose = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

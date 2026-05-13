@@ -17,7 +17,8 @@ import { SidebarCollapseContext } from "./sidebar-collapse-context";
 import { useSidebarCollapsedState } from "#/hooks/use-sidebar-collapsed";
 import { useClickOutsideElement } from "#/hooks/use-click-outside-element";
 import { useBackendsHealth } from "#/hooks/query/use-backends-health";
-import AutomationsIcon from "#/icons/automations.svg?react";
+import { AddBackendModal } from "#/components/features/backends/add-backend-modal";
+import { ManageBackendsModal } from "#/components/features/backends/manage-backends-modal";
 import SparkleIcon from "#/icons/sparkle.svg?react";
 
 // The LLM settings modal is only mounted when the settings query 404s and
@@ -48,6 +49,8 @@ export function Sidebar() {
   const [collapsedBackendPopoverOpen, setCollapsedBackendPopoverOpen] =
     React.useState(false);
   const collapsedBackendCloseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [collapsedAddBackendOpen, setCollapsedAddBackendOpen] = React.useState(false);
+  const [collapsedManageBackendsOpen, setCollapsedManageBackendsOpen] = React.useState(false);
   const [collapsedRailHovered, setCollapsedRailHovered] = React.useState(false);
   const collapsedBackendPopoverRef = useClickOutsideElement<HTMLDivElement>(() =>
     setCollapsedBackendPopoverOpen(false),
@@ -284,6 +287,12 @@ export function Sidebar() {
                 }
                 setCollapsedBackendPopoverOpen(true);
               }}
+              onMouseLeave={() => {
+                collapsedBackendCloseTimer.current = setTimeout(
+                  () => setCollapsedBackendPopoverOpen(false),
+                  150,
+                );
+              }}
             >
               <button
                 type="button"
@@ -310,6 +319,14 @@ export function Sidebar() {
                     defaultOpen
                     openUpward
                     onSelectOption={() => setCollapsedBackendPopoverOpen(false)}
+                    onRequestAddBackend={() => {
+                      setCollapsedBackendPopoverOpen(false);
+                      setCollapsedAddBackendOpen(true);
+                    }}
+                    onRequestManageBackends={() => {
+                      setCollapsedBackendPopoverOpen(false);
+                      setCollapsedManageBackendsOpen(true);
+                    }}
                   />
                 </div>
               ) : null}
@@ -334,6 +351,12 @@ export function Sidebar() {
             onClose={() => setSettingsModalIsOpen(false)}
           />
         </React.Suspense>
+      )}
+      {collapsedAddBackendOpen && (
+        <AddBackendModal onClose={() => setCollapsedAddBackendOpen(false)} />
+      )}
+      {collapsedManageBackendsOpen && (
+        <ManageBackendsModal onClose={() => setCollapsedManageBackendsOpen(false)} />
       )}
     </SidebarCollapseContext.Provider>
   );
