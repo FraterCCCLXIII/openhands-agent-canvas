@@ -8,6 +8,20 @@ import { ToggleButton } from "./toggle-button";
 import { DropdownMenu } from "./dropdown-menu";
 import { DropdownInput } from "./dropdown-input";
 
+// Equivalent to Tailwind's `sr-only`, inlined so we don't depend on the
+// utility class being preserved by the host project's CSS pipeline.
+const visuallyHiddenStyle: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
+
 interface DropdownProps {
   options: DropdownOption[];
   emptyMessage?: string;
@@ -137,7 +151,7 @@ export function Dropdown({
         closeTimerRef.current = setTimeout(() => closeMenu(), 150);
       } : undefined}
     >
-      {!hideTrigger && (
+      {!hideTrigger ? (
         <div
           className={cn(
             "bg-tertiary border border-[#717888] rounded w-full p-2",
@@ -166,6 +180,27 @@ export function Dropdown({
             getToggleButtonProps={getToggleButtonProps}
           />
         </div>
+      ) : (
+        // downshift's useCombobox always expects getInputProps() (and the
+        // toggle button) to be wired up. When the trigger is hidden (e.g.
+        // collapsed-sidebar popover) we still need to mount a real input
+        // so it stops warning every render. Keep it visually hidden but
+        // present in the DOM for accessibility.
+        <>
+          <input
+            {...getInputPropsWithCursorFix({
+              "aria-label": placeholder ?? "Filter options",
+              tabIndex: -1,
+            })}
+            style={visuallyHiddenStyle}
+          />
+          <button
+            type="button"
+            {...getToggleButtonProps({ tabIndex: -1 })}
+            style={visuallyHiddenStyle}
+            aria-hidden
+          />
+        </>
       )}
       <DropdownMenu
         isOpen={isOpen}
