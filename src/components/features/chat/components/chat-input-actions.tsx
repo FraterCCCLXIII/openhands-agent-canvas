@@ -37,8 +37,8 @@ export function ChatInputActions({ disabled }: ChatInputActionsProps) {
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-4">
           <Tools />
-          <ChatInputModel />
           {isCloud && <ChangeAgentButton />}
+          <ChatInputModel />
         </div>
       </div>
       <AgentStatus
