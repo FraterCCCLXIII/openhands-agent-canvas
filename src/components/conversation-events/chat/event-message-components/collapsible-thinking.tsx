@@ -28,7 +28,7 @@ export function CollapsibleThinking({ content }: CollapsibleThinkingProps) {
 
   return (
     <div
-      className="my-2 w-full border-l-2 border-neutral-300 pl-2 py-2 text-sm"
+      className="my-2 w-full py-2 text-sm"
       data-testid="collapsible-thinking"
     >
       <button

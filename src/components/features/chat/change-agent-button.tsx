@@ -159,10 +159,10 @@ export function ChangeAgentButton() {
             : "border border-[#597FF4] bg-[#4A67BD]",
           !isButtonDisabled &&
             isExecutionAgent &&
-            "cursor-pointer hover:border-[#4B505F] hover:text-white",
+            "cursor-pointer hover:text-white hover:bg-white/10",
           !isButtonDisabled &&
             !isExecutionAgent &&
-            "cursor-pointer text-white hover:opacity-80",
+            "cursor-pointer text-white hover:bg-white/10",
           isButtonDisabled &&
             cn("opacity-50 cursor-not-allowed", isExecutionAgent && "border-transparent"),
         )}

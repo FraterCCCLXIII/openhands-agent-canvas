@@ -9,7 +9,6 @@ import {
   isObservationEvent,
 } from "#/types/agent-server/type-guards";
 import { I18nKey } from "#/i18n/declaration";
-import { SuccessIndicator } from "../../../features/chat/success-indicator";
 import { getEventContent } from "../event-content-helpers/get-event-content";
 import { IsInEventGroupContext } from "../../../features/chat/is-in-event-group-context";
 
@@ -109,7 +108,7 @@ export function EventGroup({
 
   return (
     <div
-      className="my-2 w-full border-l-2 border-neutral-300 pl-2 py-2 text-sm"
+      className="my-2 w-full py-2 text-sm"
       data-testid="event-group"
     >
       <button
@@ -144,9 +143,7 @@ export function EventGroup({
                   data-testid="spinner-icon"
                   className="h-4 w-4 ml-2 inline animate-spin text-neutral-300"
                 />
-              ) : (
-                <SuccessIndicator status="success" />
-              )}
+              ) : null}
             </span>
           </>
         )}

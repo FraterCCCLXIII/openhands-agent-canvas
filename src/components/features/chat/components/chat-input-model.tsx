@@ -39,7 +39,7 @@ export function ChatInputModel() {
         type="button"
         className={cn(
           "inline-flex items-center gap-1 rounded-[100px] border border-transparent px-1.5 text-sm font-normal leading-5 text-[#959CB2] whitespace-nowrap min-w-0 transition-[border-color,color]",
-          "hover:border-[#4B505F] hover:text-white cursor-pointer",
+          "hover:text-white hover:bg-white/10 cursor-pointer",
         )}
         title={conversation.llm_model}
         data-testid="chat-input-llm-model"

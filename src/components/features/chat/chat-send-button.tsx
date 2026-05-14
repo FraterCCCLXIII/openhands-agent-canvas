@@ -18,8 +18,8 @@ export function ChatSendButton({
       className={cn(
         "flex items-center justify-center rounded-full border border-white size-8",
         disabled
-          ? "cursor-not-allowed border-neutral-600"
-          : "cursor-pointer hover:bg-[#959CB2]",
+          ? "cursor-not-allowed border-[#959CB2]"
+          : "cursor-pointer hover:bg-white/10",
         buttonClassName,
       )}
       data-name="arrow-up-circle-fill"
