@@ -167,17 +167,13 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
           disabled={!isConversationReady}
         />
 
-        <GitControlBarTooltipWrapper
-          tooltipMessage={t(I18nKey.COMMON$GIT_TOOLS_DISABLED_CONTENT)}
-          testId="git-control-bar-branch-button-tooltip"
-          shouldShowTooltip={!selectedBranch}
-        >
+        {selectedBranch ? (
           <GitControlBarBranchButton
             selectedBranch={selectedBranch}
             selectedRepository={selectedRepository}
             gitProvider={gitProvider}
           />
-        </GitControlBarTooltipWrapper>
+        ) : null}
 
         {hasRepository ? (
           <>

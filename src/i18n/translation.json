@@ -19889,6 +19889,23 @@
     "uk": "Репозиторій не підключено",
     "ca": "Sense repositori connectat"
   },
+  "COMMON$CONNECT_REPO": {
+    "en": "Connect Repo",
+    "ja": "リポジトリを接続",
+    "zh-CN": "连接仓库",
+    "zh-TW": "連接存放庫",
+    "ko-KR": "저장소 연결",
+    "fr": "Connecter le dépôt",
+    "es": "Conectar repositorio",
+    "de": "Repository verbinden",
+    "it": "Collega repository",
+    "pt": "Conectar repositório",
+    "ar": "ربط المستودع",
+    "no": "Koble til repo",
+    "tr": "Depoyu Bağla",
+    "uk": "Підключити репозиторій",
+    "ca": "Connecta el repositori"
+  },
   "COMMON$OPEN_REPOSITORY": {
     "en": "Open Repository",
     "ja": "リポジトリを開く",
