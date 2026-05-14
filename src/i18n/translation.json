@@ -8262,7 +8262,7 @@
     "ca": "Comandes"
   },
   "CHAT_INTERFACE$CONNECTING": {
-    "en": "Connecting... (this may take 1-2 minutes)",
+    "en": "Connecting",
     "ja": "接続中...（1-2分かかる場合があります）",
     "zh-CN": "正在连接...（这可能需要1-2分钟）",
     "zh-TW": "正在連接...（這可能需要1-2分鐘）",
@@ -9384,7 +9384,7 @@
     "ca": "L'agent s'ha aturat."
   },
   "CHAT_INTERFACE$AGENT_FINISHED_MESSAGE": {
-    "en": "Agent has finished the task.",
+    "en": "Done",
     "de": "Agent hat die Aufgabe erledigt.",
     "zh-CN": "智能体已完成任务",
     "zh-TW": "智慧代理已完成任務",
@@ -9418,7 +9418,7 @@
     "ca": "L'agent ha rebutjat la tasca."
   },
   "CHAT_INTERFACE$AGENT_ERROR_MESSAGE": {
-    "en": "Agent encountered an error.",
+    "en": "Agent error",
     "de": "Agent ist auf einen Fehler gelaufen.",
     "zh-CN": "智能体遇到错误",
     "zh-TW": "智慧代理遇到錯誤",
@@ -12274,7 +12274,7 @@
     "ca": "Configurant l'espai de treball..."
   },
   "STATUS$SETTING_UP_GIT_HOOKS": {
-    "en": "Setting up git hooks...",
+    "en": "Adding git hooks",
     "zh-CN": "正在设置 git 钩子...",
     "zh-TW": "正在設置 git 鉤子...",
     "de": "Git-Hooks werden eingerichtet...",
@@ -12291,7 +12291,7 @@
     "ca": "Configurant els hooks de Git..."
   },
   "STATUS$SETTING_UP_SKILLS": {
-    "en": "Setting up skills...",
+    "en": "Adding skills",
     "zh-CN": "正在设置技能...",
     "zh-TW": "正在設置技能...",
     "de": "Fähigkeiten werden eingerichtet...",
@@ -19108,7 +19108,7 @@
     "ca": "Agent aturat"
   },
   "AGENT_STATUS$ERROR_OCCURRED": {
-    "en": "Error occurred",
+    "en": "Error",
     "ja": "エラーが発生しました。",
     "zh-CN": "发生错误。",
     "zh-TW": "發生錯誤。",
@@ -19142,7 +19142,7 @@
     "ca": "Inicialitzant l'agent..."
   },
   "AGENT_STATUS$RUNNING_TASK": {
-    "en": "Running task",
+    "en": "Running",
     "ja": "タスクを実行中。",
     "zh-CN": "正在执行任务。",
     "zh-TW": "正在執行任務。",
@@ -19159,7 +19159,7 @@
     "ca": "Executant la tasca"
   },
   "AGENT_STATUS$WAITING_FOR_TASK": {
-    "en": "Waiting for task",
+    "en": "Ready",
     "ja": "タスクを待機中。",
     "zh-CN": "等待任务中。",
     "zh-TW": "等待任務中。",
@@ -20094,7 +20094,7 @@
     "uk": "Завершено"
   },
   "COMMON$WAITING_FOR_SANDBOX": {
-    "en": "Waiting for sandbox",
+    "en": "Waiting",
     "ja": "サンドボックスを待機中",
     "zh-CN": "等待沙盒",
     "zh-TW": "等待沙盒",
@@ -20672,7 +20672,7 @@
     "ca": "Preparat"
   },
   "CONVERSATION$STARTING_CONVERSATION": {
-    "en": "Starting conversation...",
+    "en": "Starting",
     "ja": "会話を開始しています...",
     "zh-CN": "正在启动对话...",
     "zh-TW": "正在啟動對話...",
@@ -20791,7 +20791,7 @@
     "ca": "Conversa aturada"
   },
   "AGENT_STATUS$WAITING_FOR_USER_CONFIRMATION": {
-    "en": "Waiting for user confirmation",
+    "en": "User needed",
     "ja": "ユーザーの確認を待っています",
     "zh-CN": "等待用户确认",
     "zh-TW": "等待使用者確認",
