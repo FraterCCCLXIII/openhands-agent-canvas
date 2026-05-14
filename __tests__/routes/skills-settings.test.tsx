@@ -69,10 +69,8 @@ describe("SkillsSettingsScreen", () => {
     const description = await screen.findByTestId(
       "skills-settings-description",
     );
-    expect(description).toHaveTextContent(
-      "Discover skills to add to your workspace",
-    );
-    expect(screen.getByText("Extensions")).toBeInTheDocument();
+    expect(description).toHaveTextContent("SETTINGS$SKILLS_PAGE_DESCRIPTION");
+    expect(screen.getByText("NAV$EXTENSIONS")).toBeInTheDocument();
     expect(screen.getByTestId("sidebar-extensions-/skills")).toHaveTextContent(
       "Skills",
     );
@@ -109,7 +107,6 @@ describe("SkillsSettingsScreen", () => {
   });
 
   it("filters skills by name, description, or trigger via the search input", async () => {
-    const user = userEvent.setup();
     vi.spyOn(SkillsService, "getSkills").mockResolvedValue([
       buildSkill({ name: "deno", description: "Deno runtime helper" }),
       buildSkill({
@@ -123,7 +120,9 @@ describe("SkillsSettingsScreen", () => {
     renderSkillsSettingsScreen();
     await screen.findByTestId("skill-card-deno");
 
-    await user.type(screen.getByTestId("skills-search-input"), "preview");
+    fireEvent.change(screen.getByTestId("skills-search-input"), {
+      target: { value: "preview" },
+    });
 
     expect(screen.queryByTestId("skill-card-deno")).not.toBeInTheDocument();
     expect(screen.getByTestId("skill-card-vercel")).toBeInTheDocument();

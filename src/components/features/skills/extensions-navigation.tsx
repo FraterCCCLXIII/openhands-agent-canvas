@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { cn } from "#/utils/utils";
 import ServerProcessIcon from "#/icons/server-process.svg?react";
 import { BackendSyncedSettingsBadge } from "#/components/features/settings/backend-synced-settings-badge";
+import { I18nKey } from "#/i18n/declaration";
 
 interface ExtensionNavItem {
   to: string;
@@ -70,13 +72,15 @@ const EXTENSIONS_NAV_ITEMS: ExtensionNavItem[] = [
 ];
 
 export function ExtensionsNavigation() {
+  const { t } = useTranslation("openhands");
+
   return (
     <aside
       data-testid="extensions-navbar-desktop"
       className="hidden md:flex md:w-[260px] md:shrink-0 md:flex-col md:gap-2 md:sticky md:top-8 md:self-start md:pl-[14px]"
     >
       <span className="px-3 text-xs font-semibold uppercase tracking-wider text-[#A3A3A3]">
-        Extensions
+        {t(I18nKey.NAV$EXTENSIONS)}
       </span>
       <div className="flex flex-col gap-0.5 pt-0.5">
         {EXTENSIONS_NAV_ITEMS.map((item) => (
@@ -100,7 +104,7 @@ export function ExtensionsNavigation() {
             <span className="truncate">{item.label}</span>
             {item.comingSoon && (
               <span className="ml-auto shrink-0 rounded-full border border-white/20 bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-[#8C8C8C]">
-                Coming Soon
+                {t(I18nKey.NAV$COMING_SOON)}
               </span>
             )}
           </NavigationLink>

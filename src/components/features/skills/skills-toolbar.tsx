@@ -34,10 +34,7 @@ export function SkillsToolbar({
   const { t } = useTranslation("openhands");
 
   return (
-    <div
-      data-testid="skills-toolbar"
-      className="flex flex-col gap-6"
-    >
+    <div data-testid="skills-toolbar" className="flex flex-col gap-6">
       <div
         className={cn(
           "relative flex items-center w-1/2",
@@ -46,7 +43,10 @@ export function SkillsToolbar({
           "transition-colors",
         )}
       >
-        <Search className="ml-3 h-4 w-4 text-tertiary-alt shrink-0" aria-hidden />
+        <Search
+          className="ml-3 h-4 w-4 text-tertiary-alt shrink-0"
+          aria-hidden
+        />
         <input
           data-testid="skills-search-input"
           type="search"

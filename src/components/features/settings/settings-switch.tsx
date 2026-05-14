@@ -52,16 +52,17 @@ export function SettingsSwitch({
     <StyledSwitchComponent isToggled={controlledIsToggled ?? isToggled} />
   );
 
-  const label = (children || isBeta) ? (
-    <div className="flex items-center gap-1">
-      <span className="text-sm">{children}</span>
-      {isBeta && (
-        <span className="text-[11px] leading-4 text-[#0D0F11] font-[500] tracking-tighter bg-primary px-1 rounded-full">
-          {t(I18nKey.BADGE$BETA)}
-        </span>
-      )}
-    </div>
-  ) : null;
+  const label =
+    children || isBeta ? (
+      <div className="flex items-center gap-1">
+        <span className="text-sm">{children}</span>
+        {isBeta && (
+          <span className="text-[11px] leading-4 text-[#0D0F11] font-[500] tracking-tighter bg-primary px-1 rounded-full">
+            {t(I18nKey.BADGE$BETA)}
+          </span>
+        )}
+      </div>
+    ) : null;
 
   return (
     <label

@@ -85,25 +85,19 @@ function SkillsSettingsScreen() {
   }, [skills, typeFilter, searchQuery]);
 
   return (
-    <div
-      data-testid="skills-settings-screen"
-      className="flex h-full gap-10"
-    >
+    <div data-testid="skills-settings-screen" className="flex h-full gap-10">
       <ExtensionsNavigation />
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-auto custom-scrollbar-always pr-[14px] pt-8 pb-12">
         <div className="max-w-5xl flex flex-col gap-6">
           <div className="min-w-0 space-y-1">
             <h2 className="text-xl font-semibold leading-6 text-foreground">
-              Skills
+              {t(I18nKey.SETTINGS$SKILLS_TITLE)}
             </h2>
             <div
               data-testid="skills-settings-description"
               className="max-w-2xl text-sm text-tertiary-light"
             >
-              Discover skills to add to your workspace. Open a card for prompts,
-              curl, and install flows. Search from the sidebar to filter the
-              list. Enable or disable default skills. Disabled skills will not
-              be loaded into agent context.
+              {t(I18nKey.SETTINGS$SKILLS_PAGE_DESCRIPTION)}
             </div>
           </div>
 
@@ -149,7 +143,9 @@ function SkillsSettingsScreen() {
                         key={skill.name}
                         skill={skill}
                         enabled={!disabledSet.has(skill.name)}
-                        onToggle={(enabled) => handleToggle(skill.name, enabled)}
+                        onToggle={(enabled) =>
+                          handleToggle(skill.name, enabled)
+                        }
                       />
                     ))}
                   </div>
