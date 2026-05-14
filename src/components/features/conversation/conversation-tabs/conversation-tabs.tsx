@@ -26,8 +26,7 @@ import { Typography } from "#/ui/typography";
 
 export function ConversationTabs() {
   const { conversationId } = useConversationId();
-  const { setHasRightPanelToggled, setSelectedTab, planContent } =
-    useConversationStore();
+  const { setSelectedTab, planContent } = useConversationStore();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -48,17 +47,16 @@ export function ConversationTabs() {
     isRightPanelShown,
   } = useSelectConversationTab();
 
-  // Initialize Zustand state from localStorage on component mount
+  // Restore the most-recently-used tab from localStorage so users don't
+  // lose their tab selection across reloads.
+  //
+  // Note: we deliberately do NOT mirror `rightPanelShown` from
+  // localStorage. The drawer's open/closed state is session-only — see
+  // the comment in `useConversationStore` and the schema note in
+  // `conversation-local-storage.ts` for the rationale.
   useEffect(() => {
-    // Initialize selectedTab from localStorage if available
     setSelectedTab(persistedState.selectedTab);
-    setHasRightPanelToggled(persistedState.rightPanelShown);
-  }, [
-    setSelectedTab,
-    setHasRightPanelToggled,
-    persistedState.selectedTab,
-    persistedState.rightPanelShown,
-  ]);
+  }, [setSelectedTab, persistedState.selectedTab]);
 
   useEffect(() => {
     const handlePanelVisibilityChange = () => {

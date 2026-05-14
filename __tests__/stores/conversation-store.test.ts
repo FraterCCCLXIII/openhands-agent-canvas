@@ -3,7 +3,6 @@ import { useConversationStore } from "#/stores/conversation-store";
 
 const defaultConversationState = {
   selectedTab: "editor" as const,
-  rightPanelShown: true,
   unpinnedTabs: [] as string[],
   conversationMode: "code" as const,
 };
@@ -72,7 +71,6 @@ describe("conversation store", () => {
       useConversationStore.setState({ conversationMode: "plan" });
       mockGetConversationState.mockReturnValue({
         selectedTab: "editor",
-        rightPanelShown: true,
         unpinnedTabs: [],
         conversationMode: "code",
       });
