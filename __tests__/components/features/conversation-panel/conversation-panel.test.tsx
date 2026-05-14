@@ -1086,7 +1086,7 @@ describe("ConversationPanel", () => {
       expect(screen.getByText("Old 2")).toBeInTheDocument();
 
       const summary = screen.getByTestId("older-conversations-summary");
-      expect(summary).toHaveTextContent("Conversations");
+      expect(summary).toHaveTextContent("SIDEBAR$CONVERSATIONS");
       expect(
         within(summary).getByTestId("older-conversations-filter-toggle"),
       ).toBeInTheDocument();

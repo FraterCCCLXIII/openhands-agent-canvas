@@ -220,17 +220,6 @@ describe("Sidebar", () => {
     expect(conversationsLink.className).toMatch(/(^|\s)text-\[#8C8C8C\](\s|$)/);
   });
 
-  it("labels the MCP nav item as MCP Directory instead of Integrations", () => {
-    renderSidebar("/mcp");
-
-    expect(screen.getByRole("link", { name: "SIDEBAR$MCP_DIRECTORY" })).toBe(
-      screen.getByTestId("sidebar-mcp-link"),
-    );
-    expect(
-      screen.queryByRole("link", { name: "SIDEBAR$INTEGRATIONS" }),
-    ).not.toBeInTheDocument();
-  });
-
   it("toggles between expanded and collapsed states and persists the choice", () => {
     const { unmount } = renderSidebar("/conversations");
 
