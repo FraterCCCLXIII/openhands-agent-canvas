@@ -1,15 +1,9 @@
 import React from "react";
-import { cn } from "#/utils/utils";
-import { ChatSendButton } from "../chat-send-button";
 import { ChatInputField } from "./chat-input-field";
 
 interface ChatInputRowProps {
   chatInputRef: React.RefObject<HTMLDivElement | null>;
-  disabled: boolean;
   isNewConversationPending?: boolean;
-  showButton: boolean;
-  buttonClassName: string;
-  handleSubmit: () => void;
   onInput: () => void;
   onPaste: (e: React.ClipboardEvent) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -19,11 +13,7 @@ interface ChatInputRowProps {
 
 export function ChatInputRow({
   chatInputRef,
-  disabled,
   isNewConversationPending = false,
-  showButton,
-  buttonClassName,
-  handleSubmit,
   onInput,
   onPaste,
   onKeyDown,
@@ -43,15 +33,6 @@ export function ChatInputRow({
           onBlur={onBlur}
         />
       </div>
-
-      {/* Send Button */}
-      {showButton && (
-        <ChatSendButton
-          buttonClassName={cn(buttonClassName, "translate-y-[3px]")}
-          handleSubmit={handleSubmit}
-          disabled={disabled}
-        />
-      )}
     </div>
   );
 }

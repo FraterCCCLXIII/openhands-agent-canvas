@@ -88,11 +88,7 @@ export function ChatInputContainer({
 
         <ChatInputRow
           chatInputRef={chatInputRef}
-          disabled={disabled}
           isNewConversationPending={isNewConversationPending}
-          showButton={showButton}
-          buttonClassName={buttonClassName}
-          handleSubmit={handleSubmit}
           onInput={onInput}
           onPaste={onPaste}
           onKeyDown={onKeyDown}
@@ -104,6 +100,9 @@ export function ChatInputContainer({
       <ChatInputActions
         disabled={disabled}
         onAddFileClick={() => handleFileIconClick(disabled)}
+        showButton={showButton}
+        buttonClassName={buttonClassName}
+        handleSubmit={handleSubmit}
       />
     </div>
   );

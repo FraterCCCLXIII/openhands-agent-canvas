@@ -3,20 +3,28 @@ import { Tools } from "../../controls/tools";
 import { ChangeAgentButton } from "../change-agent-button";
 import { ChatInputModel } from "./chat-input-model";
 import { ChatAddFileButton } from "../chat-add-file-button";
+import { ChatSendButton } from "../chat-send-button";
 import { useUnifiedPauseConversation } from "#/hooks/mutation/use-unified-stop-conversation";
 import { useConversationId } from "#/hooks/use-conversation-id";
 import { usePauseConversation } from "#/hooks/mutation/use-pause-conversation";
 import { useResumeConversation } from "#/hooks/mutation/use-resume-conversation";
 import { useActiveBackend } from "#/contexts/active-backend-context";
+import { cn } from "#/utils/utils";
 
 interface ChatInputActionsProps {
   disabled: boolean;
   onAddFileClick?: () => void;
+  showButton?: boolean;
+  buttonClassName?: string;
+  handleSubmit?: () => void;
 }
 
 export function ChatInputActions({
   disabled,
   onAddFileClick = () => {},
+  showButton = true,
+  buttonClassName = "",
+  handleSubmit = () => {},
 }: ChatInputActionsProps) {
   const unifiedPauseMutation = useUnifiedPauseConversation();
   const pauseConversationMutation = usePauseConversation();
@@ -50,13 +58,21 @@ export function ChatInputActions({
           <ChatInputModel />
         </div>
       </div>
-      <AgentStatus
-        className="ml-2 md:ml-3"
-        handleStop={handlePauseAgent}
-        handleResumeAgent={handleResumeAgentClick}
-        disabled={disabled}
-        isPausing={isPausing}
-      />
+      <div className="flex items-center gap-2">
+        <AgentStatus
+          handleStop={handlePauseAgent}
+          handleResumeAgent={handleResumeAgentClick}
+          disabled={disabled}
+          isPausing={isPausing}
+        />
+        {showButton && (
+          <ChatSendButton
+            buttonClassName={cn(buttonClassName, "translate-y-[3px]")}
+            handleSubmit={handleSubmit}
+            disabled={disabled}
+          />
+        )}
+      </div>
     </div>
   );
 }
