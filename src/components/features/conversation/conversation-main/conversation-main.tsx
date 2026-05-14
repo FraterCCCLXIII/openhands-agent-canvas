@@ -58,7 +58,7 @@ export function ConversationMain() {
             "flex flex-col bg-base overflow-hidden",
             isMobile
               ? getMobileChatPanelClass(isRightPanelShown)
-              : "transition-all duration-300 ease-in-out md:pt-3 md:pb-3",
+              : "transition-all duration-300 ease-in-out",
           )}
           style={
             !isMobile
