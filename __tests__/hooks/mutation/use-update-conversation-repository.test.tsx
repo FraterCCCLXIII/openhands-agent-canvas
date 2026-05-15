@@ -199,6 +199,199 @@ describe("useUpdateConversationRepository", () => {
     });
   });
 
+  it("optimistically updates every prefix-matching cache entry (multiple backends/orgs)", async () => {
+    const conversationId = "test-conversation-id";
+    const cacheKey1 = [
+      "user",
+      "conversation",
+      conversationId,
+      "backend-1",
+      "org-1",
+    ] as const;
+    const cacheKey2 = [
+      "user",
+      "conversation",
+      conversationId,
+      "backend-2",
+      "org-2",
+    ] as const;
+    const baseConversation = {
+      id: conversationId,
+      selected_repository: null,
+      selected_branch: null,
+      git_provider: null,
+    } as unknown as AppConversation;
+
+    vi.mocked(
+      AgentServerConversationService.updateConversationRepository,
+    ).mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return {
+        ...baseConversation,
+        selected_repository: "owner/repo",
+        selected_branch: "main",
+        git_provider: "github",
+      } as unknown as AppConversation;
+    });
+
+    const { Wrapper, client } = createWrapper();
+    client.setQueryData(cacheKey1, baseConversation);
+    client.setQueryData(cacheKey2, baseConversation);
+
+    const { result } = renderHook(() => useUpdateConversationRepository(), {
+      wrapper: Wrapper,
+    });
+
+    result.current.mutate({
+      conversationId,
+      repository: "owner/repo",
+      branch: "main",
+      gitProvider: "github",
+    });
+
+    await waitFor(() => {
+      const cached1 = client.getQueryData<AppConversation>(cacheKey1);
+      const cached2 = client.getQueryData<AppConversation>(cacheKey2);
+      expect(cached1?.selected_repository).toBe("owner/repo");
+      expect(cached1?.selected_branch).toBe("main");
+      expect(cached1?.git_provider).toBe("github");
+      expect(cached2?.selected_repository).toBe("owner/repo");
+      expect(cached2?.selected_branch).toBe("main");
+      expect(cached2?.git_provider).toBe("github");
+    });
+  });
+
+  it("rolls back every prefix-matching cache entry when the mutation rejects", async () => {
+    const conversationId = "test-conversation-id";
+    const cacheKey1 = [
+      "user",
+      "conversation",
+      conversationId,
+      "backend-1",
+      "org-1",
+    ] as const;
+    const cacheKey2 = [
+      "user",
+      "conversation",
+      conversationId,
+      "backend-2",
+      "org-2",
+    ] as const;
+    const baseConversation = {
+      id: conversationId,
+      selected_repository: null,
+      selected_branch: null,
+      git_provider: null,
+    } as unknown as AppConversation;
+
+    vi.mocked(
+      AgentServerConversationService.updateConversationRepository,
+    ).mockRejectedValue(new Error("nope"));
+
+    const { Wrapper, client } = createWrapper();
+    client.setQueryData(cacheKey1, baseConversation);
+    client.setQueryData(cacheKey2, baseConversation);
+
+    const { result } = renderHook(() => useUpdateConversationRepository(), {
+      wrapper: Wrapper,
+    });
+
+    result.current.mutate({
+      conversationId,
+      repository: "owner/repo",
+      branch: "main",
+      gitProvider: "github",
+    });
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true);
+    });
+
+    const cached1 = client.getQueryData<AppConversation>(cacheKey1);
+    const cached2 = client.getQueryData<AppConversation>(cacheKey2);
+    expect(cached1?.selected_repository).toBeNull();
+    expect(cached1?.selected_branch).toBeNull();
+    expect(cached1?.git_provider).toBeNull();
+    expect(cached2?.selected_repository).toBeNull();
+    expect(cached2?.selected_branch).toBeNull();
+    expect(cached2?.git_provider).toBeNull();
+  });
+
+  it("invalidates user-conversation, user-conversations, and local-git-info on settle", async () => {
+    const conversationId = "test-conversation-id";
+
+    vi.mocked(
+      AgentServerConversationService.updateConversationRepository,
+    ).mockResolvedValue({
+      id: conversationId,
+      selected_repository: "owner/repo",
+      selected_branch: "main",
+      git_provider: "github",
+    } as unknown as AppConversation);
+
+    const { Wrapper, client } = createWrapper();
+    const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useUpdateConversationRepository(), {
+      wrapper: Wrapper,
+    });
+
+    await result.current.mutateAsync({
+      conversationId,
+      repository: "owner/repo",
+      branch: "main",
+      gitProvider: "github",
+    });
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["user", "conversation", conversationId],
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["user", "conversations"],
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["local-git-info", conversationId],
+      });
+    });
+  });
+
+  it("still invalidates all three query keys on settle when the mutation rejects", async () => {
+    const conversationId = "test-conversation-id";
+
+    vi.mocked(
+      AgentServerConversationService.updateConversationRepository,
+    ).mockRejectedValue(new Error("boom"));
+
+    const { Wrapper, client } = createWrapper();
+    const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useUpdateConversationRepository(), {
+      wrapper: Wrapper,
+    });
+
+    await expect(
+      result.current.mutateAsync({
+        conversationId,
+        repository: "owner/repo",
+        branch: "main",
+        gitProvider: "github",
+      }),
+    ).rejects.toThrow("boom");
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["user", "conversation", conversationId],
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["user", "conversations"],
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ["local-git-info", conversationId],
+      });
+    });
+  });
+
   it("rolls back the prefix-keyed cache entry when the mutation rejects", async () => {
     const conversationId = "test-conversation-id";
     const cacheKey = [

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useConversationStore } from "#/stores/conversation-store";
 
 const defaultConversationState = {
-  selectedTab: "editor" as const,
+  selectedTab: "files" as const,
   unpinnedTabs: [] as string[],
   conversationMode: "code" as const,
 };
@@ -70,7 +70,7 @@ describe("conversation store", () => {
     it("sets conversationMode from getConversationState", () => {
       useConversationStore.setState({ conversationMode: "plan" });
       mockGetConversationState.mockReturnValue({
-        selectedTab: "editor",
+        selectedTab: "files",
         unpinnedTabs: [],
         conversationMode: "code",
       });
