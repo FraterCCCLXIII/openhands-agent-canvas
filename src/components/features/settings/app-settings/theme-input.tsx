@@ -13,15 +13,12 @@ import {
 export function ThemeInput() {
   const { t } = useTranslation("openhands");
 
-  const handleSelectionChange = React.useCallback(
-    (key: React.Key | null) => {
-      if (!key) return;
-      const next = key as ColorThemeKey;
-      applyColorTheme(next);
-      persistColorTheme(next);
-    },
-    [],
-  );
+  const handleSelectionChange = React.useCallback((key: React.Key | null) => {
+    if (!key) return;
+    const next = key as ColorThemeKey;
+    applyColorTheme(next);
+    persistColorTheme(next);
+  }, []);
 
   return (
     <SettingsDropdownInput

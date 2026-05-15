@@ -33,7 +33,9 @@ export function ConversationTabNav({
         isActive
           ? "hover:text-white hover:bg-base"
           : "hover:text-white hover:bg-white/5",
-        isActive ? "focus-within:text-white" : "focus-within:text-[var(--oh-muted)]",
+        isActive
+          ? "focus-within:text-white"
+          : "focus-within:text-[var(--oh-muted)]",
         className,
       )}
     >

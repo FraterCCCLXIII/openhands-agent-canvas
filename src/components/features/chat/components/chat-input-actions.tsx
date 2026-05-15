@@ -75,14 +75,18 @@ export function ChatInputActions({
   const codeRef = React.useRef<HTMLDivElement>(null);
   const modelRef = React.useRef<HTMLDivElement>(null);
   const overflowTriggerRef = React.useRef<HTMLButtonElement>(null);
-  const [actionsRowWidth, setActionsRowWidth] = React.useState<number>(Number.POSITIVE_INFINITY);
+  const [actionsRowWidth, setActionsRowWidth] = React.useState<number>(
+    Number.POSITIVE_INFINITY,
+  );
   const [rightSectionWidth, setRightSectionWidth] = React.useState(0);
   const [addFileWidth, setAddFileWidth] = React.useState(32);
   const [toolsWidth, setToolsWidth] = React.useState(100);
   const [codeWidth, setCodeWidth] = React.useState(96);
   const [modelWidth, setModelWidth] = React.useState(120);
   const [isOverflowOpen, setIsOverflowOpen] = React.useState(false);
-  const [activeSubmenu, setActiveSubmenu] = React.useState<"tools" | "agent" | "model" | null>(null);
+  const [activeSubmenu, setActiveSubmenu] = React.useState<
+    "tools" | "agent" | "model" | null
+  >(null);
   const [overflowPortalStyle, setOverflowPortalStyle] =
     React.useState<React.CSSProperties>();
 
@@ -425,14 +429,7 @@ export function ChatInputActions({
             className={contextMenuListItemClassName}
           >
             <ToolsContextMenuIconText
-              icon={
-                <Cpu
-                  width={16}
-                  height={16}
-                  strokeWidth={2}
-                  aria-hidden
-                />
-              }
+              icon={<Cpu width={16} height={16} strokeWidth={2} aria-hidden />}
               text="Model"
               rightIcon={<CarretRightFillIcon width={10} height={10} />}
               className={CONTEXT_MENU_ICON_TEXT_CLASSNAME}
@@ -480,7 +477,10 @@ export function ChatInputActions({
   );
 
   return (
-    <div ref={actionsRowRef} className="w-full min-w-0 flex items-center justify-between gap-2">
+    <div
+      ref={actionsRowRef}
+      className="w-full min-w-0 flex items-center justify-between gap-2"
+    >
       <div className="flex min-w-0 items-center gap-1">
         <div className="flex min-w-0 items-center gap-3">
           <div ref={addFileRef} className={cn(!showAddFileInline && "hidden")}>
@@ -519,7 +519,11 @@ export function ChatInputActions({
                   setIsOverflowOpen((open) => !open);
                 }}
               >
-                <ThreeDotsVerticalIcon width={16} height={16} color="currentColor" />
+                <ThreeDotsVerticalIcon
+                  width={16}
+                  height={16}
+                  color="currentColor"
+                />
               </button>
 
               {isOverflowOpen &&
@@ -533,7 +537,10 @@ export function ChatInputActions({
           )}
         </div>
       </div>
-      <div ref={rightSectionRef} className="ml-auto flex shrink-0 items-center gap-2">
+      <div
+        ref={rightSectionRef}
+        className="ml-auto flex shrink-0 items-center gap-2"
+      >
         {showAgentStatusInline && (
           <AgentStatus
             handleStop={handlePauseAgent}

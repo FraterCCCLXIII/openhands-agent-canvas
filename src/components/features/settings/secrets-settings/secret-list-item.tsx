@@ -30,7 +30,10 @@ export function SecretListItem({
   onDelete,
 }: SecretListItemProps) {
   return (
-    <tr data-testid="secret-item" className="border-t border-[var(--oh-border)]">
+    <tr
+      data-testid="secret-item"
+      className="border-t border-[var(--oh-border)]"
+    >
       <td className="p-3 text-sm text-content-2 truncate" title={title}>
         {title}
       </td>

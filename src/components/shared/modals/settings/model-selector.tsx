@@ -141,7 +141,8 @@ export function ModelSelector({
           defaultSelectedKey={selectedProvider ?? undefined}
           selectedKey={selectedProvider}
           classNames={{
-            popoverContent: "bg-content1 rounded-xl border border-[var(--oh-border)]",
+            popoverContent:
+              "bg-content1 rounded-xl border border-[var(--oh-border)]",
             selectorButton:
               "!rounded-none !bg-transparent data-[hover=true]:!bg-transparent !min-w-0 !w-auto !h-auto px-1",
           }}
@@ -212,7 +213,8 @@ export function ModelSelector({
           selectedKey={selectedModel}
           defaultSelectedKey={selectedModel ?? undefined}
           classNames={{
-            popoverContent: "bg-content1 rounded-xl border border-[var(--oh-border)]",
+            popoverContent:
+              "bg-content1 rounded-xl border border-[var(--oh-border)]",
             selectorButton:
               "!rounded-none !bg-transparent data-[hover=true]:!bg-transparent !min-w-0 !w-auto !h-auto px-1",
           }}

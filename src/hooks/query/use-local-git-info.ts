@@ -31,8 +31,10 @@ async function probeGitInfoAtDir(
     workspace.executeCommand("git rev-parse --abbrev-ref HEAD", directory, 10),
   ]);
 
-  const remoteUrl = remoteResult.exit_code === 0 ? remoteResult.stdout.trim() : "";
-  const rawBranch = branchResult.exit_code === 0 ? branchResult.stdout.trim() : "";
+  const remoteUrl =
+    remoteResult.exit_code === 0 ? remoteResult.stdout.trim() : "";
+  const rawBranch =
+    branchResult.exit_code === 0 ? branchResult.stdout.trim() : "";
   const branch = rawBranch && rawBranch !== "HEAD" ? rawBranch : null;
 
   if (!remoteUrl && !branch) return EMPTY_LOCAL_GIT_INFO;

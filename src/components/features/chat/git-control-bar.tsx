@@ -23,11 +23,6 @@ import { useHomeStore } from "#/stores/home-store";
 import { useOptimisticUserMessageStore } from "#/stores/optimistic-user-message-store";
 import { getStoredConversationMetadata } from "#/api/conversation-metadata-store";
 import { useActiveBackend } from "#/contexts/active-backend-context";
-import { useResolvedWorkspaces } from "#/hooks/query/use-resolved-workspaces";
-import { useWorkspacesStore } from "#/stores/workspaces-store";
-import { useNavigation } from "#/context/navigation-context";
-import { FolderBrowserModal } from "#/components/features/home/workspace-dropdown/folder-browser-modal";
-import RepoIcon from "#/icons/repo.svg?react";
 
 interface GitControlBarProps {
   onSuggestionsClick: (value: string) => void;
@@ -38,10 +33,9 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
   const { conversationId } = useConversationId();
   const [isOpenRepoModalOpen, setIsOpenRepoModalOpen] = useState(false);
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
-  const [isFolderBrowserOpen, setIsFolderBrowserOpen] = useState(false);
+  const [isFolderBrowserOpen, _setIsFolderBrowserOpen] = useState(false);
   const workspaceMenuContainerRef = useRef<HTMLDivElement>(null);
   const { addRecentRepository } = useHomeStore();
-  const { navigate } = useNavigation();
   const enqueuePendingMessage = useOptimisticUserMessageStore(
     (state) => state.enqueuePendingMessage,
   );
@@ -50,8 +44,6 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
   );
   const { backend } = useActiveBackend();
   const isLocalBackend = backend.kind === "local";
-  const { addWorkspaces, addWorkspaceParents } = useWorkspacesStore();
-  const { workspaces } = useResolvedWorkspaces();
 
   const { data: conversation } = useActiveConversation();
   const { repositoryInfo } = useTaskPolling();
@@ -67,7 +59,7 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
     sendRef.current = send;
   }, [send]);
   const { mutate: updateRepository } = useUpdateConversationRepository();
-  const { mutate: createConversation, isPending: isCreatingConversation } =
+  const { mutate: _createConversation, isPending: _isCreatingConversation } =
     useCreateConversation();
 
   // Priority: conversation data > task data > locally-detected git info.
@@ -197,106 +189,29 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
     );
   };
 
-  const handleOpenWorkspaceClick = () => {
-    if (!isConversationReady || isCreatingConversation) return;
-
-    if (workspaces.length === 0) {
-      setIsFolderBrowserOpen(true);
-      setIsWorkspaceMenuOpen(false);
-      return;
-    }
-
-    setIsWorkspaceMenuOpen((open) => !open);
-  };
-
-  const handleLaunchWorkspaceConversation = (workingDir?: string) => {
-    if (isCreatingConversation) return;
-    createConversation(
-      { workingDir },
-      {
-        onSuccess: (data) => {
-          setIsWorkspaceMenuOpen(false);
-          navigate(`/conversations/${data.conversation_id}`);
-        },
-      },
-    );
-  };
+  // Local backends never use the remote-repo "Connect Repo" CTA, so suppress the
+  // empty-state button there. A repo or workspace label inferred from local git
+  // metadata is still informational and stays visible.
+  const showRepoButton =
+    !isLocalBackend || !!selectedRepository || !!workspaceName;
+  // On a local backend the informational pill (e.g. workspace name, or a repo
+  // detected without a recognized provider) should not open the remote-repo
+  // modal — that flow is cloud-only. Disable the button in that case so the
+  // click is a no-op. Linkable repos render as <a> and ignore `disabled`.
+  const isRepoButtonInert = isLocalBackend && !hasRepository;
 
   return (
     <div className="flex flex-row items-center">
       <div className="flex flex-row gap-2.5 items-center overflow-x-auto flex-wrap md:flex-nowrap relative scrollbar-hide">
-        <div className="relative" ref={workspaceMenuContainerRef}>
+        {showRepoButton ? (
           <GitControlBarRepoButton
             selectedRepository={selectedRepository}
             gitProvider={gitProvider}
             workspaceName={workspaceName}
-            emptyStateLabel={isLocalBackend ? "Open Workspace" : undefined}
-            onClick={
-              isLocalBackend
-                ? handleOpenWorkspaceClick
-                : () => setIsOpenRepoModalOpen(true)
-            }
-            disabled={!isConversationReady}
+            onClick={() => setIsOpenRepoModalOpen(true)}
+            disabled={!isConversationReady || isRepoButtonInert}
           />
-          {isLocalBackend && isWorkspaceMenuOpen && (
-            <div
-              data-testid="git-control-bar-workspace-menu"
-              className="absolute z-50 left-0 bottom-full mb-2 min-w-[220px] rounded-[6px] bg-tertiary context-menu-box-shadow py-[6px] px-1"
-            >
-              <ul className="max-h-64 overflow-y-auto">
-                <li>
-                  <button
-                    type="button"
-                    disabled={isCreatingConversation}
-                    data-testid="git-control-bar-open-no-workspace"
-                    onClick={() => handleLaunchWorkspaceConversation()}
-                    className="flex items-center w-full px-2 py-2 text-sm text-white text-left hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <span className="italic text-[var(--oh-muted)]">
-                      {t(I18nKey.HOME$NO_WORKSPACE_OPTION)}
-                    </span>
-                  </button>
-                </li>
-                {workspaces.map((workspace) => (
-                  <li key={workspace.id}>
-                    <button
-                      type="button"
-                      disabled={isCreatingConversation}
-                      data-testid="git-control-bar-open-workspace"
-                      data-workspace-path={workspace.path}
-                      onClick={() =>
-                        handleLaunchWorkspaceConversation(workspace.path)
-                      }
-                      className="flex items-center gap-2 w-full px-2 py-2 text-sm text-white text-left hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      <RepoIcon width={14} height={14} className="shrink-0" />
-                      <span className="truncate">{workspace.name}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="border-t border-[var(--oh-border)] mt-1 pt-1">
-                <button
-                  type="button"
-                  data-testid="git-control-bar-add-workspace"
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setIsFolderBrowserOpen(true);
-                    setIsWorkspaceMenuOpen(false);
-                  }}
-                  className="flex items-center w-full px-2 py-2 text-sm text-white hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer"
-                >
-                  {t(I18nKey.HOME$ADD_WORKSPACES)}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        ) : null}
 
         {selectedBranch ? (
           <GitControlBarBranchButton
@@ -353,12 +268,6 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
         onClose={() => setIsOpenRepoModalOpen(false)}
         onLaunch={handleLaunchRepository}
         defaultProvider={gitProvider}
-      />
-      <FolderBrowserModal
-        isOpen={isFolderBrowserOpen}
-        onClose={() => setIsFolderBrowserOpen(false)}
-        onAdd={(items) => addWorkspaces(items)}
-        onAddParent={(items) => addWorkspaceParents(items)}
       />
     </div>
   );
