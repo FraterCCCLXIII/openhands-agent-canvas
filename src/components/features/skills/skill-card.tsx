@@ -55,7 +55,7 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
     <article
       data-testid={`skill-card-${skill.name}`}
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-[var(--oh-border)] bg-base-secondary p-4 transition-colors hover:border-white/40 hover:bg-base-tertiary/30",
+        "flex flex-col gap-3 rounded-xl border border-[var(--oh-border)] bg-base-secondary p-4 transition-colors hover:border-[var(--cool-grey-500)] hover:bg-base-tertiary/30",
         !enabled && "opacity-70",
       )}
     >
