@@ -264,7 +264,7 @@ export function InstallServerModal({
         data-testid="mcp-install-modal"
         data-marketplace-id={entry.id}
         onSubmit={handleSubmit}
-        className="bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-tertiary w-[520px] max-w-[90vw] max-h-[85vh] overflow-y-auto custom-scrollbar"
+        className="bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)] w-[520px] max-w-[90vw] max-h-[85vh] overflow-y-auto custom-scrollbar"
       >
         <div className="flex items-start gap-3">
           <span

@@ -21,7 +21,7 @@ export function ConversationCardSkeleton({
   return (
     <div
       data-testid="conversation-card-skeleton"
-      className="relative h-auto w-full px-3 py-2 border-b border-[#1f2228]"
+      className="relative h-auto w-full px-3 py-2 border-b border-[var(--oh-border-subtle)]"
     >
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2 w-full">

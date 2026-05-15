@@ -250,9 +250,9 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
                     disabled={isCreatingConversation}
                     data-testid="git-control-bar-open-no-workspace"
                     onClick={() => handleLaunchWorkspaceConversation()}
-                    className="flex items-center w-full px-2 py-2 text-sm text-white text-left hover:bg-[#5C5D62] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex items-center w-full px-2 py-2 text-sm text-white text-left hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <span className="italic text-[#A3A3A3]">
+                    <span className="italic text-[var(--oh-muted)]">
                       {t(I18nKey.HOME$NO_WORKSPACE_OPTION)}
                     </span>
                   </button>
@@ -267,7 +267,7 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
                       onClick={() =>
                         handleLaunchWorkspaceConversation(workspace.path)
                       }
-                      className="flex items-center gap-2 w-full px-2 py-2 text-sm text-white text-left hover:bg-[#5C5D62] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 w-full px-2 py-2 text-sm text-white text-left hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <RepoIcon width={14} height={14} className="shrink-0" />
                       <span className="truncate">{workspace.name}</span>
@@ -275,7 +275,7 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
                   </li>
                 ))}
               </ul>
-              <div className="border-t border-[#5C5D62] mt-1 pt-1">
+              <div className="border-t border-[var(--oh-border)] mt-1 pt-1">
                 <button
                   type="button"
                   data-testid="git-control-bar-add-workspace"
@@ -289,7 +289,7 @@ export function GitControlBar({ onSuggestionsClick }: GitControlBarProps) {
                     setIsFolderBrowserOpen(true);
                     setIsWorkspaceMenuOpen(false);
                   }}
-                  className="flex items-center w-full px-2 py-2 text-sm text-white hover:bg-[#5C5D62] rounded font-normal cursor-pointer"
+                  className="flex items-center w-full px-2 py-2 text-sm text-white hover:bg-[var(--oh-interactive-hover)] rounded font-normal cursor-pointer"
                 >
                   {t(I18nKey.HOME$ADD_WORKSPACES)}
                 </button>

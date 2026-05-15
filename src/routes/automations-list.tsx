@@ -86,7 +86,7 @@ export default function AutomationsList() {
   // Show loading state while checking health
   if (isHealthLoading) {
     return (
-      <div className="min-h-full bg-surface">
+      <div className="min-h-full">
         <div className="p-6 max-w-4xl mx-auto">
           <h1 className="text-xl font-semibold text-content">
             {t(I18nKey.AUTOMATIONS$TITLE)}
@@ -107,7 +107,7 @@ export default function AutomationsList() {
   // Show backend not configured state if health check failed
   if (!isBackendHealthy) {
     return (
-      <div className="min-h-full bg-surface">
+      <div className="min-h-full">
         <div className="p-6 max-w-4xl mx-auto">
           <h1 className="text-xl font-semibold text-content">
             {t(I18nKey.AUTOMATIONS$TITLE)}
@@ -122,7 +122,7 @@ export default function AutomationsList() {
   }
 
   return (
-    <div className="min-h-full bg-surface">
+    <div className="min-h-full">
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header */}
         <h1 className="text-xl font-semibold text-content">

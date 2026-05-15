@@ -10,7 +10,7 @@ export function hr({
   return (
     <hr
       {...props}
-      className="my-4 border-0 border-t border-[#4B505F]"
+      className="my-4 border-0 border-t border-[var(--oh-border)]"
     />
   );
 }
