@@ -19,6 +19,7 @@
   --color-basic: var(--oh-color-basic);
   --color-tertiary: var(--oh-color-tertiary);
   --color-tertiary-light: var(--oh-color-tertiary-light);
+  --color-tertiary-alt: var(--oh-text-dim);
   --color-content: var(--oh-color-content);
   --color-content-2: var(--oh-color-content-2);
 

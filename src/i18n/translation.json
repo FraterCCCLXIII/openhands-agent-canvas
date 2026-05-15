@@ -1886,6 +1886,9 @@
     "uk": "Після цієї кількості подій конденсатор узагальнить історію. Мінімум 20.",
     "ca": "Després d'aquest nombre d'esdeveniments, el condensador resumirà l'historial. Mínim 20."
   },
+  "SETTINGS$COLOR_THEME": {
+    "en": "Color Theme"
+  },
   "SETTINGS$LANGUAGE": {
     "en": "Language",
     "ja": "言語",

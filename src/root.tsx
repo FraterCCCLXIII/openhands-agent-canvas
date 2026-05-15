@@ -15,6 +15,18 @@ import { TelemetryConsentBanner } from "#/components/features/analytics/telemetr
 import { LoadingSpinner } from "#/components/shared/loading-spinner";
 import { useConfig } from "#/hooks/query/use-config";
 import { AgentServerUIRoot } from "#/components/providers";
+import {
+  applyColorTheme,
+  readPersistedColorTheme,
+} from "#/themes/color-themes";
+
+/** Applies the persisted color-theme palette to document.body on mount. */
+function ColorThemeApplier() {
+  React.useEffect(() => {
+    applyColorTheme(readPersistedColorTheme());
+  }, []);
+  return null;
+}
 
 // Only rendered when the active backend is unreachable; keep the modal out of
 // the default root graph.
@@ -35,6 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body data-agent-server-ui="" style={{ margin: 0 }}>
         <AgentServerUIRoot contentClassName="min-h-screen">
+          <ColorThemeApplier />
           {children}
           <Toaster />
           <TelemetryConsentBanner />

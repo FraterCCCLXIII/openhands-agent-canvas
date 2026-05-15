@@ -153,7 +153,10 @@ export function ModelSelector({
             },
           }}
         >
-          <AutocompleteSection title={t(I18nKey.MODEL_SELECTOR$VERIFIED)}>
+          <AutocompleteSection
+            title={t(I18nKey.MODEL_SELECTOR$VERIFIED)}
+            classNames={{ heading: "text-[var(--oh-muted)]" }}
+          >
             {verifiedProviders.map((provider) => (
               <AutocompleteItem
                 data-testid={`provider-item-${provider.name}`}
@@ -164,7 +167,10 @@ export function ModelSelector({
             ))}
           </AutocompleteSection>
           {unverifiedProviders.length > 0 ? (
-            <AutocompleteSection title={t(I18nKey.MODEL_SELECTOR$OTHERS)}>
+            <AutocompleteSection
+              title={t(I18nKey.MODEL_SELECTOR$OTHERS)}
+              classNames={{ heading: "text-[var(--oh-muted)]" }}
+            >
               {unverifiedProviders.map((provider) => (
                 <AutocompleteItem key={provider.name}>
                   {mapProvider(provider.name)}
@@ -218,13 +224,19 @@ export function ModelSelector({
             },
           }}
         >
-          <AutocompleteSection title={t(I18nKey.MODEL_SELECTOR$VERIFIED)}>
+          <AutocompleteSection
+            title={t(I18nKey.MODEL_SELECTOR$VERIFIED)}
+            classNames={{ heading: "text-[var(--oh-muted)]" }}
+          >
             {verifiedModels.map((model) => (
               <AutocompleteItem key={model.name}>{model.name}</AutocompleteItem>
             ))}
           </AutocompleteSection>
           {unverifiedModels.length > 0 ? (
-            <AutocompleteSection title={t(I18nKey.MODEL_SELECTOR$OTHERS)}>
+            <AutocompleteSection
+              title={t(I18nKey.MODEL_SELECTOR$OTHERS)}
+              classNames={{ heading: "text-[var(--oh-muted)]" }}
+            >
               {unverifiedModels.map((model) => (
                 <AutocompleteItem
                   data-testid={`model-item-${model.name}`}

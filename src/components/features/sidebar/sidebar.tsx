@@ -162,7 +162,7 @@ export function Sidebar() {
         }}
         className={cn(
           "bg-base flex flex-col transition-[width,min-width] duration-200",
-          "md:border-r md:border-[var(--oh-border-subtle)]",
+          "md:border-r md:border-[var(--oh-border)]",
           // Mobile: top bar; Desktop: vertical column. Width responds to
           // the collapsed state on md+ screens.
           "h-[54px] md:h-full",
@@ -388,7 +388,7 @@ export function Sidebar() {
             visual separator above it. Hidden in collapsed mode because the
             control needs full-width space. */}
         {!collapsed && (
-          <div className="hidden md:flex md:flex-col md:items-stretch pt-2 border-t border-[var(--oh-border-subtle)] md:-mx-2 md:px-2">
+          <div className="hidden md:flex md:flex-col md:items-stretch pt-2 border-t border-[var(--oh-border)] md:-mx-2 md:px-2">
             <BackendSelector openUpward />
           </div>
         )}

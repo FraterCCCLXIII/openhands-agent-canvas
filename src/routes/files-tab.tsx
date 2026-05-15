@@ -184,7 +184,7 @@ function FilesTab() {
               <div className="flex flex-1 min-h-0">
                 {isTreeVisible && (
                   <aside
-                    className="w-56 shrink-0 border-r border-[var(--oh-border-subtle)] overflow-y-auto custom-scrollbar-always"
+                    className="w-56 shrink-0 border-r border-[var(--oh-border)] overflow-y-auto custom-scrollbar-always"
                     data-testid="files-tab-tree"
                   >
                     <FileTreeView
