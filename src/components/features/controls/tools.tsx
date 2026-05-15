@@ -58,7 +58,12 @@ export function Tools() {
         <span className="text-sm font-normal leading-5">
           {t(I18nKey.MICROAGENTS_MODAL$TOOLS)}
         </span>
-        <ChevronDownSmallIcon width={18} height={18} color="currentColor" aria-hidden />
+        <ChevronDownSmallIcon
+          width={18}
+          height={18}
+          color="currentColor"
+          aria-hidden
+        />
       </button>
       {contextMenuOpen && (
         <ToolsContextMenu
