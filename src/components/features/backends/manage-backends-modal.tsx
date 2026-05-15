@@ -72,7 +72,7 @@ function BackendRow({ backend, health, onEdit, onRemove }: BackendRowProps) {
 
   return (
     <li
-      className="flex items-center gap-3 px-5 py-3 border-b border-[var(--oh-border-subtle)] last:border-b-0"
+      className="flex items-center gap-3 px-5 py-3 border-b border-[var(--oh-border)] last:border-b-0"
       data-testid={`manage-backends-row-${backend.name}`}
     >
       <BackendStatusDot isConnected={health?.isConnected ?? null} />
@@ -137,11 +137,11 @@ export function ManageBackendsModal({ onClose }: ManageBackendsModalProps) {
         <div
           data-testid="manage-backends-modal"
           className={cn(
-            "flex flex-col bg-[var(--oh-surface)] border border-[var(--oh-border-input)] rounded-xl",
+            "flex flex-col bg-[var(--oh-surface)] border border-[var(--oh-border)] rounded-xl",
             "w-[640px] max-w-[90vw] max-h-[70vh]",
           )}
         >
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--oh-border-input)]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--oh-border)]">
             <span className="text-sm font-semibold text-white">
               {t(I18nKey.BACKEND$MANAGE_TITLE)}
             </span>
@@ -175,7 +175,7 @@ export function ManageBackendsModal({ onClose }: ManageBackendsModalProps) {
             )}
           </div>
 
-          <div className="flex justify-between gap-2 px-5 py-3 border-t border-[var(--oh-border-input)]">
+          <div className="flex justify-between gap-2 px-5 py-3 border-t border-[var(--oh-border)]">
             <BrandButton
               type="button"
               variant="secondary"

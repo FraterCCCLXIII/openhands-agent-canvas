@@ -55,7 +55,7 @@ export function DropdownMenu({
                   "text-white focus:outline-none font-normal",
                   "flex items-center gap-2",
                   selectedItem?.value === option.value
-                    ? "bg-[var(--oh-interactive-active)] text-white"
+                    ? "bg-[var(--oh-interactive-selected)] text-white"
                     : "hover:bg-[var(--oh-interactive-hover)]",
                 ),
               })}

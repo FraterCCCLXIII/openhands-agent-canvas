@@ -111,7 +111,7 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
             type="button"
             onClick={() => setShowFullDescription((prev) => !prev)}
             data-testid={`skill-show-more-${skill.name}`}
-            className="mt-1 text-xs font-medium text-primary hover:underline"
+            className="mt-1 text-xs font-medium text-[var(--oh-muted)] hover:text-white hover:underline transition-colors"
           >
             {showFullDescription
               ? t(I18nKey.SETTINGS$SKILLS_SHOW_LESS)

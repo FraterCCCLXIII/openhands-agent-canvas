@@ -292,7 +292,7 @@ export function InstallServerModal({
             href={entry.docsUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs text-primary hover:underline self-start"
+            className="text-xs text-[var(--oh-muted)] hover:text-white hover:underline self-start transition-colors"
           >
             {t(I18nKey.MCP$VIEW_DOCS)}
           </a>

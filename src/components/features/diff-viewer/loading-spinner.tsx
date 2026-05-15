@@ -9,7 +9,7 @@ export function LoadingSpinner({ className }: LoadingSpinnerProps) {
     <div className="flex items-center justify-center">
       <div
         className={cn(
-          "animate-spin rounded-full border-4 border-[var(--oh-text-tertiary)] border-t-blue-500",
+          "animate-spin rounded-full border-4 border-[var(--oh-border)] border-t-white",
           className,
         )}
         role="status"
