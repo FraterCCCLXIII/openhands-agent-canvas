@@ -12,8 +12,12 @@ export function ResizeHandle({ onMouseDown, className }: ResizeHandleProps) {
       aria-hidden
     >
       <div
-        className="absolute inset-y-0 left-1/2 w-3 min-w-[12px] -translate-x-1/2 cursor-ew-resize"
+        className="peer absolute inset-y-0 left-1/2 w-3 min-w-[12px] -translate-x-1/2 cursor-ew-resize"
         onMouseDown={onMouseDown}
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-transparent transition-colors peer-hover:bg-white"
+        aria-hidden
       />
     </div>
   );

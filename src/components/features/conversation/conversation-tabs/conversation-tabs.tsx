@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import TerminalIcon from "#/icons/terminal.svg?react";
 import GlobeIcon from "#/icons/globe.svg?react";
@@ -71,7 +71,7 @@ export function ConversationTabs() {
     handlePanelVisibilityChange();
   }, [isRightPanelShown, selectedTab, onTabChange]);
 
-  const { t } = useTranslation("openhands");
+  const { t, i18n } = useTranslation("openhands");
 
   // `files` is intentionally the leftmost tab — it's the primary entry
   // point for inspecting agent output (workspace files + git diff).
@@ -144,63 +144,176 @@ export function ConversationTabs() {
     return !persistedState.unpinnedTabs.includes(tab.tabValue);
   });
 
+  const unpinnedSignature = persistedState.unpinnedTabs.join(",");
+
   const isAgentRunning =
     curAgentState === AgentState.RUNNING ||
     curAgentState === AgentState.LOADING;
   const isBuildDisabled = isAgentRunning || !planContent;
 
+  const tabsRowInnerRef = useRef<HTMLDivElement>(null);
+  const measureRowRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [inlineTabCount, setInlineTabCount] = useState(visibleTabs.length);
+
+  useLayoutEffect(() => {
+    const rowInner = tabsRowInnerRef.current;
+    const measureRow = measureRowRef.current;
+    const menuEl = menuRef.current;
+    if (!rowInner || !measureRow || !menuEl) return undefined;
+
+    const measure = () => {
+      const measureButtons = measureRow.querySelectorAll<HTMLButtonElement>(
+        '[data-tab-measure="true"]',
+      );
+      const tabCount = measureButtons.length;
+
+      const rowWidth = rowInner.getBoundingClientRect().width;
+      if (rowWidth === 0) {
+        setInlineTabCount(tabCount);
+        return;
+      }
+
+      const widths = Array.from(measureButtons).map(
+        (button) => button.getBoundingClientRect().width,
+      );
+
+      if (widths.length !== tabCount || tabCount === 0) {
+        setInlineTabCount(Math.max(0, tabCount));
+        return;
+      }
+
+      const menuWidth = menuEl.getBoundingClientRect().width;
+      const gapCss =
+        getComputedStyle(rowInner).columnGap || getComputedStyle(rowInner).gap;
+      const gapPx = parseFloat(gapCss) || 6;
+
+      let nextCount = 0;
+      for (let k = tabCount; k >= 0; k -= 1) {
+        let total = menuWidth;
+        for (let i = 0; i < k; i += 1) {
+          total += widths[i] ?? 0;
+        }
+        if (k > 0) {
+          total += k * gapPx;
+        }
+        if (total <= rowWidth + 0.5) {
+          nextCount = k;
+          break;
+        }
+      }
+
+      setInlineTabCount((prev) => (prev === nextCount ? prev : nextCount));
+    };
+
+    measure();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(rowInner);
+    return () => ro.disconnect();
+  }, [
+    unpinnedSignature,
+    visibleTabs.length,
+    hasTaskList,
+    backend.kind,
+    selectedTab,
+    isRightPanelShown,
+    i18n.language,
+  ]);
+
+  const safeInlineTabCount = Math.min(inlineTabCount, visibleTabs.length);
+
   return (
     <>
-      <div
-        className={cn(
-          "relative flex min-h-10 w-full flex-row flex-wrap items-center justify-start gap-1.5 p-1",
-        )}
-      >
-        {visibleTabs.map(
-          (
-            {
-              tabValue,
-              icon,
-              onClick,
-              isActive,
-              tooltipContent,
-              tooltipAriaLabel,
-              label,
-              className,
-            },
-            index,
-          ) => (
-            <ChatActionTooltip
-              key={index}
-              tooltip={tooltipContent}
-              ariaLabel={tooltipAriaLabel}
-            >
-              <ConversationTabNav
-                tabValue={tabValue}
-                icon={icon}
-                onClick={onClick}
-                isActive={isActive}
-                label={label}
-                className={className}
-              />
-            </ChatActionTooltip>
-          ),
-        )}
-        <div className="relative">
-          <EllipsisButton
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            ariaLabel={t(I18nKey.COMMON$MORE_OPTIONS)}
-          />
-          <ConversationTabsContextMenu
-            isOpen={isMenuOpen}
-            onClose={() => setIsMenuOpen(false)}
-          />
+      <div className="relative min-h-10 w-full min-w-0 p-1">
+        <div
+          ref={measureRowRef}
+          aria-hidden
+          className="pointer-events-none absolute top-0 left-[-10000px] flex flex-nowrap items-center gap-1.5"
+        >
+          {visibleTabs.map(
+            (
+              {
+                tabValue,
+                icon,
+                isActive,
+                tooltipContent,
+                tooltipAriaLabel,
+                label,
+                className: tabClassName,
+              },
+              index,
+            ) => (
+              <ChatActionTooltip
+                key={`measure-${tabValue}-${index}`}
+                tooltip={tooltipContent}
+                ariaLabel={tooltipAriaLabel}
+              >
+                <ConversationTabNav
+                  tabValue={tabValue}
+                  icon={icon}
+                  onClick={() => {}}
+                  isActive={isActive}
+                  label={label}
+                  className={cn(tabClassName, "shrink-0")}
+                  measureOnly
+                />
+              </ChatActionTooltip>
+            ),
+          )}
+        </div>
+        <div
+          ref={tabsRowInnerRef}
+          className="flex w-full min-w-0 flex-nowrap items-center gap-1.5 overflow-x-hidden"
+        >
+          {visibleTabs
+            .slice(0, safeInlineTabCount)
+            .map(
+              (
+                {
+                  tabValue,
+                  icon,
+                  onClick,
+                  isActive,
+                  tooltipContent,
+                  tooltipAriaLabel,
+                  label,
+                  className: tabClassName,
+                },
+                index,
+              ) => (
+                <ChatActionTooltip
+                  key={`${tabValue}-${index}`}
+                  tooltip={tooltipContent}
+                  ariaLabel={tooltipAriaLabel}
+                >
+                  <ConversationTabNav
+                    tabValue={tabValue}
+                    icon={icon}
+                    onClick={onClick}
+                    isActive={isActive}
+                    label={label}
+                    className={cn(tabClassName, "shrink-0")}
+                  />
+                </ChatActionTooltip>
+              ),
+            )}
+          <div ref={menuRef} className="relative shrink-0">
+            <EllipsisButton
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              ariaLabel={t(I18nKey.COMMON$MORE_OPTIONS)}
+            />
+            <ConversationTabsContextMenu
+              isOpen={isMenuOpen}
+              onClose={() => setIsMenuOpen(false)}
+            />
+          </div>
         </div>
       </div>
       {isTabActive("planner") && (
         <div
           className={cn(
-            "flex h-10 min-h-10 shrink-0 items-center border-t border-[var(--oh-border)] px-1",
+            "flex h-10 min-h-10 shrink-0 items-center border-t border-[var(--oh-border)] pl-[10px] pr-1",
           )}
         >
           <button

@@ -8,6 +8,8 @@ type ConversationTabNavProps = {
   isActive?: boolean;
   label?: string;
   className?: string;
+  /** Omit test id (e.g. offscreen width measurement clones). */
+  measureOnly?: boolean;
 };
 
 export function ConversationTabNav({
@@ -17,6 +19,7 @@ export function ConversationTabNav({
   isActive,
   label,
   className,
+  measureOnly,
 }: ConversationTabNavProps) {
   return (
     <button
@@ -24,7 +27,10 @@ export function ConversationTabNav({
       onClick={() => {
         onClick();
       }}
-      data-testid={`conversation-tab-${tabValue}`}
+      {...(measureOnly
+        ? {}
+        : { "data-testid": `conversation-tab-${tabValue}` as const })}
+      data-tab-measure={measureOnly ? "true" : undefined}
       className={cn(
         "flex items-center gap-2 rounded-md cursor-pointer",
         "pl-1.5 pr-2 py-1 lg:py-1.5",
