@@ -20,11 +20,24 @@ describe("ConversationCardSkeleton", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses a single bar with conversation-card outer spacing and rounded corners", () => {
-    const { container } = render(<ConversationCardSkeleton />);
+  it("renders three staggered rounded skeleton rows", () => {
+    render(<ConversationCardSkeleton />);
 
     const root = screen.getByTestId("conversation-card-skeleton");
-    expect(root).toHaveClass("rounded-md", "py-1", "pl-2", "pr-1", "skeleton");
-    expect(container.querySelector(".skeleton")).toBe(root);
+    const bars = root.querySelectorAll(":scope > div");
+    expect(bars.length).toBe(3);
+    bars.forEach((bar, index) => {
+      expect(bar).toHaveClass("rounded-md", "animate-pulse");
+      expect(bar.getAttribute("style")).toContain(
+        `animation-delay: ${[0, 180, 360][index]}ms`,
+      );
+    });
+  });
+
+  it("renders three compact skeleton bars", () => {
+    render(<ConversationCardSkeleton compact />);
+    const root = screen.getByTestId("conversation-card-skeleton-compact");
+    const bars = root.querySelectorAll(":scope > div");
+    expect(bars.length).toBe(3);
   });
 });

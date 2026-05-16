@@ -2,9 +2,13 @@ interface ConversationCardSkeletonProps {
   compact?: boolean;
 }
 
+/** Stagger so each bar’s pulse peaks after the previous (ms). */
+const PULSE_STAGGER_MS = [0, 180, 360] as const;
+
 /**
- * Non-compact: one pulse rectangle matching {@link ConversationCard} outer
- * spacing and corners (list wrapping uses the same `py-0.5` as real rows).
+ * Loading placeholders for the conversation list. Non-compact: three darker
+ * rounded bars with staggered pulse; compact: three small bars for the icon
+ * rail.
  */
 export function ConversationCardSkeleton({
   compact = false,
@@ -13,9 +17,16 @@ export function ConversationCardSkeleton({
     return (
       <div
         data-testid="conversation-card-skeleton-compact"
-        className="flex items-center justify-center px-2 py-2"
+        className="flex flex-col items-center gap-1.5 py-1"
+        aria-hidden
       >
-        <div className="skeleton-round h-2 w-2" />
+        {[0, 1, 2].map((i) => (
+          <div
+            key={`conversation-skeleton-compact-${i}`}
+            className="h-1.5 w-7 shrink-0 rounded-md bg-neutral-700 animate-pulse motion-reduce:animate-none"
+            style={{ animationDelay: `${PULSE_STAGGER_MS[i]}ms` }}
+          />
+        ))}
       </div>
     );
   }
@@ -23,8 +34,16 @@ export function ConversationCardSkeleton({
   return (
     <div
       data-testid="conversation-card-skeleton"
-      className="h-auto w-full min-h-8 rounded-md py-1 pl-2 pr-1 skeleton"
+      className="flex flex-col gap-1.5 py-0.5"
       aria-hidden
-    />
+    >
+      {[0, 1, 2].map((i) => (
+        <div
+          key={`conversation-skeleton-row-${i}`}
+          className="h-6 min-h-6 w-full rounded-md bg-neutral-700 animate-pulse motion-reduce:animate-none"
+          style={{ animationDelay: `${PULSE_STAGGER_MS[i]}ms` }}
+        />
+      ))}
+    </div>
   );
 }

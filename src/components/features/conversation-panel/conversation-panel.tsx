@@ -519,15 +519,7 @@ export function ConversationPanel({
         }}
         className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar-always"
       >
-        {showInitialSkeleton && (
-          <div>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className={cn(compact ? "" : "block py-0.5")}>
-                <ConversationCardSkeleton compact={compact} />
-              </div>
-            ))}
-          </div>
-        )}
+        {showInitialSkeleton && <ConversationCardSkeleton compact={compact} />}
 
         {!compact && showEmptyState && (
           <div className="flex flex-col items-center justify-center h-full">
