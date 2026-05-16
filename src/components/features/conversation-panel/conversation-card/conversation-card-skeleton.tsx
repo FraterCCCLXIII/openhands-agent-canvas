@@ -19,14 +19,16 @@ export function ConversationCardSkeleton({
   return (
     <div
       data-testid="conversation-card-skeleton"
-      className="relative h-auto w-full pl-3 pr-1 py-2 border-b border-[var(--oh-border-subtle)]"
+      className="relative h-auto w-full border-b border-[var(--oh-border-subtle)] py-2"
     >
       <div className="flex items-center w-full min-w-0 h-6">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div
-            data-testid="conversation-card-skeleton-status-dot"
-            className="skeleton-round h-2.5 w-2.5 shrink-0"
-          />
+          <div className="flex w-[18px] shrink-0 items-center justify-center">
+            <div
+              data-testid="conversation-card-skeleton-status-dot"
+              className="skeleton-round h-2.5 w-2.5 shrink-0"
+            />
+          </div>
           <div
             data-testid="conversation-card-skeleton-title"
             className="skeleton h-3 w-2/3 rounded"

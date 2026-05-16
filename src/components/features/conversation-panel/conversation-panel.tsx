@@ -467,16 +467,18 @@ export function ConversationPanel({
     <div
       ref={ref}
       data-testid="conversation-panel"
-      className="w-full h-full flex flex-col"
+      className="flex h-full min-h-0 w-full flex-col"
     >
       {showConversationHeader && (
-        <div className={isListScrolled ? "-mx-2" : undefined}>
+        <div
+          className={cn(
+            "-mx-2 border-b",
+            isListScrolled ? "border-[var(--oh-border)]" : "border-transparent",
+          )}
+        >
           <div
             data-testid="older-conversations-summary"
-            className={cn(
-              "px-2 py-2 text-[var(--oh-muted)] flex flex-wrap items-center gap-x-2 gap-y-1",
-              isListScrolled && "border-b border-[var(--oh-border)]",
-            )}
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 pl-4 pr-2 text-[var(--oh-muted)]"
           >
             <span className="text-sm font-medium text-[var(--oh-muted)]">
               {t(I18nKey.SIDEBAR$CONVERSATIONS)}
