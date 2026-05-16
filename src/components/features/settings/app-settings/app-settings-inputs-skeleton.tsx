@@ -5,7 +5,7 @@ export function AppSettingsInputsSkeleton() {
   return (
     <div
       data-testid="app-settings-skeleton"
-      className="skeleton-stagger px-11 py-9 flex flex-col gap-6"
+      className="px-11 py-9 flex flex-col gap-6"
     >
       <InputSkeleton />
       <SwitchSkeleton />

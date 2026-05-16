@@ -26,7 +26,7 @@ function TaskGroupSkeleton({ items = 3 }: TaskGroupSkeletonProps) {
         <div className="h-3 w-40 skeleton !rounded-sm" />
       </div>
 
-      <ul className="skeleton-stagger">
+      <ul>
         {Array.from({ length: items }).map((_, index) => (
           <TaskCardSkeleton key={index} />
         ))}
