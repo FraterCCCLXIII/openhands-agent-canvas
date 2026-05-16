@@ -517,12 +517,12 @@ export function ConversationPanel({
         onScroll={(event) => {
           setIsListScrolled(event.currentTarget.scrollTop > 0);
         }}
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar-always"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar-always"
       >
         {showInitialSkeleton && <ConversationCardSkeleton compact={compact} />}
 
         {!compact && showEmptyState && (
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-8">
             <p className="text-[var(--oh-muted)]">
               {t(I18nKey.CONVERSATION$NO_CONVERSATIONS)}
             </p>
@@ -550,7 +550,8 @@ export function ConversationPanel({
         {!showInitialSkeleton &&
         !compact &&
         organizeMode === "grouped" &&
-        conversationGroups ? (
+        conversationGroups &&
+        conversationGroups.length > 0 ? (
           <nav
             aria-label={t(I18nKey.SIDEBAR$CONVERSATIONS)}
             className="space-y-1 md:space-y-0.5 pb-1"

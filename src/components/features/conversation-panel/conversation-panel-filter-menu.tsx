@@ -2,9 +2,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import {
   Bot,
+  CalendarArrowDown,
   Check,
-  CirclePlus,
   Clock3,
+  ClockArrowDown,
   Folder,
   GitBranch,
   ListFilter,
@@ -32,7 +33,12 @@ function MenuHeading({ children }: { children: React.ReactNode }) {
 }
 
 function MenuSeparator() {
-  return <div className="my-1 h-px w-full bg-[var(--oh-border-subtle)]" />;
+  return (
+    <div
+      className="-mx-1 my-1 h-px shrink-0 bg-[var(--oh-border)]"
+      role="separator"
+    />
+  );
 }
 
 function MenuRow({
@@ -165,7 +171,7 @@ export function ConversationPanelFilterMenu({
           <MenuSeparator />
           <MenuHeading>{t(I18nKey.CONVERSATION_PANEL$SORT_BY)}</MenuHeading>
           <MenuRow
-            icon={CirclePlus}
+            icon={CalendarArrowDown}
             label={t(I18nKey.CONVERSATION_PANEL$SORT_CREATED)}
             selected={conversationSort === "created"}
             onClick={() => {
@@ -174,7 +180,7 @@ export function ConversationPanelFilterMenu({
             }}
           />
           <MenuRow
-            icon={MessageCircle}
+            icon={ClockArrowDown}
             label={t(I18nKey.CONVERSATION_PANEL$SORT_UPDATED)}
             selected={conversationSort === "updated"}
             onClick={() => {
