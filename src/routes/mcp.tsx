@@ -137,7 +137,7 @@ export default function MCPPage() {
     <div data-testid="mcp-page" className="flex h-full gap-10">
       <ExtensionsNavigation />
       <main className="flex-1 min-w-0 overflow-auto custom-scrollbar-always pr-[14px] pt-8 pb-12">
-        <div className="max-w-5xl flex flex-col gap-6">
+        <div className="max-w-[800px] flex flex-col gap-6">
           <div className="min-w-0">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">

@@ -17,11 +17,13 @@ interface SettingsNavigationProps {
   navigationItems: SettingsNavRenderedItem[];
 }
 
-export function SettingsNavigation({
-  isMobileMenuOpen,
-  onCloseMobileMenu,
+/**
+ * Desktop sidebar only — must stay inside the main settings scroll row so flex
+ * layout is just aside + content (fixed mobile UI lives outside that row).
+ */
+export function SettingsDesktopSidebar({
   navigationItems,
-}: SettingsNavigationProps) {
+}: Pick<SettingsNavigationProps, "navigationItems">) {
   const { t } = useTranslation("openhands");
   const desktopNavItems = navigationItems.filter(
     (item): item is Extract<SettingsNavRenderedItem, { type: "item" }> =>
@@ -29,37 +31,53 @@ export function SettingsNavigation({
   );
 
   return (
-    <>
-      <aside
-        data-testid="settings-navbar-desktop"
-        className={cn(
-          "hidden md:flex md:w-[260px] md:shrink-0 md:flex-col md:gap-2",
-          "md:sticky md:top-8 md:self-start",
-        )}
-      >
-        <Typography.Text className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--oh-muted)]">
-          {t(I18nKey.SETTINGS$TITLE)}
-        </Typography.Text>
-        <div className="flex flex-col gap-0.5 pt-0.5">
-          {desktopNavItems.map((renderedItem) => (
-            <SidebarNavLink
-              key={renderedItem.item.to}
-              to={renderedItem.item.to}
-              label={t(renderedItem.item.text as I18nKey)}
-              end
-              testId={`sidebar-settings-${renderedItem.item.to}`}
-              icon={renderedItem.item.icon}
-            />
-          ))}
-        </div>
-        <div className="px-2 pt-3">
-          <BackendSyncedSettingsBadge />
-        </div>
-      </aside>
+    <aside
+      data-testid="settings-navbar-desktop"
+      className={cn(
+        "hidden md:flex md:w-[260px] md:shrink-0 md:flex-col md:gap-2",
+        // No md:pt-8 here — main already has md:pt-8 for the page title; doubling
+        // it pushed the nav below the H2 on LLM, Application, etc.
+        "md:sticky md:top-8 md:self-start",
+      )}
+    >
+      <Typography.Text className="px-3 text-xs font-semibold uppercase tracking-wider text-[var(--oh-muted)]">
+        {t(I18nKey.SETTINGS$TITLE)}
+      </Typography.Text>
+      <div className="flex flex-col gap-0.5 pt-0.5">
+        {desktopNavItems.map((renderedItem) => (
+          <SidebarNavLink
+            key={renderedItem.item.to}
+            to={renderedItem.item.to}
+            label={t(renderedItem.item.text as I18nKey)}
+            end
+            testId={`sidebar-settings-${renderedItem.item.to}`}
+            icon={renderedItem.item.icon}
+          />
+        ))}
+      </div>
+      <div className="flex min-h-[2.75rem] items-start px-2 pt-3">
+        <BackendSyncedSettingsBadge />
+      </div>
+    </aside>
+  );
+}
 
+/**
+ * Mobile overlay + drawer. Rendered outside the scrolling flex row so `position:
+ * fixed` does not interact with flex item sizing on desktop.
+ */
+export function SettingsMobileDrawer({
+  isMobileMenuOpen,
+  onCloseMobileMenu,
+  navigationItems,
+}: SettingsNavigationProps) {
+  const { t } = useTranslation("openhands");
+
+  return (
+    <>
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={onCloseMobileMenu}
         />
       )}
@@ -72,14 +90,14 @@ export function SettingsNavigation({
         )}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 ml-1 sm:ml-4.5">
+          <div className="ml-1 flex items-center gap-2 sm:ml-4.5">
             <SettingsIcon width={16} height={16} />
             <Typography.H2>{t(I18nKey.SETTINGS$TITLE)}</Typography.H2>
           </div>
           <button
             type="button"
             onClick={onCloseMobileMenu}
-            className="md:hidden p-0.5 hover:bg-tertiary rounded-md transition-colors cursor-pointer"
+            className="cursor-pointer rounded-md p-0.5 transition-colors hover:bg-tertiary md:hidden"
             aria-label="Close navigation menu"
           >
             <CloseIcon width={32} height={32} />
@@ -111,10 +129,19 @@ export function SettingsNavigation({
           })}
         </div>
 
-        <div className="px-2 pt-3">
+        <div className="flex min-h-[2.75rem] items-start px-2 pt-3">
           <BackendSyncedSettingsBadge />
         </div>
       </nav>
+    </>
+  );
+}
+
+export function SettingsNavigation(props: SettingsNavigationProps) {
+  return (
+    <>
+      <SettingsDesktopSidebar navigationItems={props.navigationItems} />
+      <SettingsMobileDrawer {...props} />
     </>
   );
 }

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { MobileHeader } from "./mobile-header";
-import { SettingsNavigation } from "./settings-navigation";
+import {
+  SettingsDesktopSidebar,
+  SettingsMobileDrawer,
+} from "./settings-navigation";
 import { SettingsNavRenderedItem } from "#/hooks/use-settings-nav-items";
 
 interface SettingsLayoutProps {
@@ -27,18 +30,17 @@ export function SettingsLayout({
       {/* Desktop: one vertical scroll for nav + content so the sidebar can
           stay sticky (`md:sticky` on the desktop aside). */}
       <div className="flex min-h-0 flex-1 items-start gap-10 overflow-y-auto custom-scrollbar-always">
-        {/* Navigation */}
-        <SettingsNavigation
-          isMobileMenuOpen={isMobileMenuOpen}
-          onCloseMobileMenu={closeMobileMenu}
-          navigationItems={navigationItems}
-        />
-        {/* Main content: same max width as extensions settings pages, centered in
-            the flexible area beside the nav. */}
+        <SettingsDesktopSidebar navigationItems={navigationItems} />
+        {/* Main content: fixed reading width (~800px) centered beside the nav. */}
         <main className="flex min-w-0 flex-1 flex-col md:pt-8">
-          <div className="mx-auto w-full min-w-0 max-w-5xl">{children}</div>
+          <div className="mx-auto w-full min-w-0 max-w-[800px]">{children}</div>
         </main>
       </div>
+      <SettingsMobileDrawer
+        isMobileMenuOpen={isMobileMenuOpen}
+        onCloseMobileMenu={closeMobileMenu}
+        navigationItems={navigationItems}
+      />
     </div>
   );
 }

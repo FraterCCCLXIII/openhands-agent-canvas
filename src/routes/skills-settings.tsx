@@ -88,7 +88,7 @@ function SkillsSettingsScreen() {
     <div data-testid="skills-settings-screen" className="flex h-full gap-10">
       <ExtensionsNavigation />
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-auto custom-scrollbar-always pr-[14px] pt-8 pb-12">
-        <div className="max-w-5xl flex flex-col gap-6">
+        <div className="max-w-[800px] flex flex-col gap-6">
           <div className="min-w-0 space-y-1">
             <h2 className="text-xl font-semibold leading-6 text-foreground">
               {t(I18nKey.SETTINGS$SKILLS_TITLE)}
