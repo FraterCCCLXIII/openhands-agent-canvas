@@ -19,7 +19,7 @@ export function ConversationCardSkeleton({
   return (
     <div
       data-testid="conversation-card-skeleton"
-      className="relative h-auto w-full border-b border-[var(--oh-border-subtle)] py-2"
+      className="relative h-auto w-full border-b border-[var(--oh-border-subtle)] py-2 pl-2 pr-1"
     >
       <div className="flex items-center w-full min-w-0 h-6">
         <div className="flex items-center gap-2 flex-1 min-w-0">

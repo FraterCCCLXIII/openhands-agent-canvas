@@ -399,7 +399,7 @@ export function ConversationPanel({
           key={conversation.id}
           to={`/conversations/${conversation.id}`}
           onClick={onClose}
-          className="block px-2 py-0.5"
+          className="block py-0.5"
         >
           <ConversationCard
             onDelete={() =>
@@ -522,10 +522,7 @@ export function ConversationPanel({
         {showInitialSkeleton && (
           <div>
             {Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={index}
-                className={cn(compact ? "" : "block px-2 py-0.5")}
-              >
+              <div key={index} className={cn(compact ? "" : "block py-0.5")}>
                 <ConversationCardSkeleton compact={compact} />
               </div>
             ))}
