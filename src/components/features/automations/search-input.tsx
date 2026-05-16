@@ -18,7 +18,7 @@ export function SearchInput({ value, onChange }: SearchInputProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER)}
-        className="w-full max-w-sm rounded-lg border border-[var(--oh-border)] bg-[var(--oh-surface)] py-2 pl-10 pr-3 text-sm text-white placeholder:text-muted focus:border-[var(--oh-border)] focus:outline-none"
+        className="w-full rounded-lg border border-[var(--oh-border)] bg-[var(--oh-surface)] py-2 pl-10 pr-3 text-sm text-white placeholder:text-muted focus:border-[var(--oh-border)] focus:outline-none"
       />
     </div>
   );

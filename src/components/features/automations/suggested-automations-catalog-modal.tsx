@@ -83,7 +83,7 @@ export function SuggestedAutomationsCatalogModal({
             type="button"
             onClick={onClose}
             aria-label={t(I18nKey.BUTTON$CLOSE)}
-            className="rounded-lg bg-surface-raised p-1.5 text-muted transition-colors hover:bg-base-tertiary/50 hover:text-content"
+            className="cursor-pointer rounded-lg bg-surface-raised p-1.5 text-muted transition-colors [&_path]:fill-current hover:bg-[var(--oh-interactive-hover)] hover:text-white"
           >
             <CloseIcon width={18} height={18} />
           </button>
