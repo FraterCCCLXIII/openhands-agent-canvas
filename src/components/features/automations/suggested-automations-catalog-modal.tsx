@@ -36,7 +36,7 @@ function CatalogItemCard({
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-tertiary text-muted transition-colors group-hover:text-content-2"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-tertiary text-muted"
         >
           <Icon className="size-5" strokeWidth={2} aria-hidden />
         </span>
