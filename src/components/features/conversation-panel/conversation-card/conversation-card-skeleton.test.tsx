@@ -10,7 +10,7 @@ describe("ConversationCardSkeleton", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders compact skeleton without text placeholders", () => {
+  it("renders compact skeleton without full-row placeholder", () => {
     render(<ConversationCardSkeleton compact />);
     expect(
       screen.getByTestId("conversation-card-skeleton-compact"),
@@ -20,17 +20,11 @@ describe("ConversationCardSkeleton", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders the same header slots a loaded conversation card shows: status dot, title, and timestamp", () => {
-    render(<ConversationCardSkeleton />);
+  it("uses a single bar with conversation-card outer spacing and rounded corners", () => {
+    const { container } = render(<ConversationCardSkeleton />);
 
-    expect(
-      screen.getByTestId("conversation-card-skeleton-status-dot"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("conversation-card-skeleton-title"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("conversation-card-skeleton-timestamp"),
-    ).toBeInTheDocument();
+    const root = screen.getByTestId("conversation-card-skeleton");
+    expect(root).toHaveClass("rounded-md", "py-1", "pl-2", "pr-1", "skeleton");
+    expect(container.querySelector(".skeleton")).toBe(root);
   });
 });

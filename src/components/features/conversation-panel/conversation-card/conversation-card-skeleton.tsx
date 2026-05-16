@@ -2,6 +2,10 @@ interface ConversationCardSkeletonProps {
   compact?: boolean;
 }
 
+/**
+ * Non-compact: one pulse rectangle matching {@link ConversationCard} outer
+ * spacing and corners (list wrapping uses the same `py-0.5` as real rows).
+ */
 export function ConversationCardSkeleton({
   compact = false,
 }: ConversationCardSkeletonProps) {
@@ -19,28 +23,8 @@ export function ConversationCardSkeleton({
   return (
     <div
       data-testid="conversation-card-skeleton"
-      className="relative h-auto w-full border-b border-[var(--oh-border-subtle)] py-2 pl-2 pr-1"
-    >
-      <div className="flex items-center w-full min-w-0 h-6">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="flex w-[18px] shrink-0 items-center justify-center">
-            <div
-              data-testid="conversation-card-skeleton-status-dot"
-              className="skeleton-round h-2.5 w-2.5 shrink-0"
-            />
-          </div>
-          <div
-            data-testid="conversation-card-skeleton-title"
-            className="skeleton h-3 w-2/3 rounded"
-          />
-        </div>
-        <div className="ml-auto pl-2 shrink-0">
-          <div
-            data-testid="conversation-card-skeleton-timestamp"
-            className="skeleton h-2 w-8 rounded"
-          />
-        </div>
-      </div>
-    </div>
+      className="h-auto w-full min-h-8 rounded-md py-1 pl-2 pr-1 skeleton"
+      aria-hidden
+    />
   );
 }

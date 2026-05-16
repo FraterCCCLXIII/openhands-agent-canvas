@@ -152,7 +152,7 @@ export function ConversationCard({
           {(createdAt ?? lastUpdatedAt) && (
             <p
               className={cn(
-                "text-xs text-[var(--oh-muted)] text-right whitespace-nowrap transition-opacity",
+                "text-xs text-[var(--oh-muted)] text-right whitespace-nowrap transition-opacity -translate-x-1.5",
                 hasContextMenu &&
                   "group-hover:opacity-0 group-focus-within:opacity-0",
                 contextMenuOpen && "opacity-0",

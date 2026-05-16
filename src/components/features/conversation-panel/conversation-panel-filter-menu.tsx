@@ -119,7 +119,7 @@ export function ConversationPanelFilterMenu({
       : t(I18nKey.CONVERSATION_PANEL$BY_REPOSITORY);
 
   return (
-    <div ref={menuRef} className="relative shrink-0">
+    <div ref={menuRef} className="relative shrink-0 pr-0.5">
       <button
         type="button"
         data-testid="older-conversations-filter-toggle"
