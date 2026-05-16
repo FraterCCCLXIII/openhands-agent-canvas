@@ -71,7 +71,7 @@ export function ConversationMain() {
         >
           <div
             data-testid="chat-pane-header"
-            className="flex items-center min-h-9 pt-2 lg:pt-0"
+            className="flex items-center h-10 min-h-10 shrink-0"
           >
             <ConversationNameWithStatus />
           </div>
@@ -121,7 +121,7 @@ export function ConversationMain() {
             <div className="flex flex-col flex-1 min-h-0 bg-[var(--oh-surface)] border border-[var(--oh-border)] overflow-hidden">
               <div
                 data-testid="tabs-pane-header"
-                className="flex items-center min-h-9 px-3 py-1.5 border-b border-[var(--oh-border)]"
+                className="flex items-center h-10 min-h-10 shrink-0 px-3 border-b border-[var(--oh-border)]"
               >
                 <ConversationTabs />
               </div>

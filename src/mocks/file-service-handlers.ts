@@ -8,6 +8,36 @@ export const FILE_VARIANTS_2 = [
 ];
 
 export const FILE_SERVICE_HANDLERS = [
+  // Home directory for the workspace folder-browser
+  http.get("*/api/file/home", () =>
+    HttpResponse.json({
+      home: "/home/user",
+      favorites: [{ label: "Home", path: "/home/user" }],
+      locations: [{ label: "Projects", path: "/projects" }],
+    }),
+  ),
+
+  // Subdirectory listing for the workspace folder-browser
+  http.get("*/api/file/search_subdirs", ({ request }) => {
+    const url = new URL(request.url);
+    const path = url.searchParams.get("path") ?? "/";
+    return HttpResponse.json({
+      path,
+      entries: [
+        {
+          name: "project-a",
+          path: `${path}/project-a`.replace("//", "/"),
+          is_dir: true,
+        },
+        {
+          name: "project-b",
+          path: `${path}/project-b`.replace("//", "/"),
+          is_dir: true,
+        },
+      ],
+    });
+  }),
+
   http.get(
     "/api/conversations/:conversationId/list-files",
     async ({ params }) => {

@@ -1887,7 +1887,21 @@
     "ca": "Després d'aquest nombre d'esdeveniments, el condensador resumirà l'historial. Mínim 20."
   },
   "SETTINGS$COLOR_THEME": {
-    "en": "Color Theme"
+    "en": "Color Theme",
+    "ja": "カラーテーマ",
+    "zh-CN": "颜色主题",
+    "zh-TW": "顏色主題",
+    "ko-KR": "색 테마",
+    "no": "Fargetema",
+    "ar": "سمة الألوان",
+    "de": "Farbschema",
+    "fr": "Thème de couleur",
+    "it": "Tema colore",
+    "pt": "Tema de cores",
+    "es": "Tema de color",
+    "ca": "Tema de color",
+    "tr": "Renk teması",
+    "uk": "Кольорова тема"
   },
   "SETTINGS$LANGUAGE": {
     "en": "Language",
