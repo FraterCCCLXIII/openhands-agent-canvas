@@ -77,6 +77,13 @@ describe("conversation-panel-list-helpers", () => {
     expect(groups[0].conversations.map((c) => c.id)).toEqual(["2"]);
     expect(groups[1].conversations.map((c) => c.id)).toEqual(["1"]);
     expect(groups[2].conversations.map((c) => c.id)).toEqual(["3"]);
+    expect(groups[0].launch).toEqual({
+      workingDir: "/workspace/project/bar",
+    });
+    expect(groups[1].launch).toEqual({
+      workingDir: "/workspace/project/foo",
+    });
+    expect(groups[2].launch).toEqual({});
   });
 
   it("groups cloud conversations by repository string", () => {
@@ -101,5 +108,19 @@ describe("conversation-panel-list-helpers", () => {
     });
 
     expect(groups.map((g) => g.label)).toEqual(["sdk", "agent-canvas"]);
+    expect(groups[0].launch).toEqual({
+      repository: {
+        name: "org/sdk",
+        gitProvider: "github",
+        branch: "main",
+      },
+    });
+    expect(groups[1].launch).toEqual({
+      repository: {
+        name: "org/agent-canvas",
+        gitProvider: "github",
+        branch: "main",
+      },
+    });
   });
 });

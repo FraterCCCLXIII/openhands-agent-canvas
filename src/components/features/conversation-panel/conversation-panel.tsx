@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, Folder } from "lucide-react";
+import { Folder, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { useNavigation } from "#/context/navigation-context";
 import { useActiveBackend } from "#/contexts/active-backend-context";
@@ -21,6 +21,8 @@ import {
   displaySuccessToast,
 } from "#/utils/custom-toast-handlers";
 import { isExecutionActive } from "#/utils/status";
+import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
+import { useIsCreatingConversation } from "#/hooks/use-is-creating-conversation";
 import { ConversationCard } from "./conversation-card/conversation-card";
 import { StartTaskCard } from "./start-task-card/start-task-card";
 import { ConversationCardSkeleton } from "./conversation-card/conversation-card-skeleton";
@@ -28,9 +30,11 @@ import { CompactConversationRow } from "./compact-conversation-row";
 import { useConversationPanelPreferencesStore } from "#/stores/conversation-panel-preferences-store";
 import { cn } from "#/utils/utils";
 import { ConversationPanelFilterMenu } from "./conversation-panel-filter-menu";
+import { ConversationPanelNewThreadPicker } from "./conversation-panel-new-thread-picker";
 import {
   groupConversations,
   sortConversationsByField,
+  type ConversationGroupLaunch,
 } from "./conversation-panel-list-helpers";
 
 interface ConversationPanelProps {
@@ -266,6 +270,27 @@ export function ConversationPanel({
   // conversations contradicts the "active only" intent of the icon rail.
   const showLoadMore = !!hasNextPage && !olderHidden && !compact;
 
+  const { mutate: createConversation } = useCreateConversation();
+  const isCreatingConversationFlow = useIsCreatingConversation();
+
+  const launchFromGroup = React.useCallback(
+    (launch: ConversationGroupLaunch) => {
+      if (isCreatingConversationFlow) return;
+      createConversation(
+        {
+          workingDir: launch.workingDir,
+          repository: launch.repository,
+        },
+        {
+          onSuccess: (data) => {
+            navigate(`/conversations/${data.conversation_id}`);
+          },
+        },
+      );
+    },
+    [createConversation, isCreatingConversationFlow, navigate],
+  );
+
   const handleDeleteProject = React.useCallback(
     (conversationId: string, title: string) => {
       setConfirmDeleteModalVisible(true);
@@ -445,36 +470,43 @@ export function ConversationPanel({
       className="w-full h-full flex flex-col"
     >
       {showConversationHeader && (
-        <div
-          data-testid="older-conversations-summary"
-          className={cn(
-            "pl-4 pr-3 py-2 text-[var(--oh-muted)] flex flex-wrap items-center gap-x-2 gap-y-1",
-            isListScrolled && "border-b border-[var(--oh-border-subtle)]",
-          )}
-        >
-          <span className="text-sm font-medium text-[var(--oh-muted)]">
-            {t(I18nKey.SIDEBAR$CONVERSATIONS)}
-          </span>
-          <ConversationPanelFilterMenu
-            filterMenuOpen={filterMenuOpen}
-            setFilterMenuOpen={setFilterMenuOpen}
-            menuRef={filterMenuRef}
-            backendKind={activeBackend.kind}
-            organizeMode={organizeMode}
-            setOrganizeMode={setOrganizeMode}
-            conversationSort={conversationSort}
-            setConversationSort={setConversationSort}
-            threadScope={threadScope}
-            setThreadScope={setThreadScope}
-            showOlderConversations={showOlderConversations}
-            toggleShowOlderConversations={toggleShowOlderConversations}
-            showRepoBranchMetadata={showRepoBranchMetadata}
-            toggleShowRepoBranchMetadata={toggleShowRepoBranchMetadata}
-            showLlmProfiles={showLlmProfiles}
-            toggleShowLlmProfiles={toggleShowLlmProfiles}
-            olderConversationsCount={olderScoped.length}
-            onRequestDeleteOlder={() => setConfirmDeleteOlderVisible(true)}
-          />
+        <div className={isListScrolled ? "-mx-2" : undefined}>
+          <div
+            data-testid="older-conversations-summary"
+            className={cn(
+              "px-2 py-2 text-[var(--oh-muted)] flex flex-wrap items-center gap-x-2 gap-y-1",
+              isListScrolled && "border-b border-[var(--oh-border)]",
+            )}
+          >
+            <span className="text-sm font-medium text-[var(--oh-muted)]">
+              {t(I18nKey.SIDEBAR$CONVERSATIONS)}
+            </span>
+            <div className="ml-auto flex shrink-0 items-center gap-0.5">
+              <ConversationPanelNewThreadPicker
+                backendKind={activeBackend.kind}
+              />
+              <ConversationPanelFilterMenu
+                filterMenuOpen={filterMenuOpen}
+                setFilterMenuOpen={setFilterMenuOpen}
+                menuRef={filterMenuRef}
+                backendKind={activeBackend.kind}
+                organizeMode={organizeMode}
+                setOrganizeMode={setOrganizeMode}
+                conversationSort={conversationSort}
+                setConversationSort={setConversationSort}
+                threadScope={threadScope}
+                setThreadScope={setThreadScope}
+                showOlderConversations={showOlderConversations}
+                toggleShowOlderConversations={toggleShowOlderConversations}
+                showRepoBranchMetadata={showRepoBranchMetadata}
+                toggleShowRepoBranchMetadata={toggleShowRepoBranchMetadata}
+                showLlmProfiles={showLlmProfiles}
+                toggleShowLlmProfiles={toggleShowLlmProfiles}
+                olderConversationsCount={olderScoped.length}
+                onRequestDeleteOlder={() => setConfirmDeleteOlderVisible(true)}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -488,7 +520,10 @@ export function ConversationPanel({
         {showInitialSkeleton && (
           <div>
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className={compact ? "" : "block px-2 py-0.5"}>
+              <div
+                key={index}
+                className={cn(compact ? "" : "block px-2 py-0.5")}
+              >
                 <ConversationCardSkeleton compact={compact} />
               </div>
             ))}
@@ -527,30 +562,58 @@ export function ConversationPanel({
         conversationGroups ? (
           <nav
             aria-label={t(I18nKey.SIDEBAR$CONVERSATIONS)}
-            className="space-y-1 px-1 pb-1"
+            className="space-y-1 pb-1"
           >
             {conversationGroups.map((group) => {
               const headingId = `thread-folder-${group.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
               const expanded = !collapsedGroupIds.has(group.id);
               return (
                 <section key={group.id} aria-labelledby={headingId}>
-                  <button
-                    type="button"
-                    id={headingId}
-                    aria-expanded={expanded}
-                    onClick={() => toggleGroupCollapsed(group.id)}
-                    className="flex h-8 w-full min-w-0 items-center gap-2 rounded-md px-1.5 text-left text-sm font-medium text-[var(--oh-muted)] outline-none transition-colors hover:bg-[var(--oh-surface-raised)] hover:text-white focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]"
+                  <div
+                    className={cn(
+                      "flex h-8 w-full min-w-0 items-center gap-0.5 rounded-md pl-2 pr-1 text-sm font-medium",
+                      "text-[var(--oh-muted)] transition-colors",
+                      "hover:bg-[var(--oh-surface-raised)] hover:text-white",
+                    )}
                   >
-                    <ChevronDown
-                      aria-hidden
+                    <button
+                      type="button"
+                      id={headingId}
+                      aria-expanded={expanded}
+                      onClick={() => toggleGroupCollapsed(group.id)}
+                      className="flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md py-1 text-left text-inherit outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]"
+                    >
+                      <Folder className="h-4 w-4 shrink-0" aria-hidden />
+                      <span className="truncate">{group.label}</span>
+                    </button>
+                    <button
+                      type="button"
                       className={cn(
-                        "h-4 w-4 shrink-0 transition-transform",
-                        !expanded && "-rotate-90",
+                        "inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md",
+                        "text-inherit transition-colors",
+                        "hover:bg-white/10 hover:text-white",
+                        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
+                        "disabled:cursor-not-allowed disabled:opacity-50",
                       )}
-                    />
-                    <Folder className="h-4 w-4 shrink-0" aria-hidden />
-                    <span className="truncate">{group.label}</span>
-                  </button>
+                      disabled={isCreatingConversationFlow}
+                      aria-label={t(
+                        I18nKey.CONVERSATION_PANEL$ADD_CONVERSATION_TO_GROUP,
+                        { label: group.label },
+                      )}
+                      data-testid={`add-conversation-to-group-${group.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        launchFromGroup(group.launch);
+                      }}
+                    >
+                      <Plus
+                        className="h-3.5 w-3.5 shrink-0"
+                        aria-hidden
+                        strokeWidth={2}
+                      />
+                    </button>
+                  </div>
                   {expanded ? (
                     <div className="mt-0.5 space-y-0.5">
                       {group.conversations.map(renderConversationCard)}

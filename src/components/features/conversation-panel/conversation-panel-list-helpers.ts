@@ -1,9 +1,55 @@
 import type { AppConversation } from "#/api/conversation-service/agent-server-conversation-service.types";
 import type { BackendKind } from "#/api/backend-registry/types";
+import type { Provider } from "#/types/settings";
 
 export type ConversationSortField = "created" | "updated";
 export type ThreadScope = "all" | "relevant";
 export type OrganizeMode = "grouped" | "chronological";
+
+/** Subset of `useCreateConversation` variables for launching from a group row */
+export type ConversationGroupLaunch = {
+  workingDir?: string;
+  repository?: {
+    name: string;
+    gitProvider: Provider;
+    branch?: string;
+  };
+};
+
+function buildGroupLaunch(
+  id: string,
+  backendKind: BackendKind,
+  conversations: AppConversation[],
+): ConversationGroupLaunch {
+  if (backendKind === "local") {
+    if (id === "__none_workspace") {
+      return {};
+    }
+    if (id.startsWith("ws:")) {
+      return { workingDir: id.slice(3) };
+    }
+    return {};
+  }
+
+  if (id === "__none_repo") {
+    return {};
+  }
+  if (id.startsWith("repo:")) {
+    const name = id.slice(5);
+    const sample = conversations[0];
+    const gitProvider = (sample?.git_provider ?? "github") as Provider;
+    const branch = sample?.selected_branch ?? "main";
+    return {
+      repository: {
+        name,
+        gitProvider,
+        branch,
+      },
+    };
+  }
+
+  return {};
+}
 
 export function parseConversationTimeMs(iso: string | undefined): number {
   if (!iso) return 0;
@@ -55,7 +101,12 @@ export function groupConversations(
   backendKind: BackendKind,
   sortField: ConversationSortField,
   labels: { emptyWorkspace: string; emptyRepository: string },
-): { id: string; label: string; conversations: AppConversation[] }[] {
+): {
+  id: string;
+  label: string;
+  conversations: AppConversation[];
+  launch: ConversationGroupLaunch;
+}[] {
   const byId = new Map<
     string,
     { label: string; conversations: AppConversation[] }
@@ -78,11 +129,15 @@ export function groupConversations(
     }
   }
 
-  const groups = [...byId.entries()].map(([id, g]) => ({
-    id,
-    label: g.label,
-    conversations: sortConversationsByField(g.conversations, sortField),
-  }));
+  const groups = [...byId.entries()].map(([id, g]) => {
+    const conversations = sortConversationsByField(g.conversations, sortField);
+    return {
+      id,
+      label: g.label,
+      conversations,
+      launch: buildGroupLaunch(id, backendKind, conversations),
+    };
+  });
 
   const groupOrderKey = (g: (typeof groups)[number]) =>
     Math.max(

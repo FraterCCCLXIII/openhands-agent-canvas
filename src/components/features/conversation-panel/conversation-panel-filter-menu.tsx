@@ -119,14 +119,14 @@ export function ConversationPanelFilterMenu({
       : t(I18nKey.CONVERSATION_PANEL$BY_REPOSITORY);
 
   return (
-    <div ref={menuRef} className="relative ml-auto shrink-0">
+    <div ref={menuRef} className="relative shrink-0">
       <button
         type="button"
         data-testid="older-conversations-filter-toggle"
         aria-label={t(I18nKey.CONVERSATION_PANEL$FILTER_LABEL)}
         aria-expanded={filterMenuOpen}
         onClick={() => setFilterMenuOpen(!filterMenuOpen)}
-        className="inline-flex items-center justify-center rounded-md p-1 text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)] transition-colors"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)] transition-colors"
       >
         <ListFilter
           className="lucide lucide-list-filter shrink-0"

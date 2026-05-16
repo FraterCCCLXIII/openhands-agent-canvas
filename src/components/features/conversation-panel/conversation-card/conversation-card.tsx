@@ -133,7 +133,7 @@ export function ConversationCard({
       data-active={isActive ? "true" : "false"}
       onClick={onClick}
       className={cn(
-        "group relative h-auto w-full rounded-md px-3 pt-1 pb-1 cursor-pointer transition-colors",
+        "group relative h-auto w-full rounded-md pl-3 pr-1 pt-1 pb-1 cursor-pointer transition-colors",
         "data-[context-menu-open=false]:hover:bg-[var(--oh-surface)]",
         "data-[active=true]:bg-[var(--oh-surface)]",
         "data-[context-menu-open=true]:z-20",

@@ -3,7 +3,7 @@ import { cn } from "#/utils/utils";
 import { ExecutionStatus } from "#/types/agent-server/core/base/common";
 import { isExecutionActive, isExecutionPaused } from "#/utils/status";
 import { ConversationCardContextMenu } from "./conversation-card-context-menu";
-import { EllipsisButton } from "../ellipsis-button";
+import EllipsisIcon from "#/icons/ellipsis.svg?react";
 
 interface ConversationCardActionsProps {
   contextMenuOpen: boolean;
@@ -34,21 +34,26 @@ export function ConversationCardActions({
   const isActive = isExecutionActive(executionStatus);
 
   return (
-    <div className="relative">
-      <EllipsisButton
+    <div className="group">
+      <button
+        data-testid="ellipsis-button"
+        type="button"
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
           onContextMenuToggle(!contextMenuOpen);
         }}
-        className={cn("translate-x-2.5", isPaused && "opacity-60")}
-      />
+        className={cn(
+          "cursor-pointer w-6 h-6 flex flex-row items-center justify-center",
+          isPaused && "opacity-60",
+        )}
+      >
+        <EllipsisIcon />
+      </button>
       <div
         className={cn(
-          "relative",
-          contextMenuOpen
-            ? "opacity-100 visible z-[60]"
-            : "opacity-0 invisible pointer-events-none",
+          "relative opacity-0 invisible group-hover:opacity-100 group-hover:visible",
+          contextMenuOpen && "opacity-100 visible",
         )}
       >
         <ConversationCardContextMenu
