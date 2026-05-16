@@ -84,7 +84,7 @@ export function ConversationMain() {
 
         {/* Resize Handle - only shown on desktop when right panel is visible */}
         {!isMobile && isRightPanelShown && (
-          <ResizeHandle onMouseDown={handleMouseDown} />
+          <ResizeHandle onMouseDown={handleMouseDown} isDragging={isDragging} />
         )}
 
         {/* Tab Content Panel - always mounted, styled as bottom sheet (mobile)
