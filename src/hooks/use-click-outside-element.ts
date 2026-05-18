@@ -9,6 +9,12 @@ export const useClickOutsideElement = <T extends HTMLElement>(
   ignoreOutsideClickRef?: React.RefObject<HTMLElement | null>,
 ) => {
   const ref = React.useRef<T>(null);
+  // Hold the latest callback in a ref so the listener effect doesn't
+  // re-register every render when callers pass an inline arrow function.
+  const callbackRef = React.useRef(callback);
+  React.useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -16,13 +22,13 @@ export const useClickOutsideElement = <T extends HTMLElement>(
       if (!ref.current) return;
       if (ref.current.contains(target)) return;
       if (ignoreOutsideClickRef?.current?.contains(target)) return;
-      callback();
+      callbackRef.current();
     };
 
     document.addEventListener("click", handleClickOutside);
 
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [callback, ignoreOutsideClickRef]);
+  }, [ignoreOutsideClickRef]);
 
   return ref;
 };

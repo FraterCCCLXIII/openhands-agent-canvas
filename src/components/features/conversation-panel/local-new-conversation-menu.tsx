@@ -14,6 +14,7 @@ import { FolderBrowserModal } from "#/components/features/home/workspace-dropdow
 import { ManageWorkspacesModal } from "#/components/features/home/workspace-dropdown/manage-workspaces-modal";
 
 import { NEW_CONVERSATION_DROPDOWN_SURFACE } from "./new-conversation-dropdown-styles";
+import { usePopoverFixedPlacement } from "#/hooks/use-popover-fixed-placement";
 
 export type LocalNewConversationMenuTriggerProps = {
   onClick: () => void;
@@ -55,11 +56,10 @@ export function LocalNewConversationMenu({
   const [open, setOpen] = React.useState(false);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const triggerWrapRef = React.useRef<HTMLSpanElement>(null);
-  const [fixedBox, setFixedBox] = React.useState<{
-    top: number;
-    left: number;
-    width: number;
-  } | null>(null);
+  const fixedBox = usePopoverFixedPlacement(triggerWrapRef, {
+    open,
+    enabled: useFixedPlacement,
+  });
 
   const {
     workspaceParents,
@@ -75,39 +75,6 @@ export function LocalNewConversationMenu({
   const { mutate: createConversation, isPending } = useCreateConversation();
   const isCreatingElsewhere = useIsCreatingConversation();
   const isCreating = isPending || isCreatingElsewhere;
-
-  const measureFixed = React.useCallback(() => {
-    const el = triggerWrapRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const gutter = 8;
-    const targetW = 16 * 16;
-    const width = Math.min(targetW, window.innerWidth - gutter * 2);
-    let left = r.right - width;
-    if (left < gutter) left = gutter;
-    if (left + width > window.innerWidth - gutter) {
-      left = Math.max(gutter, window.innerWidth - gutter - width);
-    }
-    setFixedBox({
-      top: r.bottom + 4,
-      left,
-      width,
-    });
-  }, []);
-
-  React.useLayoutEffect(() => {
-    if (!open || !useFixedPlacement) {
-      setFixedBox(null);
-      return undefined;
-    }
-    measureFixed();
-    window.addEventListener("resize", measureFixed);
-    window.addEventListener("scroll", measureFixed, true);
-    return () => {
-      window.removeEventListener("resize", measureFixed);
-      window.removeEventListener("scroll", measureFixed, true);
-    };
-  }, [open, useFixedPlacement, measureFixed]);
 
   React.useEffect(() => {
     if (!open || browserOpen || manageOpen) return undefined;

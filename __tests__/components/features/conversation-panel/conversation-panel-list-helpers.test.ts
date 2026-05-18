@@ -45,6 +45,92 @@ describe("conversation-panel-list-helpers", () => {
     ).toEqual(["b", "a"]);
   });
 
+  it("sorts by created desc independently of updated", () => {
+    // Inverted: the newer `created_at` belongs to the older `updated_at`,
+    // so a "created" sort must NOT fall through to `updated_at`.
+    const a: AppConversation = {
+      ...base,
+      id: "a",
+      title: "a",
+      created_at: "2024-01-05T00:00:00.000Z",
+      updated_at: "2024-01-01T00:00:00.000Z",
+    };
+    const b: AppConversation = {
+      ...base,
+      id: "b",
+      title: "b",
+      created_at: "2024-01-02T00:00:00.000Z",
+      updated_at: "2024-01-10T00:00:00.000Z",
+    };
+    expect(
+      sortConversationsByField([b, a], "created").map((c) => c.id),
+    ).toEqual(["a", "b"]);
+  });
+
+  it("normalizes group keys and labels across edge-case inputs", () => {
+    // Bundles four edge cases the implementation already handles into one
+    // assertion so each is covered without proliferating tests:
+    //  - workspace paths with trailing slashes are normalized
+    //  - whitespace-only `selected_workspace` falls back to "No workspace"
+    //  - repository names ending in `.git` strip the suffix in the label
+    //  - missing/invalid timestamps don't break group ordering (they sort
+    //    to the bottom rather than throwing)
+    const trailingSlash: AppConversation = {
+      ...base,
+      id: "ws-trailing",
+      title: "ws-trailing",
+      selected_workspace: "/workspace/agent-server-gui///",
+      updated_at: "2024-01-03T00:00:00.000Z",
+    };
+    const whitespaceOnly: AppConversation = {
+      ...base,
+      id: "ws-blank",
+      title: "ws-blank",
+      selected_workspace: "   ",
+      updated_at: "2024-01-02T00:00:00.000Z",
+    };
+    const localGroups = groupConversations(
+      [trailingSlash, whitespaceOnly],
+      "local",
+      "updated",
+      { emptyWorkspace: "No workspace", emptyRepository: "No repository" },
+    );
+    expect(
+      localGroups.map((g) => ({ id: g.id, label: g.label })),
+    ).toEqual([
+      { id: "ws:/workspace/agent-server-gui", label: "agent-server-gui" },
+      { id: "__none_workspace", label: "No workspace" },
+    ]);
+
+    const dotGit: AppConversation = {
+      ...base,
+      id: "repo-git",
+      title: "repo-git",
+      selected_repository: "org/canvas.git",
+      // Unparseable timestamp — must not throw; falls to 0 ms and sorts last.
+      updated_at: "not-a-date",
+    };
+    const blankRepo: AppConversation = {
+      ...base,
+      id: "repo-blank",
+      title: "repo-blank",
+      selected_repository: "  ",
+      updated_at: "2024-01-04T00:00:00.000Z",
+    };
+    const cloudGroups = groupConversations(
+      [dotGit, blankRepo],
+      "cloud",
+      "updated",
+      { emptyWorkspace: "No workspace", emptyRepository: "No repository" },
+    );
+    expect(
+      cloudGroups.map((g) => ({ id: g.id, label: g.label })),
+    ).toEqual([
+      { id: "__none_repo", label: "No repository" },
+      { id: "repo:org/canvas.git", label: "canvas" },
+    ]);
+  });
+
   it("groups local conversations by selected_workspace, collapsing per-conversation worktree paths", () => {
     // Two conversations launched against the same workspace but with
     // different per-conversation worktree dirs (the agent-server runs

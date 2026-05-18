@@ -213,9 +213,12 @@ export function ConversationPanel({
     if (compact || organizeMode !== "grouped") {
       return null;
     }
+    // Use the unsorted partitions: groupConversations sorts each bucket
+    // internally by `sortField`, so pre-sorting the merged input is wasted
+    // work in grouped mode (the per-group sort overrides any global order).
     const merged = [
-      ...sortedRecent,
-      ...(showOlderConversations ? sortedOlder : []),
+      ...recentScoped,
+      ...(showOlderConversations ? olderScoped : []),
     ];
     return groupConversations(
       merged,
@@ -228,10 +231,10 @@ export function ConversationPanel({
     compact,
     conversationSort,
     groupLabels,
+    olderScoped,
     organizeMode,
+    recentScoped,
     showOlderConversations,
-    sortedOlder,
-    sortedRecent,
   ]);
 
   const compactVisibleConversations = React.useMemo(

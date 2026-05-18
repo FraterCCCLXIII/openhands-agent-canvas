@@ -40,10 +40,21 @@ export function ConversationCardActions({
     if (!contextMenuOpen) return undefined;
     // Anchor ref is assigned after the ellipsis mounts; measure on the next frame.
     bumpPosition();
-    const update = () => bumpPosition();
+    // The scroll listener is in capture phase so it fires for nested scroll
+    // containers too. Coalesce bursts via rAF so fast scrolling triggers at
+    // most one reposition per paint frame instead of one per scroll event.
+    let frame = 0;
+    const update = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        bumpPosition();
+      });
+    };
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
     return () => {
+      if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
