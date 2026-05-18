@@ -45,45 +45,81 @@ describe("conversation-panel-list-helpers", () => {
     ).toEqual(["b", "a"]);
   });
 
-  it("groups local conversations by normalized workspace path", () => {
-    const w1: AppConversation = {
+  it("groups local conversations by selected_workspace, collapsing per-conversation worktree paths", () => {
+    // Two conversations launched against the same workspace but with
+    // different per-conversation worktree dirs (the agent-server runs
+    // with worktree: true). They must end up in a single group keyed
+    // off the user-selected workspace, not split by the worktree dir.
+    const sameWsA: AppConversation = {
       ...base,
       id: "1",
       title: "one",
-      workspace: { working_dir: "/workspace/project/foo" },
+      selected_workspace: "/workspace/agent-server-gui",
+      workspace: { working_dir: "/workspace/agent-server-gui/wt-abc" },
       updated_at: "2024-01-02T00:00:00.000Z",
     };
-    const w2: AppConversation = {
+    const sameWsB: AppConversation = {
       ...base,
       id: "2",
       title: "two",
-      workspace: { working_dir: "/workspace/project/bar" },
-      updated_at: "2024-01-03T00:00:00.000Z",
+      selected_workspace: "/workspace/agent-server-gui",
+      workspace: { working_dir: "/workspace/agent-server-gui/wt-def" },
+      updated_at: "2024-01-04T00:00:00.000Z",
     };
-    const none: AppConversation = {
+    // Different workspace — its own group.
+    const otherWs: AppConversation = {
       ...base,
       id: "3",
       title: "three",
-      workspace: null,
+      selected_workspace: "/workspace/other",
+      workspace: { working_dir: "/workspace/other/wt-xyz" },
+      updated_at: "2024-01-03T00:00:00.000Z",
+    };
+    // No user-selected workspace — must bucket under "No workspace"
+    // even though working_dir is set (to a per-conversation default).
+    const none: AppConversation = {
+      ...base,
+      id: "4",
+      title: "four",
+      selected_workspace: null,
+      workspace: { working_dir: "/workspace/project/agent-canvas/wt-noop" },
       updated_at: "2024-01-01T00:00:00.000Z",
     };
 
-    const groups = groupConversations([w1, w2, none], "local", "updated", {
-      emptyWorkspace: "No workspace",
-      emptyRepository: "No repository",
-    });
+    const groups = groupConversations(
+      [sameWsA, sameWsB, otherWs, none],
+      "local",
+      "updated",
+      { emptyWorkspace: "No workspace", emptyRepository: "No repository" },
+    );
 
-    expect(groups.map((g) => g.label)).toEqual(["bar", "foo", "No workspace"]);
-    expect(groups[0].conversations.map((c) => c.id)).toEqual(["2"]);
-    expect(groups[1].conversations.map((c) => c.id)).toEqual(["1"]);
-    expect(groups[2].conversations.map((c) => c.id)).toEqual(["3"]);
-    expect(groups[0].launch).toEqual({
-      workingDir: "/workspace/project/bar",
-    });
-    expect(groups[1].launch).toEqual({
-      workingDir: "/workspace/project/foo",
-    });
-    expect(groups[2].launch).toEqual({});
+    expect(
+      groups.map((g) => ({
+        id: g.id,
+        label: g.label,
+        ids: g.conversations.map((c) => c.id),
+        launch: g.launch,
+      })),
+    ).toEqual([
+      {
+        id: "ws:/workspace/agent-server-gui",
+        label: "agent-server-gui",
+        ids: ["2", "1"],
+        launch: { workingDir: "/workspace/agent-server-gui" },
+      },
+      {
+        id: "ws:/workspace/other",
+        label: "other",
+        ids: ["3"],
+        launch: { workingDir: "/workspace/other" },
+      },
+      {
+        id: "__none_workspace",
+        label: "No workspace",
+        ids: ["4"],
+        launch: {},
+      },
+    ]);
   });
 
   it("groups cloud conversations by repository string", () => {

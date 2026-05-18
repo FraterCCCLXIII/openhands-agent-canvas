@@ -386,7 +386,10 @@ export function ConversationPanel({
             sandboxStatus={conversation.sandbox_status}
             lastUpdatedAt={conversation.updated_at}
             createdAt={conversation.created_at}
-            workspaceWorkingDir={conversation.workspace?.working_dir}
+            workspaceWorkingDir={
+              conversation.selected_workspace ??
+              conversation.workspace?.working_dir
+            }
             isActive={conversation.id === currentConversationId}
             onClose={onClose}
             showRepositoryMetadata={showRepoBranchMetadata}
@@ -426,7 +429,10 @@ export function ConversationPanel({
               setOpenContextMenuId(isOpen ? conversation.id : null)
             }
             isActive={conversation.id === currentConversationId}
-            workspaceWorkingDir={conversation.workspace?.working_dir}
+            workspaceWorkingDir={
+              conversation.selected_workspace ??
+              conversation.workspace?.working_dir
+            }
             showRepositoryMetadata={showRepoBranchMetadata}
             llmModel={conversation.llm_model}
             showLlmProfiles={showLlmProfiles}

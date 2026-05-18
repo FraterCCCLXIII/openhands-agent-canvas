@@ -71,7 +71,12 @@ function workspaceGroup(conversation: AppConversation): {
   id: string;
   label: string;
 } {
-  const dir = conversation.workspace?.working_dir;
+  // Group by the user-selected workspace (a stable identifier shared by
+  // every conversation launched from the same picker selection), not
+  // `workspace.working_dir` — that field holds the per-conversation
+  // worktree path the agent-server creates, which is unique per
+  // conversation and would fragment the grouping.
+  const dir = conversation.selected_workspace;
   if (!dir?.trim()) {
     return { id: "__none_workspace", label: "" };
   }
