@@ -78,4 +78,73 @@ describe("conversation-panel-preferences store", () => {
       "threadScope",
     ]);
   });
+
+  it("exposes setters and a toggler for the LLM-profiles preference", () => {
+    useConversationPanelPreferencesStore.getState().setShowLlmProfiles(true);
+    expect(
+      useConversationPanelPreferencesStore.getState().showLlmProfiles,
+    ).toBe(true);
+
+    useConversationPanelPreferencesStore
+      .getState()
+      .toggleShowLlmProfiles();
+    expect(
+      useConversationPanelPreferencesStore.getState().showLlmProfiles,
+    ).toBe(false);
+  });
+
+  it("updates organize, sort, and thread-scope preferences via their setters", () => {
+    const store = useConversationPanelPreferencesStore.getState();
+    store.setOrganizeMode("grouped");
+    store.setConversationSort("created");
+    store.setThreadScope("relevant");
+
+    const next = useConversationPanelPreferencesStore.getState();
+    expect({
+      organizeMode: next.organizeMode,
+      conversationSort: next.conversationSort,
+      threadScope: next.threadScope,
+    }).toEqual({
+      organizeMode: "grouped",
+      conversationSort: "created",
+      threadScope: "relevant",
+    });
+  });
+
+  it("rehydrates legacy localStorage payloads (older fields preserved, new fields filled with defaults)", async () => {
+    // Simulate a user upgrading from a build that only persisted the two
+    // original preferences. After rehydration the store should keep the
+    // user's existing choices and fill the new fields from `initialState`.
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          showOlderConversations: false,
+          showRepoBranchMetadata: true,
+        },
+        version: 0,
+      }),
+    );
+
+    await useConversationPanelPreferencesStore.persist.rehydrate();
+
+    const state = useConversationPanelPreferencesStore.getState();
+    expect({
+      showOlderConversations: state.showOlderConversations,
+      showRepoBranchMetadata: state.showRepoBranchMetadata,
+      showLlmProfiles: state.showLlmProfiles,
+      organizeMode: state.organizeMode,
+      conversationSort: state.conversationSort,
+      threadScope: state.threadScope,
+    }).toEqual({
+      // Preserved from the legacy payload.
+      showOlderConversations: false,
+      showRepoBranchMetadata: true,
+      // Filled with defaults for missing fields.
+      showLlmProfiles: false,
+      organizeMode: "chronological",
+      conversationSort: "updated",
+      threadScope: "all",
+    });
+  });
 });

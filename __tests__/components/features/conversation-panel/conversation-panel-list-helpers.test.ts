@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   groupConversations,
+  parseConversationTimeMs,
   sortConversationsByField,
 } from "#/components/features/conversation-panel/conversation-panel-list-helpers";
 import type { AppConversation } from "#/api/conversation-service/agent-server-conversation-service.types";
@@ -25,6 +26,16 @@ const base: Omit<AppConversation, "id" | "title" | "workspace"> = {
 };
 
 describe("conversation-panel-list-helpers", () => {
+  it("parseConversationTimeMs returns 0 for missing or unparseable timestamps and ms for ISO strings", () => {
+    // Three branches in one assertion: missing input (undefined), malformed
+    // string (NaN from Date.parse), and a real ISO timestamp.
+    expect([
+      parseConversationTimeMs(undefined),
+      parseConversationTimeMs("not-a-date"),
+      parseConversationTimeMs("2024-01-02T00:00:00.000Z"),
+    ]).toEqual([0, 0, Date.UTC(2024, 0, 2)]);
+  });
+
   it("sorts by updated desc", () => {
     const a: AppConversation = {
       ...base,

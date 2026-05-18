@@ -153,13 +153,18 @@ export function groupConversations(
     };
   });
 
+  // Use reduce instead of `Math.max(...arr)` — the spread form would push
+  // every conversation onto the call stack as a separate argument, which
+  // hits JS engines' ~100k-arg limit on very large buckets.
   const groupOrderKey = (g: (typeof groups)[number]) =>
-    Math.max(
-      ...g.conversations.map((c) =>
-        parseConversationTimeMs(
-          sortField === "created" ? c.created_at : c.updated_at,
+    g.conversations.reduce(
+      (max, c) =>
+        Math.max(
+          max,
+          parseConversationTimeMs(
+            sortField === "created" ? c.created_at : c.updated_at,
+          ),
         ),
-      ),
       0,
     );
 

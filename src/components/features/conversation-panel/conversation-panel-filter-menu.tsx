@@ -136,12 +136,65 @@ export function ConversationPanelFilterMenu({
       ? t(I18nKey.CONVERSATION_PANEL$BY_WORKSPACE)
       : t(I18nKey.CONVERSATION_PANEL$BY_REPOSITORY);
 
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const menuContentRef = React.useRef<HTMLDivElement>(null);
+
+  // When the menu opens, move keyboard focus into it so screen-reader /
+  // keyboard-only users can interact with the options immediately. When
+  // it closes, return focus to the trigger so Tab order picks up where
+  // the user left off.
+  const wasOpenRef = React.useRef(filterMenuOpen);
+  React.useEffect(() => {
+    if (filterMenuOpen) {
+      const firstItem =
+        menuContentRef.current?.querySelector<HTMLButtonElement>(
+          '[role="menuitem"], [role="menuitemradio"]',
+        );
+      firstItem?.focus();
+    } else if (wasOpenRef.current) {
+      // Only return focus on a real open→close transition (not the
+      // mount-with-open=false case).
+      triggerRef.current?.focus();
+    }
+    wasOpenRef.current = filterMenuOpen;
+  }, [filterMenuOpen]);
+
+  // Roving Arrow Up/Down + Escape across the menu items. Tab still works
+  // natively; Escape closes the menu and returns focus to the trigger
+  // (via the effect above).
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setFilterMenuOpen(false);
+      return;
+    }
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+    const container = menuContentRef.current;
+    if (!container) return;
+    const items = Array.from(
+      container.querySelectorAll<HTMLButtonElement>(
+        '[role="menuitem"], [role="menuitemradio"]',
+      ),
+    ).filter((el) => !el.disabled);
+    if (items.length === 0) return;
+    const currentIdx = items.indexOf(
+      document.activeElement as HTMLButtonElement,
+    );
+    const delta = event.key === "ArrowDown" ? 1 : -1;
+    const start = currentIdx === -1 ? 0 : currentIdx;
+    const nextIdx = (start + delta + items.length) % items.length;
+    event.preventDefault();
+    items[nextIdx]?.focus();
+  };
+
   return (
     <div ref={menuRef} className="relative shrink-0 pr-0.5">
       <button
+        ref={triggerRef}
         type="button"
         data-testid="older-conversations-filter-toggle"
         aria-label={t(I18nKey.CONVERSATION_PANEL$FILTER_LABEL)}
+        aria-haspopup="menu"
         aria-expanded={filterMenuOpen}
         onClick={() => setFilterMenuOpen(!filterMenuOpen)}
         className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)] transition-colors"
@@ -157,10 +210,18 @@ export function ConversationPanelFilterMenu({
 
       {filterMenuOpen ? (
         <div
+          ref={menuContentRef}
           role="menu"
           aria-orientation="vertical"
           aria-label={t(I18nKey.CONVERSATION_PANEL$FILTER_LABEL)}
+          // `role="menu"` is an interactive ARIA role, so the container
+          // must be focusable to satisfy jsx-a11y. `-1` keeps it out of
+          // the natural Tab order (the menu items themselves are
+          // `<button>`s and tabbable on their own) but still allows the
+          // open-effect to focus it / its children programmatically.
+          tabIndex={-1}
           data-testid="older-conversations-filter-menu"
+          onKeyDown={handleMenuKeyDown}
           className="absolute right-0 top-full z-50 mt-0 w-64 rounded-md border border-[var(--oh-border-subtle)] bg-tertiary px-1 py-1 text-white shadow-lg"
         >
           <MenuHeading>{t(I18nKey.CONVERSATION_PANEL$ORGANIZE)}</MenuHeading>
