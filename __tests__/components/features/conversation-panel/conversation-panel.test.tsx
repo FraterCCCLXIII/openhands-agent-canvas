@@ -1266,6 +1266,21 @@ describe("ConversationPanel", () => {
       ).toBeInTheDocument();
     });
 
+    it("shows icons on hide and delete-all filter menu actions", async () => {
+      const user = userEvent.setup();
+      renderConversationPanel();
+
+      await user.click(screen.getByTestId("older-conversations-filter-toggle"));
+
+      const hideRow = await screen.findByTestId("toggle-older-conversations");
+      expect(hideRow.querySelector("svg")).toBeInTheDocument();
+      expect(hideRow).toHaveClass("group");
+
+      const deleteAllRow = screen.getByTestId("delete-all-conversations");
+      expect(deleteAllRow.querySelector("svg")).toBeInTheDocument();
+      expect(deleteAllRow).toHaveClass("text-danger");
+    });
+
     it("toggles older conversations visibility via the filter dropdown", async () => {
       const user = userEvent.setup();
       vi.spyOn(
