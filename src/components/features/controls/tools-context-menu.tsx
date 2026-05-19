@@ -118,7 +118,7 @@ export function ToolsContextMenu({
         </div>
       </div>
 
-      {shouldShowAgentTools && <Divider className="-mx-1 my-1 shrink-0" />}
+      {shouldShowAgentTools && <Divider inset="menu" />}
 
       <ContextMenuListItem testId="show-skills-button" onClick={onShowSkills}>
         <ToolsContextMenuIconText

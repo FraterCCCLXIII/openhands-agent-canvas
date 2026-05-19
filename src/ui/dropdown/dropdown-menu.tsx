@@ -1,4 +1,5 @@
 import React from "react";
+import { Divider } from "#/ui/divider";
 import { cn } from "#/utils/utils";
 import { DropdownOption } from "./types";
 
@@ -67,7 +68,7 @@ export function DropdownMenu({
       </ul>
       {isOpen && footer ? (
         <>
-          <div className="my-1 h-[1px] w-full bg-[var(--oh-border)]" />
+          <Divider inset="menu" />
           <div className="p-0">{footer}</div>
         </>
       ) : null}

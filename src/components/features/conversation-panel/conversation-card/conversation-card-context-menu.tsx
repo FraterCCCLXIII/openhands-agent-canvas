@@ -68,7 +68,7 @@ export function ConversationCardContextMenu({
         return !isLast ? (
           <React.Fragment key={sectionKey}>
             {filteredItems}
-            <Divider className="-mx-1 my-1 shrink-0" />
+            <Divider inset="menu" />
           </React.Fragment>
         ) : (
           <React.Fragment key={sectionKey}>{filteredItems}</React.Fragment>

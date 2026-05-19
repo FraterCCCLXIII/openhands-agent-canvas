@@ -445,7 +445,7 @@ export function ChatInputActions({
                   {conversation?.llm_model}
                 </div>
               </li>
-              <Divider className="-mx-1 my-1 shrink-0" />
+              <Divider inset="menu" />
               <li className="text-sm">
                 <NavigationLink
                   to="/settings"

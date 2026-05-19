@@ -141,9 +141,7 @@ export function ConversationNameContextMenu({
         </ContextMenuListItem>
       )}
 
-      {hasTools && (
-        <Divider testId="separator-tools" className="-mx-1 my-1 shrink-0" />
-      )}
+      {hasTools && <Divider testId="separator-tools" inset="menu" />}
 
       {onShowSkills && (
         <ContextMenuListItem testId="show-skills-button" onClick={onShowSkills}>
@@ -188,10 +186,7 @@ export function ConversationNameContextMenu({
       )}
 
       {(hasInfo || hasControl) && (
-        <Divider
-          testId="separator-info-control"
-          className="-mx-1 my-1 shrink-0"
-        />
+        <Divider testId="separator-info-control" inset="menu" />
       )}
 
       {onDisplayCost && (
