@@ -2,6 +2,11 @@ import React from "react";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { StyledTooltip } from "#/components/shared/buttons/styled-tooltip";
 import { cn } from "#/utils/utils";
+import {
+  SIDEBAR_ICON_SLOT_CLASS,
+  sidebarNavLabelClassName,
+  sidebarNavRowClassName,
+} from "./sidebar-layout";
 
 interface SidebarNavLinkProps {
   to: string;
@@ -30,12 +35,6 @@ interface SidebarNavLinkProps {
   forceActive?: boolean;
 }
 
-function getLayoutClasses(collapsed: boolean, indent: boolean): string {
-  if (collapsed) return "justify-center w-10 h-10 p-0 mx-auto";
-  if (indent) return "pl-7 pr-2 py-1.5 w-full";
-  return "px-2 py-2 w-full";
-}
-
 export function SidebarNavLink({
   to,
   label,
@@ -62,9 +61,7 @@ export function SidebarNavLink({
       }}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2 rounded-md transition-colors",
-          "text-sm leading-5 truncate",
-          getLayoutClasses(collapsed, indent),
+          sidebarNavRowClassName({ indent, collapsed }),
           isActive || forceActive
             ? "bg-tertiary text-white font-medium"
             : "text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
@@ -72,12 +69,8 @@ export function SidebarNavLink({
         )
       }
     >
-      {icon ? (
-        <span className="shrink-0 flex items-center justify-center">
-          {icon}
-        </span>
-      ) : null}
-      {!collapsed && <span className="truncate">{label}</span>}
+      {icon ? <span className={SIDEBAR_ICON_SLOT_CLASS}>{icon}</span> : null}
+      <span className={sidebarNavLabelClassName(collapsed)}>{label}</span>
     </NavigationLink>
   );
 
