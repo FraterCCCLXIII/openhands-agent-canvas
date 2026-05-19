@@ -199,7 +199,7 @@ export function LocalNewConversationMenu({
             ))}
           </ul>
 
-          <div className="mt-1 flex flex-col pt-1">
+          <div className="mt-1 flex flex-col border-t border-[var(--oh-border-subtle)] pt-2">
             <button
               type="button"
               data-testid="add-workspaces-button"
