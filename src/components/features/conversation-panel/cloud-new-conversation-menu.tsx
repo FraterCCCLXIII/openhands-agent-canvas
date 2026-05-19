@@ -240,7 +240,6 @@ export function CloudNewConversationMenu({
           data-testid={popoverTestId}
           className={cn(
             NEW_CONVERSATION_DROPDOWN_SURFACE,
-            "gap-1",
             !useFixedPlacement &&
               cn("absolute top-full mt-0", popoverClassName),
           )}
@@ -248,7 +247,7 @@ export function CloudNewConversationMenu({
         >
           {providers.length > 1 && (
             <div
-              className="flex items-center gap-1 px-1 pt-1"
+              className="flex items-center gap-1 px-1 py-1"
               data-testid="cloud-provider-tabs"
             >
               {providers.map((provider) => {
