@@ -230,7 +230,7 @@ export function BackendSelector({
   );
 
   const addBackendFooter = (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col">
       <button
         type="button"
         data-testid="add-backend-menu-item"

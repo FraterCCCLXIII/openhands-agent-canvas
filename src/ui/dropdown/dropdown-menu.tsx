@@ -33,7 +33,7 @@ export function DropdownMenu({
       className={cn(
         "absolute z-50 w-full overflow-hidden text-white",
         openUpward ? "bottom-full mb-1" : "mt-1",
-        "bg-tertiary rounded-[6px] context-menu-box-shadow py-[6px] px-1",
+        "bg-tertiary rounded-[6px] context-menu-box-shadow p-1",
         "max-h-60 overflow-auto",
         !isOpen && "hidden",
       )}
