@@ -17,11 +17,14 @@ import { BackendStatusDot } from "#/components/features/backends/backend-status-
 import { SidebarConversationList } from "./sidebar-conversation-list";
 import AutomationsIcon from "#/icons/automations.svg?react";
 import {
+  SIDEBAR_COLLAPSE_TOGGLE_OVERLAY_CLASS,
+  SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS,
   SIDEBAR_HEADER_ROW_CLASS,
   SIDEBAR_ICON_BUTTON_CLASS,
   SIDEBAR_ICON_SLOT_CLASS,
-  SIDEBAR_NAV_LIST_CLASS,
+  sidebarIconSlotClassName,
   sidebarNavLabelClassName,
+  sidebarNavListClassName,
   sidebarNavRowClassName,
 } from "./sidebar-layout";
 
@@ -81,9 +84,7 @@ export function SidebarRailBody({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className={SIDEBAR_HEADER_ROW_CLASS}>
         {collapsed && showCollapseToggle ? (
-          <div
-            className={cn("relative hidden md:block", SIDEBAR_ICON_SLOT_CLASS)}
-          >
+          <div className={SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS}>
             <div
               className={cn(
                 "transition-opacity duration-150",
@@ -104,15 +105,13 @@ export function SidebarRailBody({
               aria-label={collapseToggleLabel}
               onClick={onExpand}
               className={cn(
-                "absolute inset-0 hidden md:inline-flex items-center justify-center",
-                "rounded-md text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
-                "transition-colors cursor-pointer",
+                SIDEBAR_COLLAPSE_TOGGLE_OVERLAY_CLASS,
                 showCollapsedExpandButton
                   ? "opacity-100 pointer-events-auto"
                   : "opacity-0 pointer-events-none",
               )}
             >
-              <ChevronRight width={18} height={18} />
+              <ChevronRight width={16} height={16} />
             </button>
           </div>
         ) : (
@@ -136,7 +135,7 @@ export function SidebarRailBody({
                   "text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
                 )}
               >
-                <ChevronLeft width={18} height={18} />
+                <ChevronLeft width={16} height={16} />
               </button>
             ) : null}
             {showMobileCloseButton ? (
@@ -151,14 +150,14 @@ export function SidebarRailBody({
                   "text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
                 )}
               >
-                <ChevronLeft width={18} height={18} />
+                <ChevronLeft width={16} height={16} />
               </button>
             ) : null}
           </>
         )}
       </div>
 
-      <nav className={SIDEBAR_NAV_LIST_CLASS}>
+      <nav className={sidebarNavListClassName(collapsed)}>
         <SidebarNavLink
           to="/conversations"
           end
@@ -217,7 +216,10 @@ export function SidebarRailBody({
 
       {collapsed && showCollapseToggle ? (
         <nav
-          className={cn(SIDEBAR_NAV_LIST_CLASS, "mt-auto pb-2 cursor-pointer")}
+          className={cn(
+            sidebarNavListClassName(collapsed),
+            "mt-auto pb-2 cursor-pointer",
+          )}
         >
           <StyledTooltip
             content={t(I18nKey.SIDEBAR$SETTINGS)}
@@ -228,15 +230,17 @@ export function SidebarRailBody({
               data-testid="collapsed-settings-link"
               aria-label={t(I18nKey.SIDEBAR$SETTINGS)}
               onClick={() => navigate("/settings")}
-              className={cn(
-                sidebarNavRowClassName({ collapsed: true }),
-                currentPath.startsWith("/settings")
-                  ? "bg-tertiary text-white font-medium"
-                  : "text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
-              )}
+              className={sidebarNavRowClassName({ collapsed: true })}
             >
-              <span className={SIDEBAR_ICON_SLOT_CLASS}>
-                <Settings width={ICON_SIZE} height={ICON_SIZE} />
+              <span
+                className={sidebarIconSlotClassName({
+                  collapsed: true,
+                  active: currentPath.startsWith("/settings"),
+                })}
+              >
+                <span className={SIDEBAR_ICON_SLOT_CLASS}>
+                  <Settings width={ICON_SIZE} height={ICON_SIZE} />
+                </span>
               </span>
               <span className={sidebarNavLabelClassName(true)}>
                 {t(I18nKey.SIDEBAR$SETTINGS)}
@@ -272,17 +276,25 @@ export function SidebarRailBody({
               onMouseUp={(event) => event.stopPropagation()}
               className={cn(
                 sidebarNavRowClassName({ collapsed: true }),
-                collapsedBackendPopoverOpen
-                  ? "bg-tertiary text-white font-medium"
-                  : "text-[var(--oh-muted)] hover:text-white hover:bg-[var(--oh-surface-raised)]",
+                "relative",
               )}
             >
-              <span className={cn("relative", SIDEBAR_ICON_SLOT_CLASS)}>
-                <BackendStatusDot
-                  isConnected={activeBackendHealth?.isConnected ?? null}
-                  className="absolute top-1 left-0 pointer-events-none"
-                />
-                <Server width={ICON_SIZE} height={ICON_SIZE} />
+              <span
+                className={cn(
+                  "relative",
+                  sidebarIconSlotClassName({
+                    collapsed: true,
+                    active: collapsedBackendPopoverOpen,
+                  }),
+                )}
+              >
+                <span className={cn(SIDEBAR_ICON_SLOT_CLASS, "relative")}>
+                  <BackendStatusDot
+                    isConnected={activeBackendHealth?.isConnected ?? null}
+                    className="absolute top-1 left-0 pointer-events-none"
+                  />
+                  <Server width={ICON_SIZE} height={ICON_SIZE} />
+                </span>
               </span>
               <span className={sidebarNavLabelClassName(true)}>
                 {t(I18nKey.BACKEND$MANAGE)}
