@@ -1,6 +1,6 @@
-import { PanelLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
+import BlockDrawerLeftIcon from "#/icons/block-drawer-left.svg?react";
 import {
   mobileTopBarIconButtonClassName,
   mobileTopBarIconClassName,
@@ -22,12 +22,7 @@ export function SidebarMobileMenuToggle() {
       }
       className={mobileTopBarIconButtonClassName}
     >
-      <PanelLeft
-        size={20}
-        className={mobileTopBarIconClassName}
-        aria-hidden
-        strokeWidth={2}
-      />
+      <BlockDrawerLeftIcon className={mobileTopBarIconClassName} aria-hidden />
     </button>
   );
 }
