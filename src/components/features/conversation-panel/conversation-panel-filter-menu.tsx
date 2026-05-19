@@ -72,17 +72,20 @@ function MenuRow({
       data-testid={testId}
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded px-2 py-2 text-left text-sm text-white",
+        "group flex w-full items-center gap-2 rounded px-2 py-2 text-left text-sm text-[var(--oh-foreground)]",
         "hover:bg-[var(--oh-interactive-hover)]",
       )}
     >
       <Icon
-        className="h-3.5 w-3.5 shrink-0 text-[var(--oh-muted)]"
+        className="h-3.5 w-3.5 shrink-0 text-[var(--oh-muted)] transition-colors group-hover:text-[var(--oh-foreground)] group-focus-visible:text-[var(--oh-foreground)]"
         aria-hidden
       />
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {selected ? (
-        <Check className="ml-auto h-3.5 w-3.5 shrink-0" aria-hidden />
+        <Check
+          className="ml-auto h-3.5 w-3.5 shrink-0 text-[var(--oh-foreground)]"
+          aria-hidden
+        />
       ) : null}
     </button>
   );
@@ -222,7 +225,7 @@ export function ConversationPanelFilterMenu({
           tabIndex={-1}
           data-testid="older-conversations-filter-menu"
           onKeyDown={handleMenuKeyDown}
-          className="absolute right-0 top-full z-50 mt-0 w-64 rounded-md border border-[var(--oh-border-subtle)] bg-tertiary px-1 py-1 text-white shadow-lg"
+          className="absolute right-0 top-full z-50 mt-0 w-64 rounded-md border border-[var(--oh-border-subtle)] bg-tertiary px-1 py-1 text-[var(--oh-foreground)] shadow-lg"
         >
           <MenuHeading>{t(I18nKey.CONVERSATION_PANEL$ORGANIZE)}</MenuHeading>
           <MenuRow
@@ -329,7 +332,7 @@ export function ConversationPanelFilterMenu({
               toggleShowOlderConversations();
               setFilterMenuOpen(false);
             }}
-            className="block w-full rounded px-2 py-2 text-left text-sm text-white hover:bg-[var(--oh-interactive-hover)]"
+            className="block w-full rounded px-2 py-2 text-left text-sm text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]"
           >
             {showOlderConversations
               ? capitalizeLabel(t(I18nKey.CONVERSATION$HIDE))
