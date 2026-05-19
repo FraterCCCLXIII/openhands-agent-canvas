@@ -276,7 +276,7 @@ export function Sidebar() {
           <SidebarNavLink
             to="/conversations"
             end
-            label="Code"
+            label="New Chat"
             testId="sidebar-conversations-link"
             disabled={linkDisabled}
             collapsed={collapsed}

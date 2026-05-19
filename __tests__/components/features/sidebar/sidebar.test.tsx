@@ -402,7 +402,7 @@ describe("Sidebar", () => {
 
     // Act + Assert: each top-level nav link surfaces its new user-facing label.
     expect(screen.getByTestId("sidebar-conversations-link")).toHaveTextContent(
-      "Code",
+      "New Chat",
     );
     expect(screen.getByTestId("sidebar-skills-link")).toHaveTextContent(
       "Customize",
