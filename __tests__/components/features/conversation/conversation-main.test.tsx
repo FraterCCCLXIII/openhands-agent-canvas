@@ -12,6 +12,7 @@ const chatInterfaceUnmount = vi.fn();
 
 vi.mock("#/hooks/use-breakpoint", () => ({
   useBreakpoint: () => mockIsMobile,
+  SIDEBAR_RAIL_COLLAPSE_MAX_WIDTH: 767,
 }));
 
 vi.mock("#/hooks/use-resizable-panels", () => ({

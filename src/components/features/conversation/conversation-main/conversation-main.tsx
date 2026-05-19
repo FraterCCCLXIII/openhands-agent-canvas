@@ -10,7 +10,10 @@ import { ConversationTabs } from "../conversation-tabs/conversation-tabs";
 import { ResizeHandle } from "../../../ui/resize-handle";
 import { useResizablePanels } from "#/hooks/use-resizable-panels";
 import { useConversationStore } from "#/stores/conversation-store";
-import { useBreakpoint } from "#/hooks/use-breakpoint";
+import {
+  useBreakpoint,
+  SIDEBAR_RAIL_COLLAPSE_MAX_WIDTH,
+} from "#/hooks/use-breakpoint";
 import { SidebarMobileMenuToggle } from "#/components/features/sidebar/sidebar-mobile-menu-toggle";
 
 function getDesktopTabPanelClass(isRightPanelShown: boolean) {
@@ -21,6 +24,7 @@ function getDesktopTabPanelClass(isRightPanelShown: boolean) {
 
 export function ConversationMain() {
   const isMobile = useBreakpoint();
+  const isSidebarRailHidden = useBreakpoint(SIDEBAR_RAIL_COLLAPSE_MAX_WIDTH);
   const { isRightPanelShown } = useConversationStore();
 
   const { leftWidth, rightWidth, isDragging, containerRef, handleMouseDown } =
@@ -74,11 +78,11 @@ export function ConversationMain() {
             data-testid="chat-pane-header"
             className={cn(
               "flex h-10 min-h-10 shrink-0 items-center",
-              isMobile && "gap-2 px-2.5",
+              isSidebarRailHidden && "gap-2 px-2.5",
             )}
           >
-            {isMobile ? <SidebarMobileMenuToggle /> : null}
-            <div className={cn(isMobile && "min-w-0 flex-1")}>
+            {isSidebarRailHidden ? <SidebarMobileMenuToggle /> : null}
+            <div className="min-w-0 flex-1">
               <ConversationNameWithStatus />
             </div>
           </div>

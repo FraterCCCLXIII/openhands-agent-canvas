@@ -77,7 +77,7 @@ export function RightPanelToggle({ className }: RightPanelToggleProps) {
         aria-pressed={ariaPressed}
         data-testid="right-panel-toggle"
       >
-        <BlockDrawerLeftIcon className="w-5 h-5" />
+        <BlockDrawerLeftIcon className="w-5 h-5 -scale-x-100" />
       </button>
     </ChatActionTooltip>
   );
