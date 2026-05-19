@@ -10,7 +10,7 @@ export function SidebarMobileMenuBar() {
 
   return (
     <header
-      className="flex md:hidden h-12 shrink-0 items-center border-b border-[var(--oh-border)] px-2"
+      className="flex md:hidden h-12 shrink-0 items-center px-2"
       aria-label={t(I18nKey.SIDEBAR$NAVIGATION_LABEL)}
     >
       <button
