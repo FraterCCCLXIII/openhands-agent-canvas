@@ -3,10 +3,10 @@ import { NavigationLink } from "#/components/shared/navigation-link";
 import { StyledTooltip } from "#/components/shared/buttons/styled-tooltip";
 import { useNavigation } from "#/context/navigation-context";
 import { cn } from "#/utils/utils";
+import { SidebarCollapsedIconSlot } from "./sidebar-collapsed-icon-slot";
 import {
   SIDEBAR_ICON_SLOT_CLASS,
   SIDEBAR_ROW_INTERACTIVE_CLASS,
-  sidebarIconSlotClassName,
   sidebarNavLabelClassName,
   sidebarNavRowClassName,
 } from "./sidebar-layout";
@@ -73,13 +73,13 @@ export function SidebarNavLink({
       )}
     >
       {icon ? (
-        <span className={sidebarIconSlotClassName({ collapsed, active })}>
-          {collapsed ? (
-            <span className={SIDEBAR_ICON_SLOT_CLASS}>{icon}</span>
-          ) : (
-            icon
-          )}
-        </span>
+        collapsed ? (
+          <SidebarCollapsedIconSlot active={active}>
+            {icon}
+          </SidebarCollapsedIconSlot>
+        ) : (
+          <span className={SIDEBAR_ICON_SLOT_CLASS}>{icon}</span>
+        )
       ) : null}
       <span className={sidebarNavLabelClassName(collapsed)}>{label}</span>
     </NavigationLink>

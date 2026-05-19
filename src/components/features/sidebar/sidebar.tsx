@@ -210,8 +210,8 @@ export function Sidebar() {
           "max-md:hidden flex bg-base flex-col min-h-0 transition-[width,min-width] duration-200",
           "md:border-r md:border-[var(--oh-border)] md:h-full",
           collapsed
-            ? "md:w-[64px] md:min-w-[64px] md:px-2"
-            : "md:w-[300px] md:min-w-[300px] pb-2 md:pl-2 md:pr-0",
+            ? "md:w-[60px] md:min-w-[60px] md:px-2.5"
+            : "md:w-[300px] md:min-w-[300px] pb-2 md:pl-2.5 md:pr-0",
           currentPath === "/" && "md:pb-3",
         )}
       >
@@ -242,7 +242,7 @@ export function Sidebar() {
             aria-hidden={!mobileDrawerVisible}
             className={cn(
               "fixed inset-y-0 left-0 z-50 flex min-h-0 w-[min(300px,85vw)] flex-col bg-base",
-              "border-r border-[var(--oh-border)] pb-2 pl-2 pr-0 md:hidden",
+              "border-r border-[var(--oh-border)] pb-2 pl-2.5 pr-0 md:hidden",
               "transition-transform ease-in-out motion-reduce:transition-none",
               mobileDrawerVisible ? "translate-x-0" : "-translate-x-full",
             )}

@@ -262,6 +262,11 @@ export function ConversationPanel({
     return conversationGroups.reduce((n, g) => n + g.conversations.length, 0);
   }, [conversationGroups]);
 
+  const listIsEffectivelyEmpty =
+    organizeMode === "grouped" && !compact
+      ? visibleGroupedCount === 0
+      : visibleFlatCount === 0;
+
   const { mutate: deleteConversation, mutateAsync: deleteConversationAsync } =
     useDeleteConversation();
   const { mutate: pauseConversation } = useUnifiedPauseConversation();
@@ -274,7 +279,10 @@ export function ConversationPanel({
   const olderHidden = olderScoped.length > 0 && !showOlderConversations;
   // Compact mode also hides "Load more" — paginating into archived
   // conversations contradicts the "active only" intent of the icon rail.
-  const showLoadMore = !!hasNextPage && !olderHidden && !compact;
+  // Do not show when the visible list is empty (e.g. filters hide every
+  // loaded conversation) — that state already shows "No conversations found".
+  const showLoadMore =
+    !!hasNextPage && !olderHidden && !compact && !listIsEffectivelyEmpty;
 
   const { mutate: createConversation } = useCreateConversation();
   const isCreatingConversationFlow = useIsCreatingConversation();
@@ -468,10 +476,6 @@ export function ConversationPanel({
   // background refetch, causing the skeleton/empty-state to flicker when
   // the list is empty.
   const showInitialSkeleton = isLoading;
-  const listIsEffectivelyEmpty =
-    organizeMode === "grouped" && !compact
-      ? visibleGroupedCount === 0
-      : visibleFlatCount === 0;
   const showEmptyState =
     !isLoading && !compact && listIsEffectivelyEmpty && !startTasks?.length;
 
@@ -486,15 +490,15 @@ export function ConversationPanel({
       {showConversationHeader && (
         <div
           className={cn(
-            // Pull flush to the sidebar edges: `-ml-2` matches aside `pl-2`;
+            // Pull flush to the sidebar edges: `-ml-2.5` matches aside `pl-2.5`;
             // width extends by that inset on the right now that aside is `pr-0`.
-            "-ml-2 w-[calc(100%+0.5rem)] max-w-none box-border border-b",
+            "-ml-2.5 w-[calc(100%+0.625rem)] max-w-none box-border border-b",
             isListScrolled ? "border-[var(--oh-border)]" : "border-transparent",
           )}
         >
           <div
             data-testid="older-conversations-summary"
-            className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 pl-4 pr-2 text-[var(--oh-muted)]"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 pl-4 pr-2.5 text-[var(--oh-muted)]"
           >
             <span className="text-sm font-medium text-[var(--oh-muted)]">
               {t(I18nKey.SIDEBAR$CONVERSATIONS)}

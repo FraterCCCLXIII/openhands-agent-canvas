@@ -8,6 +8,7 @@ import {
   Settings,
 } from "lucide-react";
 import { OpenHandsLogoButton } from "#/components/shared/buttons/openhands-logo-button";
+import { SidebarCollapsedIconSlot } from "./sidebar-collapsed-icon-slot";
 import { SidebarNavLink } from "./sidebar-nav-link";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
@@ -19,10 +20,9 @@ import AutomationsIcon from "#/icons/automations.svg?react";
 import {
   SIDEBAR_COLLAPSE_TOGGLE_OVERLAY_CLASS,
   SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS,
-  SIDEBAR_HEADER_ROW_CLASS,
   SIDEBAR_ICON_BUTTON_CLASS,
   SIDEBAR_ICON_SLOT_CLASS,
-  sidebarIconSlotClassName,
+  sidebarHeaderRowClassName,
   sidebarNavLabelClassName,
   sidebarNavListClassName,
   sidebarNavRowClassName,
@@ -82,12 +82,12 @@ export function SidebarRailBody({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className={SIDEBAR_HEADER_ROW_CLASS}>
+      <div className={sidebarHeaderRowClassName(collapsed)}>
         {collapsed && showCollapseToggle ? (
           <div className={SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS}>
             <div
               className={cn(
-                "transition-opacity duration-150",
+                "flex h-full w-full items-center justify-start pl-2.5 transition-opacity duration-150",
                 showCollapsedExpandButton && "opacity-0",
               )}
             >
@@ -232,16 +232,11 @@ export function SidebarRailBody({
               onClick={() => navigate("/settings")}
               className={sidebarNavRowClassName({ collapsed: true })}
             >
-              <span
-                className={sidebarIconSlotClassName({
-                  collapsed: true,
-                  active: currentPath.startsWith("/settings"),
-                })}
+              <SidebarCollapsedIconSlot
+                active={currentPath.startsWith("/settings")}
               >
-                <span className={SIDEBAR_ICON_SLOT_CLASS}>
-                  <Settings width={ICON_SIZE} height={ICON_SIZE} />
-                </span>
-              </span>
+                <Settings width={ICON_SIZE} height={ICON_SIZE} />
+              </SidebarCollapsedIconSlot>
               <span className={sidebarNavLabelClassName(true)}>
                 {t(I18nKey.SIDEBAR$SETTINGS)}
               </span>
@@ -279,30 +274,22 @@ export function SidebarRailBody({
                 "relative",
               )}
             >
-              <span
-                className={cn(
-                  "relative",
-                  sidebarIconSlotClassName({
-                    collapsed: true,
-                    active: collapsedBackendPopoverOpen,
-                  }),
-                )}
-              >
-                <span className={cn(SIDEBAR_ICON_SLOT_CLASS, "relative")}>
+              <SidebarCollapsedIconSlot active={collapsedBackendPopoverOpen}>
+                <span className="relative inline-flex size-[18px] shrink-0 items-center justify-center">
                   <BackendStatusDot
                     isConnected={activeBackendHealth?.isConnected ?? null}
-                    className="absolute top-1 left-0 pointer-events-none"
+                    className="absolute left-0 top-0 z-[1] pointer-events-none"
                   />
                   <Server width={ICON_SIZE} height={ICON_SIZE} />
                 </span>
-              </span>
+              </SidebarCollapsedIconSlot>
               <span className={sidebarNavLabelClassName(true)}>
                 {t(I18nKey.BACKEND$MANAGE)}
               </span>
             </button>
             {collapsedBackendPopoverOpen ? (
               <div
-                className="absolute bottom-[-4px] left-full pl-2 z-40 w-[272px]"
+                className="absolute bottom-[-4px] left-full pl-2.5 z-40 w-[272px]"
                 onClick={(event) => event.stopPropagation()}
               >
                 <BackendSelector
@@ -323,7 +310,7 @@ export function SidebarRailBody({
         <div
           className={cn(
             "flex flex-col items-stretch max-w-none box-border shrink-0",
-            "-ml-2 w-[calc(100%+0.5rem)] border-t border-[var(--oh-border)] pt-2 px-2",
+            "-ml-2.5 w-[calc(100%+0.625rem)] border-t border-[var(--oh-border)] pt-2 px-2.5",
           )}
         >
           <BackendSelector openUpward />

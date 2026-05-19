@@ -140,6 +140,20 @@ describe("ConversationPanel", () => {
     expect(emptyState).toBeInTheDocument();
   });
 
+  it("does not show load more when the visible list is empty even if another page exists", async () => {
+    vi.spyOn(AgentServerConversationService, "searchConversations").mockResolvedValue({
+      items: [],
+      next_page_id: "page-2",
+    });
+
+    renderConversationPanel();
+
+    await screen.findByText("CONVERSATION$NO_CONVERSATIONS");
+    expect(
+      screen.queryByTestId("load-more-conversations"),
+    ).not.toBeInTheDocument();
+  });
+
   it("does not flash the loading skeleton during a background refetch when the list is empty", async () => {
     // Arrange: first call (initial load) resolves with an empty list.
     // Second call (the background refetch) is kept in-flight so we can
