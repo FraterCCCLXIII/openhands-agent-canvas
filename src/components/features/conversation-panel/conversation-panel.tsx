@@ -409,6 +409,8 @@ export function ConversationPanel({
             showRepositoryMetadata={showRepoBranchMetadata}
             llmModel={conversation.llm_model}
             showLlmProfiles={showLlmProfiles}
+            agentKind={conversation.agent_kind}
+            acpServer={conversation.acp_server}
           />
         );
       }
@@ -450,6 +452,8 @@ export function ConversationPanel({
             showRepositoryMetadata={showRepoBranchMetadata}
             llmModel={conversation.llm_model}
             showLlmProfiles={showLlmProfiles}
+            agentKind={conversation.agent_kind}
+            acpServer={conversation.acp_server}
           />
         </NavigationLink>
       );

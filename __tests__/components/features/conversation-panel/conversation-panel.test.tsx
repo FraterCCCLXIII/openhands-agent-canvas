@@ -33,29 +33,37 @@ vi.mock("#/hooks/mutation/use-unified-stop-conversation", () => ({
 
 // Helper to create complete AppConversation mock data
 // Default timestamps use "now" so conversations are considered recent and
-// rendered eagerly by the panel.
+// rendered eagerly by the panel.  Each call produces a timestamp 1 s older
+// than the previous one so that the sort-by-updated_at order matches the
+// array insertion order (first created → newest → cards[0]).
+let _mockConversationCounter = 0;
 const createMockConversation = (
   overrides: Partial<AppConversation> = {},
-): AppConversation => ({
-  id: "test-id",
-  title: "Test Conversation",
-  selected_repository: null,
-  git_provider: null,
-  selected_branch: null,
-  updated_at: new Date().toISOString(),
-  created_at: new Date().toISOString(),
-  execution_status: ExecutionStatus.FINISHED,
-  conversation_url: null,
-  created_by_user_id: "user1",
-  metrics: null,
-  llm_model: null,
-  trigger: null,
-  pr_number: [],
-  session_api_key: null,
-  sandbox_id: null,
-  sub_conversation_ids: [],
-  ...overrides,
-});
+): AppConversation => {
+  const ts = new Date(
+    Date.now() - _mockConversationCounter++ * 1000,
+  ).toISOString();
+  return {
+    id: "test-id",
+    title: "Test Conversation",
+    selected_repository: null,
+    git_provider: null,
+    selected_branch: null,
+    updated_at: ts,
+    created_at: ts,
+    execution_status: ExecutionStatus.FINISHED,
+    conversation_url: null,
+    created_by_user_id: "user1",
+    metrics: null,
+    llm_model: null,
+    trigger: null,
+    pr_number: [],
+    session_api_key: null,
+    sandbox_id: null,
+    sub_conversation_ids: [],
+    ...overrides,
+  };
+};
 
 // Mock toast handlers to prevent unhandled rejection errors
 vi.mock("#/utils/custom-toast-handlers", () => ({
@@ -773,44 +781,59 @@ describe("ConversationPanel", () => {
     const cards = await screen.findAllByTestId("conversation-card");
     expect(cards).toHaveLength(3);
 
+    const getCardByTitle = async (title: string) => {
+      const currentCards = await screen.findAllByTestId("conversation-card");
+      const card = currentCards.find((candidate) =>
+        within(candidate).queryByText(title),
+      );
+      expect(card).toBeDefined();
+      return card as HTMLElement;
+    };
+
     // Test RUNNING conversation - should show stop button
-    const runningEllipsisButton = within(cards[0]).getByTestId(
+    const runningCard = await getCardByTitle("Running Conversation");
+    const runningEllipsisButton = within(runningCard).getByTestId(
       "ellipsis-button",
     );
     await user.click(runningEllipsisButton);
 
-    expect(screen.getByTestId("stop-button")).toBeInTheDocument();
+    expect(await screen.findByTestId("stop-button")).toBeInTheDocument();
 
     // Click outside to close the menu
     await user.click(document.body);
 
-    // Wait for context menu to close.
+    // Wait for context menu to close before opening the next one.
     await waitFor(() => {
-      expect(cards[0]).toHaveAttribute("data-context-menu-open", "false");
+      expect(screen.queryByTestId("stop-button")).not.toBeInTheDocument();
     });
 
-    // Test STARTING conversation - should show stop button
-    const startingEllipsisButton = within(cards[1]).getByTestId(
+    // Test STARTING/RUNNING conversation - should show stop button
+    const startingCard = await getCardByTitle("Starting Conversation");
+    const startingEllipsisButton = within(startingCard).getByTestId(
       "ellipsis-button",
     );
     await user.click(startingEllipsisButton);
 
-    expect(screen.getByTestId("stop-button")).toBeInTheDocument();
+    expect(await screen.findByTestId("stop-button")).toBeInTheDocument();
 
     // Click outside to close the menu
     await user.click(document.body);
 
-    // Wait for context menu to close.
+    // Wait for context menu to close before opening the next one.
     await waitFor(() => {
-      expect(cards[1]).toHaveAttribute("data-context-menu-open", "false");
+      expect(screen.queryByTestId("stop-button")).not.toBeInTheDocument();
     });
 
     // Test STOPPED conversation - should NOT show stop button
-    const stoppedEllipsisButton = within(cards[2]).getByTestId(
+    const stoppedCard = await getCardByTitle("Stopped Conversation");
+    const stoppedEllipsisButton = within(stoppedCard).getByTestId(
       "ellipsis-button",
     );
     await user.click(stoppedEllipsisButton);
 
+    await waitFor(() => {
+      expect(stoppedCard).toHaveAttribute("data-context-menu-open", "true");
+    });
     expect(screen.queryByTestId("stop-button")).not.toBeInTheDocument();
   });
 
