@@ -19,7 +19,7 @@ export function PastedImageUploadAsFileButton({
   const label = active ? doNotUploadLabel : uploadLabel;
 
   return (
-    <div className="absolute bottom-1 left-1 z-10 h-4 w-4">
+    <div className="absolute bottom-2 left-1 z-10 h-4 w-4">
       <StyledTooltip
         content={label}
         placement="bottom"
@@ -36,10 +36,7 @@ export function PastedImageUploadAsFileButton({
             onToggle();
           }}
           className={cn(
-            "flex h-4 w-4 items-center justify-center rounded-full transition-colors cursor-pointer",
-            active
-              ? "bg-[var(--oh-primary)] text-[var(--oh-primary-foreground)] hover:bg-[var(--oh-primary)] hover:brightness-95"
-              : "bg-[var(--oh-surface)] text-[var(--oh-foreground)] hover:bg-[var(--oh-muted)]",
+            "flex h-4 w-4 items-center justify-center rounded-full bg-[var(--oh-surface)] text-[var(--oh-foreground)] transition-colors cursor-pointer hover:bg-[var(--oh-muted)]",
           )}
         >
           {active ? (
