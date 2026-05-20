@@ -31,6 +31,13 @@ interface ToolsContextMenuProps {
   onShowAgentTools: (event: React.MouseEvent<HTMLButtonElement>) => void;
   shouldShowAgentTools?: boolean;
   shouldShowHooks?: boolean;
+  /** When set, renders a divider and this action as the last menu item. */
+  footerAction?: {
+    testId: string;
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export function ToolsContextMenu({
@@ -40,6 +47,7 @@ export function ToolsContextMenu({
   onShowAgentTools,
   shouldShowAgentTools = true,
   shouldShowHooks = false,
+  footerAction,
 }: ToolsContextMenuProps) {
   const { t } = useTranslation("openhands");
   const { data: conversation } = useActiveConversation();
@@ -170,6 +178,28 @@ export function ToolsContextMenu({
             className={CONTEXT_MENU_ICON_TEXT_CLASSNAME}
           />
         </ContextMenuListItem>
+      )}
+
+      {footerAction && (
+        <>
+          <Divider />
+          <ContextMenuListItem
+            testId={footerAction.testId}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              footerAction.onClick();
+              handleClose();
+            }}
+            className={contextMenuListItemClassName}
+          >
+            <ToolsContextMenuIconText
+              icon={footerAction.icon}
+              text={footerAction.label}
+              className={CONTEXT_MENU_ICON_TEXT_CLASSNAME}
+            />
+          </ContextMenuListItem>
+        </>
       )}
     </ContextMenu>
   );
