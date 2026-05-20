@@ -32,6 +32,32 @@ export function normalizePastedFile(file: File): File {
   });
 }
 
+/** Matches names assigned by {@link normalizePastedFile} for clipboard screenshots. */
+export const PASTED_CLIPBOARD_IMAGE_NAME = /^pasted-image-\d+\.[a-z0-9]+$/i;
+
+export function isPastedClipboardImage(file: File): boolean {
+  return PASTED_CLIPBOARD_IMAGE_NAME.test(file.name);
+}
+
+export function partitionImagesForUpload(
+  images: File[],
+  markedUploadAsFileNames: readonly string[],
+): { imagesToEmbed: File[]; imagesAsFiles: File[] } {
+  const marked = new Set(markedUploadAsFileNames);
+  const imagesToEmbed: File[] = [];
+  const imagesAsFiles: File[] = [];
+
+  for (const image of images) {
+    if (marked.has(image.name)) {
+      imagesAsFiles.push(image);
+    } else {
+      imagesToEmbed.push(image);
+    }
+  }
+
+  return { imagesToEmbed, imagesAsFiles };
+}
+
 /**
  * Collect files from a paste event, including clipboard image items.
  */

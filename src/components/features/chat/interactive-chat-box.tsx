@@ -9,6 +9,7 @@ import { GitControlBar } from "./git-control-bar";
 import { useConversationStore } from "#/stores/conversation-store";
 import { useAgentState } from "#/hooks/use-agent-state";
 import { useSubConversationTaskPolling } from "#/hooks/query/use-sub-conversation-task-polling";
+import { partitionImagesForUpload } from "#/components/features/chat/utils/chat-input.utils";
 import { isTaskPolling } from "#/utils/utils";
 
 interface InteractiveChatBoxProps {
@@ -23,7 +24,7 @@ export function InteractiveChatBox({
   const {
     images,
     files,
-    uploadImagesAsFiles,
+    imagesMarkedUploadAsFile,
     clearAllFiles,
     subConversationTaskId,
   } = useConversationStore();
@@ -41,11 +42,11 @@ export function InteractiveChatBox({
   const { handleUpload } = useChatAttachmentUpload();
 
   const handleAfterModel = useBtwInterceptor(conversationId, (message) => {
-    if (uploadImagesAsFiles) {
-      onSubmit(message, [], [...files, ...images]);
-    } else {
-      onSubmit(message, images, files);
-    }
+    const { imagesToEmbed, imagesAsFiles } = partitionImagesForUpload(
+      images,
+      imagesMarkedUploadAsFile,
+    );
+    onSubmit(message, imagesToEmbed, [...files, ...imagesAsFiles]);
     clearAllFiles();
   });
   const handleSubmit = useModelInterceptor(conversationId, handleAfterModel);

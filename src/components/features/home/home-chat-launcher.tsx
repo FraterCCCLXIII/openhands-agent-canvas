@@ -42,7 +42,7 @@ export function HomeChatLauncher() {
   const { mutate: createConversation, isPending } = useCreateConversation();
   const isCreatingElsewhere = useIsCreatingConversation();
   const isCreating = isPending || isCreatingElsewhere;
-  const { images, files, uploadImagesAsFiles, clearAllFiles } =
+  const { images, files, imagesMarkedUploadAsFile, clearAllFiles } =
     useConversationStore();
   const enqueuePendingMessage = useOptimisticUserMessageStore(
     (state) => state.enqueuePendingMessage,
@@ -100,7 +100,7 @@ export function HomeChatLauncher() {
               content: trimmed,
               images: attachmentSnapshot.images,
               files: attachmentSnapshot.files,
-              uploadImagesAsFiles,
+              imagesMarkedUploadAsFile,
               t,
             });
             enqueuePendingMessage({

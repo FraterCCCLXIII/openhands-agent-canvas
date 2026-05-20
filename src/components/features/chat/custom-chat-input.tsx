@@ -18,7 +18,10 @@ export interface CustomChatInputProps {
   onSubmit: (message: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
-  onFilesPaste?: (files: File[]) => void;
+  onFilesPaste?: (
+    files: File[],
+    options?: import("#/hooks/chat/use-chat-attachment-upload").ChatAttachmentUploadOptions,
+  ) => void;
   className?: React.HTMLAttributes<HTMLDivElement>["className"];
   buttonClassName?: React.HTMLAttributes<HTMLButtonElement>["className"];
 }

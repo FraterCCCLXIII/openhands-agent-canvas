@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   getClipboardFiles,
+  isPastedClipboardImage,
   normalizePastedFile,
+  partitionImagesForUpload,
 } from "#/components/features/chat/utils/chat-input.utils";
 
 function createFileList(files: File[]): FileList {
@@ -46,6 +48,32 @@ describe("normalizePastedFile", () => {
     const normalized = normalizePastedFile(file);
     expect(normalized.name).toMatch(/^pasted-image-\d+\.png$/);
     expect(normalized.type).toBe("image/png");
+  });
+});
+
+describe("isPastedClipboardImage", () => {
+  it("returns true for normalized clipboard screenshot names", () => {
+    const file = new File(["x"], "pasted-image-1710000000000.png", {
+      type: "image/png",
+    });
+    expect(isPastedClipboardImage(file)).toBe(true);
+  });
+
+  it("returns false for images picked from the file dialog", () => {
+    const file = new File(["x"], "photo.png", { type: "image/png" });
+    expect(isPastedClipboardImage(file)).toBe(false);
+  });
+});
+
+describe("partitionImagesForUpload", () => {
+  it("splits marked images into the file-upload bucket", () => {
+    const embed = new File(["a"], "embed.png", { type: "image/png" });
+    const upload = new File(["b"], "upload.png", { type: "image/png" });
+
+    const result = partitionImagesForUpload([embed, upload], ["upload.png"]);
+
+    expect(result.imagesToEmbed).toEqual([embed]);
+    expect(result.imagesAsFiles).toEqual([upload]);
   });
 });
 

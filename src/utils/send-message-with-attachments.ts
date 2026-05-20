@@ -4,6 +4,7 @@ import ConversationService from "#/api/conversation-service/conversation-service
 import type { SendMessageRequest } from "#/api/conversation-service/agent-server-conversation-service.types";
 import { convertImageToBase64 } from "#/utils/convert-image-to-base-64";
 import { displayErrorToast } from "#/utils/custom-toast-handlers";
+import { partitionImagesForUpload } from "#/components/features/chat/utils/chat-input.utils";
 import { validateFiles } from "#/utils/file-validation";
 
 export interface SendMessageWithAttachmentsResult {
@@ -19,14 +20,23 @@ export async function sendMessageWithAttachments(options: {
   content: string;
   images: File[];
   files: File[];
-  uploadImagesAsFiles: boolean;
+  imagesMarkedUploadAsFile: string[];
   t: TFunction;
 }): Promise<SendMessageWithAttachmentsResult> {
-  const { conversationId, content, images, files, uploadImagesAsFiles, t } =
-    options;
+  const {
+    conversationId,
+    content,
+    images,
+    files,
+    imagesMarkedUploadAsFile,
+    t,
+  } = options;
 
-  const imagesToEmbed = uploadImagesAsFiles ? [] : images;
-  const filesToUpload = uploadImagesAsFiles ? [...files, ...images] : files;
+  const { imagesToEmbed, imagesAsFiles } = partitionImagesForUpload(
+    images,
+    imagesMarkedUploadAsFile,
+  );
+  const filesToUpload = [...files, ...imagesAsFiles];
 
   const validation = validateFiles([...imagesToEmbed, ...filesToUpload]);
   if (!validation.isValid) {

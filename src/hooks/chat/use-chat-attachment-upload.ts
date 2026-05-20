@@ -1,4 +1,8 @@
 import { useCallback } from "react";
+
+export type ChatAttachmentUploadOptions = {
+  fromPaste?: boolean;
+};
 import { isFileImage } from "#/utils/is-file-image";
 import { displayErrorToast } from "#/utils/custom-toast-handlers";
 import { validateFiles } from "#/utils/file-validation";
@@ -18,10 +22,11 @@ export function useChatAttachmentUpload() {
     removeFileLoading,
     addImageLoading,
     removeImageLoading,
+    markImagesAsPasted,
   } = useConversationStore();
 
   const handleUpload = useCallback(
-    async (selectedFiles: File[]) => {
+    async (selectedFiles: File[], options?: ChatAttachmentUploadOptions) => {
       const validation = validateFiles(selectedFiles, [...images, ...files]);
 
       if (!validation.isValid) {
@@ -31,6 +36,10 @@ export function useChatAttachmentUpload() {
 
       const validFiles = selectedFiles.filter((f) => !isFileImage(f));
       const validImages = selectedFiles.filter((f) => isFileImage(f));
+
+      if (options?.fromPaste && validImages.length > 0) {
+        markImagesAsPasted(validImages.map((image) => image.name));
+      }
 
       validFiles.forEach((file) => addFileLoading(file.name));
       validImages.forEach((image) => addImageLoading(image.name));
@@ -85,6 +94,7 @@ export function useChatAttachmentUpload() {
       removeFileLoading,
       addImageLoading,
       removeImageLoading,
+      markImagesAsPasted,
     ],
   );
 
