@@ -1,6 +1,6 @@
-import { Upload } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ChatActionTooltip } from "#/components/features/chat/chat-action-tooltip";
+import { StyledTooltip } from "#/components/shared/buttons/styled-tooltip";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 
@@ -14,27 +14,41 @@ export function PastedImageUploadAsFileButton({
   onToggle,
 }: PastedImageUploadAsFileButtonProps) {
   const { t } = useTranslation("openhands");
+  const uploadLabel = t(I18nKey.CHAT_INTERFACE$UPLOAD_IMAGES_AS_FILES);
+  const doNotUploadLabel = t(I18nKey.CHAT_INTERFACE$DO_NOT_UPLOAD_AS_FILE);
+  const label = active ? doNotUploadLabel : uploadLabel;
+
   return (
-    <ChatActionTooltip
-      tooltip={t(I18nKey.CHAT_INTERFACE$UPLOAD_IMAGES_AS_FILES)}
-      ariaLabel={t(I18nKey.CHAT_INTERFACE$UPLOAD_IMAGES_AS_FILES)}
-    >
-      <button
-        type="button"
-        aria-pressed={active}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
-        className={cn(
-          "absolute bottom-0.5 left-0.5 z-10 flex h-5 w-5 items-center justify-center rounded-full border border-[var(--oh-border)] shadow-sm transition-colors cursor-pointer",
-          active
-            ? "bg-[var(--oh-primary)] text-[var(--oh-primary-foreground)] border-transparent"
-            : "bg-[var(--oh-surface)]/95 text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]",
-        )}
+    <div className="absolute bottom-1 left-1 z-10 h-4 w-4">
+      <StyledTooltip
+        content={label}
+        placement="bottom"
+        offset={10}
+        shouldFlip={false}
+        tooltipClassName="bg-white text-black text-xs font-medium leading-5"
       >
-        <Upload className="h-3 w-3" strokeWidth={2.5} aria-hidden />
-      </button>
-    </ChatActionTooltip>
+        <button
+          type="button"
+          aria-label={label}
+          aria-pressed={active}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          className={cn(
+            "flex h-4 w-4 items-center justify-center rounded-full transition-colors cursor-pointer",
+            active
+              ? "bg-[var(--oh-primary)] text-[var(--oh-primary-foreground)] hover:bg-[var(--oh-primary)] hover:brightness-95"
+              : "bg-[var(--oh-surface)] text-[var(--oh-foreground)] hover:bg-[var(--oh-muted)]",
+          )}
+        >
+          {active ? (
+            <Check width={10} height={10} strokeWidth={2.5} aria-hidden />
+          ) : (
+            <Upload width={10} height={10} strokeWidth={2.5} aria-hidden />
+          )}
+        </button>
+      </StyledTooltip>
+    </div>
   );
 }

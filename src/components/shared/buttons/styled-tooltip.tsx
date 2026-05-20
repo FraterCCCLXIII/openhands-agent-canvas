@@ -9,6 +9,8 @@ export interface StyledTooltipProps {
   placement?: TooltipProps["placement"];
   showArrow?: boolean;
   closeDelay?: number;
+  offset?: number;
+  shouldFlip?: boolean;
 }
 
 export function StyledTooltip({
@@ -18,6 +20,8 @@ export function StyledTooltip({
   placement = "right",
   showArrow = false,
   closeDelay = 100,
+  offset,
+  shouldFlip,
 }: StyledTooltipProps) {
   const disableAnimation = import.meta.env.MODE === "test";
 
@@ -26,6 +30,8 @@ export function StyledTooltip({
       content={content}
       closeDelay={closeDelay}
       placement={placement}
+      offset={offset}
+      shouldFlip={shouldFlip}
       className={cn("bg-white text-black", tooltipClassName)}
       showArrow={showArrow}
       disableAnimation={disableAnimation}

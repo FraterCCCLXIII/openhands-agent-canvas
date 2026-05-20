@@ -10165,6 +10165,23 @@
     "tr": "dosya olarak yükle",
     "uk": "завантажити як файл"
   },
+  "CHAT_INTERFACE$DO_NOT_UPLOAD_AS_FILE": {
+    "en": "Do not upload as file",
+    "ja": "ファイルとしてアップロードしない",
+    "zh-CN": "不作为文件上传",
+    "zh-TW": "不作為檔案上傳",
+    "ko-KR": "파일로 업로드하지 않음",
+    "no": "ikke last opp som fil",
+    "ar": "عدم التحميل كملف",
+    "de": "Nicht als Datei hochladen",
+    "fr": "ne pas envoyer en tant que fichier",
+    "it": "non caricare come file",
+    "pt": "não enviar como arquivo",
+    "es": "no subir como archivo",
+    "ca": "no pujar com a fitxer",
+    "tr": "dosya olarak yükleme",
+    "uk": "не завантажувати як файл"
+  },
   "CHAT_INTERFACE$TOOLTIP_UPLOAD_IMAGE": {
     "en": "Upload image",
     "zh-CN": "上传图片",
