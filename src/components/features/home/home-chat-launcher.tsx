@@ -95,21 +95,32 @@ export function HomeChatLauncher() {
         toast.dismiss(toastId);
 
         if (hasAttachments) {
-          const isProvisioningTask = data.conversation_id.startsWith("task-");
+          // Cloud sandboxes provision asynchronously; uploads and the first
+          // message must target the runtime URL, not the bundled local server.
+          const shouldDeferAttachments =
+            !isLocal || data.conversation_id.startsWith("task-");
 
-          if (isProvisioningTask) {
-            if (!data.task_id) {
+          if (shouldDeferAttachments) {
+            const taskId =
+              data.task_id ??
+              (data.conversation_id.startsWith("task-")
+                ? data.conversation_id.slice("task-".length)
+                : null);
+
+            if (!taskId) {
               displayErrorToast(null);
               return;
             }
 
-            setPendingTaskAttachments(data.task_id, {
+            setPendingTaskAttachments(taskId, {
               content: trimmed,
               images: attachmentSnapshot.images,
               files: attachmentSnapshot.files,
               imagesMarkedUploadAsFile: [...imagesMarkedUploadAsFile],
             });
             clearAllFiles();
+            navigate(`/conversations/task-${taskId}`);
+            return;
           } else {
             try {
               const sent = await sendMessageWithAttachments({

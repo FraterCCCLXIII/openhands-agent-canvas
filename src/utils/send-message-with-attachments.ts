@@ -1,6 +1,9 @@
 import type { TFunction } from "i18next";
+import {
+  resolveConversationRuntime,
+  uploadFilesToConversation,
+} from "#/api/conversation-file-upload.api";
 import AgentServerConversationService from "#/api/conversation-service/agent-server-conversation-service.api";
-import ConversationService from "#/api/conversation-service/conversation-service.api";
 import type { SendMessageRequest } from "#/api/conversation-service/agent-server-conversation-service.types";
 import { convertImageToBase64 } from "#/utils/convert-image-to-base-64";
 import { displayErrorToast } from "#/utils/custom-toast-handlers";
@@ -47,9 +50,11 @@ export async function sendMessageWithAttachments(options: {
     imagesToEmbed.map((image) => convertImageToBase64(image)),
   );
 
+  const runtime = await resolveConversationRuntime(conversationId);
+
   const { skipped_files: skippedFiles, uploaded_files: uploadedFiles } =
     filesToUpload.length > 0
-      ? await ConversationService.uploadFiles(conversationId, filesToUpload)
+      ? await uploadFilesToConversation(conversationId, filesToUpload)
       : { skipped_files: [], uploaded_files: [] };
 
   skippedFiles.forEach((file) => displayErrorToast(file.reason));
@@ -75,6 +80,7 @@ export async function sendMessageWithAttachments(options: {
   await AgentServerConversationService.sendMessage(
     conversationId,
     messageContent,
+    runtime,
   );
 
   return {
