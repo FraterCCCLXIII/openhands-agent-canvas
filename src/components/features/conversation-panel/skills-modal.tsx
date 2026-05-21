@@ -13,7 +13,7 @@ import {
 } from "#/utils/skill-scope";
 import { SkillsModalHeader } from "./skills-modal-header";
 import { SkillsModalSection } from "./skills-modal-section";
-import { SkillsRuntimeWaitingState } from "./skills-runtime-waiting-state";
+import { RuntimeWaitingState } from "./runtime-waiting-state";
 import { SkillsLoadingState } from "./skills-loading-state";
 import { SkillsEmptyState } from "./skills-empty-state";
 import { SkillItem } from "./skill-item";
@@ -76,7 +76,7 @@ export function SkillsModal({ onClose }: SkillsModalProps) {
 
         <div className="w-full h-[60vh] overflow-auto rounded-md border border-[var(--oh-border)] bg-surface-raised custom-scrollbar-always">
           {!isAgentReady ? (
-            <SkillsRuntimeWaitingState />
+            <RuntimeWaitingState testId="skills-runtime-waiting" />
           ) : isLoading ? (
             <SkillsLoadingState />
           ) : isError || !skills || skills.length === 0 ? (

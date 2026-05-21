@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { HookEventItem } from "#/components/features/conversation-panel/hook-event-item";
@@ -17,6 +17,7 @@ vi.mock("react-i18next", async () => {
       t: (key: string, params?: Record<string, unknown>) => {
         const translations: Record<string, string> = {
           HOOKS_MODAL$TITLE: "Available Hooks",
+          HOOKS_MODAL$WARNING: "Hooks warning text",
           HOOKS_MODAL$HOOK_COUNT: `${params?.count ?? 0} hooks`,
           HOOKS_MODAL$EVENT_PRE_TOOL_USE: "Pre Tool Use",
           HOOKS_MODAL$EVENT_POST_TOOL_USE: "Post Tool Use",
@@ -32,6 +33,7 @@ vi.mock("react-i18next", async () => {
           COMMON$FETCH_ERROR: "Failed to fetch data",
           CONVERSATION$NO_HOOKS: "No hooks configured",
           BUTTON$REFRESH: "Refresh",
+          BUTTON$CLOSE: "Close",
         };
         return translations[key] || key;
       },
@@ -64,29 +66,33 @@ describe("HooksEmptyState", () => {
 
 describe("HooksModalHeader", () => {
   const defaultProps = {
-    isAgentReady: true,
     isLoading: false,
     isRefetching: false,
     onRefresh: vi.fn(),
+    onClose: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should render title", () => {
+  it("should render title and warning", () => {
     render(<HooksModalHeader {...defaultProps} />);
     expect(screen.getByText("Available Hooks")).toBeInTheDocument();
+    expect(screen.getByText("Hooks warning text")).toBeInTheDocument();
   });
 
-  it("should render refresh button when agent is ready", () => {
+  it("should render icon-only refresh button with accessible label", () => {
     render(<HooksModalHeader {...defaultProps} />);
-    expect(screen.getByTestId("refresh-hooks")).toBeInTheDocument();
+    const refreshButton = screen.getByTestId("refresh-hooks");
+    expect(refreshButton).toBeInTheDocument();
+    expect(refreshButton).toHaveAttribute("aria-label", "Refresh");
+    expect(refreshButton).not.toHaveTextContent("Refresh");
   });
 
-  it("should not render refresh button when agent is not ready", () => {
-    render(<HooksModalHeader {...defaultProps} isAgentReady={false} />);
-    expect(screen.queryByTestId("refresh-hooks")).not.toBeInTheDocument();
+  it("should render close button", () => {
+    render(<HooksModalHeader {...defaultProps} />);
+    expect(screen.getByTestId("close-hooks-modal")).toBeInTheDocument();
   });
 
   it("should call onRefresh when refresh button is clicked", async () => {
@@ -96,6 +102,15 @@ describe("HooksModalHeader", () => {
 
     await user.click(screen.getByTestId("refresh-hooks"));
     expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("should call onClose when close button is clicked", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    render(<HooksModalHeader {...defaultProps} onClose={onClose} />);
+
+    await user.click(screen.getByTestId("close-hooks-modal"));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("should disable refresh button when loading", () => {
@@ -158,13 +173,11 @@ describe("HookEventItem", () => {
 
   it("should show collapsed state by default", () => {
     render(<HookEventItem {...defaultProps} isExpanded={false} />);
-    // Matcher content should not be visible when collapsed
     expect(screen.queryByText("*")).not.toBeInTheDocument();
   });
 
   it("should show expanded state with matcher content", () => {
     render(<HookEventItem {...defaultProps} isExpanded={true} />);
-    // Matcher content should be visible when expanded
     expect(screen.getByText("*")).toBeInTheDocument();
   });
 
@@ -281,7 +294,6 @@ describe("HookEventItem", () => {
       ),
     ).not.toThrow();
 
-    // Should count only the valid hooks
     expect(screen.getByText("1 hooks")).toBeInTheDocument();
   });
 });

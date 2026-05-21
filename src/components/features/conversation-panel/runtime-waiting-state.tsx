@@ -3,12 +3,18 @@ import { LoadingSpinner } from "#/components/shared/loading-spinner";
 import { I18nKey } from "#/i18n/declaration";
 import { Typography } from "#/ui/typography";
 
-export function SkillsRuntimeWaitingState() {
+interface RuntimeWaitingStateProps {
+  testId?: string;
+}
+
+export function RuntimeWaitingState({
+  testId = "runtime-waiting",
+}: RuntimeWaitingStateProps) {
   const { t } = useTranslation("openhands");
 
   return (
     <div
-      data-testid="skills-runtime-waiting"
+      data-testid={testId}
       className="flex h-full w-full flex-col items-center justify-center gap-3 py-8 text-center"
     >
       <LoadingSpinner size="small" />
