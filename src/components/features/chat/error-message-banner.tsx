@@ -19,6 +19,8 @@ export function ErrorMessageBanner({
 }: ErrorMessageBannerProps) {
   const { t, i18n } = useTranslation("openhands");
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isMultiLine, setIsMultiLine] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   const isI18nKey = i18n.exists(message, { ns: "openhands" });
   const displayTextForLength = isI18nKey ? String(t(message)) : message;
@@ -27,16 +29,43 @@ export function ErrorMessageBanner({
 
   const isCollapsed = shouldShowToggle && !isExpanded;
 
+  React.useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) {
+      return undefined;
+    }
+
+    const updateIsMultiLine = () => {
+      const lineHeight = Number.parseFloat(
+        getComputedStyle(content).lineHeight,
+      );
+      if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+        setIsMultiLine(false);
+        return;
+      }
+
+      setIsMultiLine(content.getBoundingClientRect().height > lineHeight * 1.5);
+    };
+
+    updateIsMultiLine();
+
+    const observer = new ResizeObserver(updateIsMultiLine);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [displayTextForLength, isCollapsed, isExpanded, message]);
+
   return (
     <div
       className={cn(
         "flex w-full gap-2 rounded-lg border border-[var(--oh-border)] bg-[var(--oh-surface-raised)] p-2 text-[var(--oh-foreground)]",
-        shouldShowToggle && isExpanded ? "items-start" : "items-center",
+        isMultiLine ? "items-start" : "items-center",
       )}
       data-testid="error-message-banner"
     >
       <div className="min-w-0 flex-1">
         <div
+          ref={contentRef}
           className={cn(
             "whitespace-pre-wrap break-words text-sm text-[var(--oh-muted)]",
             isCollapsed && "line-clamp-3",
@@ -60,7 +89,12 @@ export function ErrorMessageBanner({
         )}
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      <div
+        className={cn(
+          "flex shrink-0 gap-1",
+          isMultiLine ? "self-start" : "items-center",
+        )}
+      >
         {onRetry && (
           <button
             type="button"
