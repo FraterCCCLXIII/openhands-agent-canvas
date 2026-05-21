@@ -84,6 +84,18 @@ describe("ManageBackendsModal", () => {
     expect(dots.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("closes when the header close button is clicked", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    renderWithProviders(<ManageBackendsModal onClose={onClose} />);
+
+    await user.click(
+      await screen.findByTestId("close-manage-backends-modal"),
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("opens the add-backend form when '+ Add backend' is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<ManageBackendsModal onClose={vi.fn()} />);
