@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Share2 } from "lucide-react";
+import { ExternalLink, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useActiveConversation } from "#/hooks/query/use-active-conversation";
@@ -20,7 +20,6 @@ import DownloadIcon from "#/icons/u-download.svg?react";
 import CreditCardIcon from "#/icons/u-credit-card.svg?react";
 import CloseIcon from "#/icons/u-close.svg?react";
 import DeleteIcon from "#/icons/u-delete.svg?react";
-import LinkIcon from "#/icons/link-external.svg?react";
 import CopyIcon from "#/icons/copy.svg?react";
 import { ConversationNameContextMenuIconText } from "./conversation-name-context-menu-icon-text";
 
@@ -274,7 +273,7 @@ export function ConversationNameContextMenu({
                   className="rounded p-0.5 text-[var(--oh-muted)] no-underline visited:text-[var(--oh-muted)] hover:bg-[var(--oh-interactive-selected)] hover:text-[var(--oh-foreground)] cursor-pointer [&_svg]:text-current"
                   title={t(I18nKey.BUTTON$OPEN_IN_NEW_TAB)}
                 >
-                  <LinkIcon width={14} height={14} />
+                  <ExternalLink size={14} aria-hidden />
                 </a>
               </div>
             )}
