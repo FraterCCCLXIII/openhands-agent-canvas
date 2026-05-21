@@ -242,7 +242,7 @@ export function ConversationNameContextMenu({
       )}
 
       {shouldShowPublicSharing && onTogglePublic && (
-        <li className="flex w-full items-center gap-2 px-2 py-2 hover:bg-[var(--oh-interactive-hover)]">
+        <li className="flex w-full items-center gap-2 rounded px-2 py-2 hover:bg-[var(--oh-interactive-hover)]">
           <span
             className="flex shrink-0 items-center text-[var(--oh-muted)]"
             aria-hidden
