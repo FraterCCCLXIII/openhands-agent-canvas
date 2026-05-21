@@ -6,18 +6,14 @@ interface SystemMessageContentProps {
 
 export function SystemMessageContent({ content }: SystemMessageContentProps) {
   return (
-    <div className="p-3">
-      <Pre
-        size="small"
-        font="mono"
-        lineHeight="relaxed"
-        padding="medium"
-        borderRadius="medium"
-        overflow="auto"
-        className="border border-[var(--oh-border)] bg-base text-[var(--oh-text-tertiary)]"
-      >
-        {content}
-      </Pre>
-    </div>
+    <Pre
+      size="small"
+      font="mono"
+      lineHeight="relaxed"
+      padding="medium"
+      className="text-[var(--oh-text-tertiary)]"
+    >
+      {content}
+    </Pre>
   );
 }
