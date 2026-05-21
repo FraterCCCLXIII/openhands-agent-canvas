@@ -12,6 +12,11 @@ import { MCPServerConfig } from "#/types/mcp-server";
 import { useAddMcpServer } from "#/hooks/mutation/use-add-mcp-server";
 import { displaySuccessToast } from "#/utils/custom-toast-handlers";
 import { retrieveAxiosErrorMessage } from "#/utils/retrieve-axios-error-message";
+import {
+  MODAL_MAX_WIDTH_VIEWPORT,
+  modalWidthClassName,
+} from "#/components/shared/modals/modal-body";
+import { cn } from "#/utils/utils";
 
 const ICON_BUTTON_CLASS =
   "rounded-md p-1 text-white hover:bg-tertiary cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed";
@@ -272,7 +277,11 @@ export function InstallServerModal({
         data-testid="mcp-install-modal"
         data-marketplace-id={entry.id}
         onSubmit={handleSubmit}
-        className="bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)] w-[520px] max-w-[90vw] max-h-[85vh] overflow-y-auto custom-scrollbar"
+        className={cn(
+          "bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)] max-h-[85vh] overflow-y-auto custom-scrollbar",
+          modalWidthClassName("md"),
+          MODAL_MAX_WIDTH_VIEWPORT,
+        )}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 items-start gap-3">

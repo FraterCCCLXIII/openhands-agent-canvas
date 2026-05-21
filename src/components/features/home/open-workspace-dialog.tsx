@@ -27,7 +27,7 @@ export function OpenWorkspaceDialog({
   return (
     <ModalBackdrop onClose={onClose}>
       <ModalBody
-        width="small"
+        width="sm"
         className="items-start border border-[var(--oh-border)] !gap-4"
       >
         <div className="flex items-center gap-[10px]">

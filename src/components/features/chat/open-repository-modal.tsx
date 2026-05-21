@@ -96,7 +96,7 @@ export function OpenRepositoryModal({
   return (
     <ModalBackdrop onClose={handleClose}>
       <ModalBody
-        width="small"
+        width="sm"
         className="items-start border border-[var(--oh-border)] !gap-4"
       >
         <div className="flex flex-col gap-4 w-full">

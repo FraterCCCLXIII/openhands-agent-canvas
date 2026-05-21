@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next";
 
 import { BaseModalTitle } from "#/components/shared/modals/confirmation-modals/base-modal";
 import { ModalBackdrop } from "#/components/shared/modals/modal-backdrop";
+import {
+  MODAL_MAX_WIDTH_VIEWPORT,
+  modalWidthClassName,
+} from "#/components/shared/modals/modal-body";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { I18nKey } from "#/i18n/declaration";
 import { LocalWorkspace, LocalWorkspaceParent } from "#/types/workspace";
@@ -206,7 +210,9 @@ export function FolderBrowserModal({
         data-testid="folder-browser-modal"
         className={cn(
           "flex flex-col bg-[var(--oh-surface)] border border-[var(--oh-border-input)] rounded-xl",
-          "w-[720px] max-w-[90vw] h-[480px]",
+          modalWidthClassName("xl"),
+          MODAL_MAX_WIDTH_VIEWPORT,
+          "h-[480px]",
         )}
       >
         {/* Title bar */}

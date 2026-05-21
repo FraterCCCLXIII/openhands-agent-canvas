@@ -5,12 +5,17 @@ import { X } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { BaseModalTitle } from "#/components/shared/modals/confirmation-modals/base-modal";
 import { ModalBackdrop } from "#/components/shared/modals/modal-backdrop";
+import {
+  MODAL_MAX_WIDTH_VIEWPORT,
+  modalWidthClassName,
+} from "#/components/shared/modals/modal-body";
 import { MCPServerForm } from "#/components/features/settings/mcp-settings/mcp-server-form";
 import { useAddMcpServer } from "#/hooks/mutation/use-add-mcp-server";
 import { useUpdateMcpServer } from "#/hooks/mutation/use-update-mcp-server";
 import { MCPServerConfig } from "#/types/mcp-server";
 import { displayErrorToast } from "#/utils/custom-toast-handlers";
 import { retrieveAxiosErrorMessage } from "#/utils/retrieve-axios-error-message";
+import { cn } from "#/utils/utils";
 
 const ICON_BUTTON_CLASS =
   "rounded-md p-1 text-white hover:bg-tertiary cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed";
@@ -74,7 +79,11 @@ export function CustomServerEditor({
     >
       <div
         data-testid="mcp-custom-editor"
-        className="bg-base-secondary p-6 rounded-xl border border-[var(--oh-border)] w-[680px] max-w-[90vw] max-h-[90vh] overflow-y-auto custom-scrollbar"
+        className={cn(
+          "bg-base-secondary p-6 rounded-xl border border-[var(--oh-border)] max-h-[90vh] overflow-y-auto custom-scrollbar",
+          modalWidthClassName("md"),
+          MODAL_MAX_WIDTH_VIEWPORT,
+        )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <BaseModalTitle

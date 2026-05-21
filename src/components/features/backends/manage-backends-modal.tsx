@@ -10,6 +10,10 @@ import { BrandButton } from "#/components/features/settings/brand-button";
 import { ConfirmationModal } from "#/components/shared/modals/confirmation-modal";
 import { BaseModalTitle } from "#/components/shared/modals/confirmation-modals/base-modal";
 import { ModalBackdrop } from "#/components/shared/modals/modal-backdrop";
+import {
+  MODAL_MAX_WIDTH_VIEWPORT,
+  modalWidthClassName,
+} from "#/components/shared/modals/modal-body";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import {
   useBackendsHealth,
@@ -149,7 +153,9 @@ export function ManageBackendsModal({ onClose }: ManageBackendsModalProps) {
           data-testid="manage-backends-modal"
           className={cn(
             "flex flex-col bg-[var(--oh-surface)] border border-[var(--oh-border)] rounded-xl",
-            "w-[640px] max-w-[90vw] max-h-[70vh]",
+            modalWidthClassName("lg"),
+            MODAL_MAX_WIDTH_VIEWPORT,
+            "max-h-[70vh]",
           )}
         >
           <div className="flex items-start justify-between gap-4 p-5">

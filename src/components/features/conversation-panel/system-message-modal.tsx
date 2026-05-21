@@ -37,7 +37,7 @@ export function SystemMessageModal({
     isOpen && (
       <ModalBackdrop onClose={onClose}>
         <ModalBody
-          width="medium"
+          width="lg"
           className="max-h-[80vh] flex flex-col items-start border border-[var(--oh-border)]"
           testID="system-message-modal"
         >

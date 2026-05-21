@@ -5,6 +5,10 @@ import { X } from "lucide-react";
 import { ServerClient } from "@openhands/typescript-client/clients";
 import OpenHandsLogoWhite from "#/assets/branding/openhands-logo-white.svg?react";
 import { ModalBackdrop } from "#/components/shared/modals/modal-backdrop";
+import {
+  MODAL_MAX_WIDTH_VIEWPORT,
+  modalWidthClassName,
+} from "#/components/shared/modals/modal-body";
 import { BaseModalTitle } from "#/components/shared/modals/confirmation-modals/base-modal";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { SettingsInput } from "#/components/features/settings/settings-input";
@@ -601,7 +605,11 @@ export function BackendFormModal({
       >
         <div
           data-testid="add-backend-modal"
-          className="w-[720px] rounded-xl border border-[var(--oh-border)] bg-base-secondary"
+          className={cn(
+            "rounded-xl border border-[var(--oh-border)] bg-base-secondary",
+            modalWidthClassName("xl"),
+            MODAL_MAX_WIDTH_VIEWPORT,
+          )}
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-2">
@@ -653,7 +661,10 @@ export function BackendFormModal({
     >
       <div
         data-testid={`${testIdRoot}-modal`}
-        className="bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)] w-[480px]"
+        className={cn(
+          "bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)]",
+          modalWidthClassName("md"),
+        )}
       >
         <BaseModalTitle title={t(I18nKey.BACKEND$EDIT_TITLE)} />
         <BackendForm
