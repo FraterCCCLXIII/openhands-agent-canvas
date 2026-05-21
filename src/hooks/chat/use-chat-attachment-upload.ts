@@ -26,7 +26,7 @@ export function useChatAttachmentUpload() {
   } = useConversationStore();
 
   const handleUpload = useCallback(
-    async (selectedFiles: File[], options?: ChatAttachmentUploadOptions) => {
+    async (selectedFiles: File[], _options?: ChatAttachmentUploadOptions) => {
       const validation = validateFiles(selectedFiles, [...images, ...files]);
 
       if (!validation.isValid) {
@@ -37,7 +37,7 @@ export function useChatAttachmentUpload() {
       const validFiles = selectedFiles.filter((f) => !isFileImage(f));
       const validImages = selectedFiles.filter((f) => isFileImage(f));
 
-      if (options?.fromPaste && validImages.length > 0) {
+      if (validImages.length > 0) {
         markImagesAsPasted(validImages.map((image) => image.name));
       }
 

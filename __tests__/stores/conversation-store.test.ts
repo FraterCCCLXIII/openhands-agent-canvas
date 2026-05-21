@@ -87,7 +87,7 @@ describe("conversation store", () => {
   });
 
   describe("pastedImageNames", () => {
-    it("tracks clipboard-pasted image names for the upload-as-file control", () => {
+    it("tracks attached image names for the upload-as-file control", () => {
       useConversationStore.getState().markImagesAsPasted(["shot.png"]);
       expect(useConversationStore.getState().pastedImageNames).toEqual([
         "shot.png",

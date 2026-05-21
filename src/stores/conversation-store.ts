@@ -27,7 +27,7 @@ interface ConversationState {
   files: File[];
   /** Image file names (e.g. pasted screenshots) to send via file upload instead of vision embed. */
   imagesMarkedUploadAsFile: string[];
-  /** Image file names attached via clipboard paste (controls per-image upload-as-file UI). */
+  /** Image file names attached in chat (controls per-image upload-as-file UI). */
   pastedImageNames: string[];
   loadingFiles: string[]; // File names currently being processed
   loadingImages: string[]; // Image names currently being processed

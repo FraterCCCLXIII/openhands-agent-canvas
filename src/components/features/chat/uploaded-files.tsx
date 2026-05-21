@@ -9,7 +9,6 @@ export function UploadedFiles() {
     loadingFiles,
     loadingImages,
     imagesMarkedUploadAsFile,
-    pastedImageNames,
     removeFile,
     removeImage,
     toggleImageUploadAsFile,
@@ -67,7 +66,7 @@ export function UploadedFiles() {
             image={image}
             onRemove={() => handleRemoveImage(index)}
             isLoading={loadingImages.includes(image.name)}
-            showUploadAsFileToggle={pastedImageNames.includes(image.name)}
+            showUploadAsFileToggle
             uploadAsFileActive={imagesMarkedUploadAsFile.includes(image.name)}
             onToggleUploadAsFile={() => toggleImageUploadAsFile(image.name)}
           />
@@ -83,7 +82,7 @@ export function UploadedFiles() {
               image={tempImage}
               onRemove={() => {}} // No remove action during loading
               isLoading
-              showUploadAsFileToggle={pastedImageNames.includes(imageName)}
+              showUploadAsFileToggle
               uploadAsFileActive={imagesMarkedUploadAsFile.includes(imageName)}
               onToggleUploadAsFile={() => toggleImageUploadAsFile(imageName)}
             />
