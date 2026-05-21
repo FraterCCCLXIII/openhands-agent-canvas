@@ -76,7 +76,7 @@ function PublicShareToggle({
           className={cn(
             "block h-2 w-2 shrink-0 rounded-full transition-transform duration-200 ease-in-out",
             isPublic
-              ? "translate-x-4 bg-base-secondary"
+              ? "translate-x-[calc(1rem-1px)] bg-base-secondary"
               : "translate-x-px bg-tertiary-light",
           )}
         />
