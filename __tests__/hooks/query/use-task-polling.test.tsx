@@ -6,6 +6,7 @@ import AgentServerConversationService from "#/api/conversation-service/agent-ser
 import type { AppConversationStartTask } from "#/api/conversation-service/agent-server-conversation-service.types";
 import { NavigationProvider } from "#/context/navigation-context";
 import { useTaskPolling } from "#/hooks/query/use-task-polling";
+import { useOptimisticUserMessageStore } from "#/stores/optimistic-user-message-store";
 import {
   consumePendingTaskDraft,
   getConversationState,
@@ -63,6 +64,7 @@ describe("useTaskPolling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    useOptimisticUserMessageStore.setState({ pendingMessages: [] });
   });
 
   afterEach(() => {
@@ -94,5 +96,30 @@ describe("useTaskPolling", () => {
     expect(AgentServerConversationService.getStartTask).toHaveBeenCalledWith(
       "123",
     );
+  });
+
+  it("reassigns optimistic pending messages before redirecting to the real conversation", async () => {
+    vi.mocked(AgentServerConversationService.getStartTask).mockResolvedValue(
+      readyTask,
+    );
+    useOptimisticUserMessageStore.getState().enqueuePendingMessage({
+      conversationId: "task-123",
+      text: "hello from home",
+    });
+
+    renderHook(() => useTaskPolling(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/conversations/conversation-1", {
+        replace: true,
+      });
+    });
+
+    const pending = useOptimisticUserMessageStore.getState().pendingMessages;
+    expect(pending).toHaveLength(1);
+    expect(pending[0].conversationId).toBe("conversation-1");
+    expect(pending[0].text).toBe("hello from home");
   });
 });

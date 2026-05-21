@@ -3,6 +3,7 @@ import { useOptimisticUserMessageStore } from "#/stores/optimistic-user-message-
 import { useSendMessage } from "#/hooks/use-send-message";
 import { createChatMessage } from "#/services/chat-service";
 import { useOptionalConversationId } from "#/hooks/use-conversation-id";
+import { ImageCarousel } from "#/components/features/images/image-carousel";
 import { ChatMessage } from "./chat-message";
 
 /**
@@ -84,7 +85,11 @@ export function PendingUserMessages() {
               ? () => handleRetry(message.id)
               : undefined
           }
-        />
+        >
+          {message.imageUrls.length > 0 && (
+            <ImageCarousel size="small" images={message.imageUrls} />
+          )}
+        </ChatMessage>
       ))}
     </>
   );

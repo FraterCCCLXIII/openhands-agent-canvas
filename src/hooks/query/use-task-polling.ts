@@ -7,6 +7,7 @@ import {
   consumePendingTaskDraft,
   setConversationState,
 } from "#/utils/conversation-local-storage";
+import { useOptimisticUserMessageStore } from "#/stores/optimistic-user-message-store";
 import { flushPendingTaskAttachments } from "#/utils/flush-pending-task-attachments";
 
 /**
@@ -75,6 +76,10 @@ export const useTaskPolling = () => {
 
     void (async () => {
       await flushPendingTaskAttachments(taskId, task.app_conversation_id!);
+
+      useOptimisticUserMessageStore
+        .getState()
+        .reassignPendingMessages(`task-${taskId}`, task.app_conversation_id!);
 
       const pendingDraft = consumePendingTaskDraft(taskId);
       if (pendingDraft) {

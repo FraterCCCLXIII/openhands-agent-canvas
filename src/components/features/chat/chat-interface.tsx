@@ -198,7 +198,18 @@ export function ChatInterface() {
     [maybeLoadOlder],
   );
 
-  const hasPendingUserMessages = pendingMessages.length > 0;
+  const hasPendingUserMessages = React.useMemo(
+    () =>
+      conversationId
+        ? pendingMessages.some(
+            (message) => message.conversationId === conversationId,
+          )
+        : false,
+    [pendingMessages, conversationId],
+  );
+
+  const isProvisioningTask =
+    isTask && taskStatus !== "READY" && taskStatus !== "ERROR";
 
   // Show V1 messages immediately if events exist in store (e.g., remount),
   // or once loading completes. This replaces the old transition-observation
@@ -416,6 +427,7 @@ export function ChatInterface() {
           !userEventsExist &&
           !hasModelEntries &&
           !isChatLoading &&
+          !isProvisioningTask &&
           !isArchivedConversation && (
             <ChatSuggestions
               onSuggestionsClick={(message) => setMessageToSend(message)}

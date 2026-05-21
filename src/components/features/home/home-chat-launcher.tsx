@@ -8,6 +8,7 @@ import { useModelInterceptor } from "#/hooks/chat/use-model-interceptor";
 import { useChatAttachmentUpload } from "#/hooks/chat/use-chat-attachment-upload";
 import { useConversationStore } from "#/stores/conversation-store";
 import { setPendingTaskAttachments } from "#/stores/pending-task-attachments-store";
+import { enqueueHomeTaskPendingMessage } from "#/utils/enqueue-home-task-pending-message";
 import { sendMessageWithAttachments } from "#/utils/send-message-with-attachments";
 import { useNavigation } from "#/context/navigation-context";
 import { useIsCreatingConversation } from "#/hooks/use-is-creating-conversation";
@@ -92,18 +93,19 @@ export function HomeChatLauncher() {
     createConversation(variables, {
       onSuccess: async (data) => {
         toast.dismiss(toastId);
+        const targetConversationId = data.conversation_id;
+        const isTaskConversation = targetConversationId.startsWith("task-");
 
         if (hasAttachments) {
           // Cloud sandboxes provision asynchronously; uploads and the first
           // message must target the runtime URL, not the bundled local server.
-          const shouldDeferAttachments =
-            !isLocal || data.conversation_id.startsWith("task-");
+          const shouldDeferAttachments = !isLocal || isTaskConversation;
 
           if (shouldDeferAttachments) {
             const taskId =
               data.task_id ??
-              (data.conversation_id.startsWith("task-")
-                ? data.conversation_id.slice("task-".length)
+              (isTaskConversation
+                ? targetConversationId.slice("task-".length)
                 : null);
 
             if (!taskId) {
@@ -118,12 +120,18 @@ export function HomeChatLauncher() {
               imagesMarkedUploadAsFile: [...imagesMarkedUploadAsFile],
             });
             clearAllFiles();
-            navigate(`/conversations/task-${taskId}`);
+            await enqueueHomeTaskPendingMessage({
+              conversationId: targetConversationId,
+              text: trimmed,
+              images: attachmentSnapshot.images,
+              imagesMarkedUploadAsFile,
+            });
+            navigate(`/conversations/${targetConversationId}`);
             return;
           } else {
             try {
               await sendMessageWithAttachments({
-                conversationId: data.conversation_id,
+                conversationId: targetConversationId,
                 content: trimmed,
                 images: attachmentSnapshot.images,
                 files: attachmentSnapshot.files,
@@ -138,7 +146,16 @@ export function HomeChatLauncher() {
           }
         }
 
-        navigate(`/conversations/${data.conversation_id}`);
+        if (isTaskConversation && trimmed) {
+          await enqueueHomeTaskPendingMessage({
+            conversationId: targetConversationId,
+            text: trimmed,
+            images: [],
+            imagesMarkedUploadAsFile: [],
+          });
+        }
+
+        navigate(`/conversations/${targetConversationId}`);
       },
       onError: (error) => {
         toast.dismiss(toastId);

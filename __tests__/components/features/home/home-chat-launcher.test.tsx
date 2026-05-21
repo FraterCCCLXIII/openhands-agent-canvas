@@ -11,6 +11,7 @@ const mockNavigate = vi.fn();
 const mockUseActiveBackend = vi.fn();
 const sendMessageWithAttachments = vi.fn();
 const mockClearAllFiles = vi.fn();
+const enqueueHomeTaskPendingMessage = vi.fn();
 
 let mockImages: File[] = [];
 let mockFiles: File[] = [];
@@ -18,6 +19,11 @@ let mockFiles: File[] = [];
 vi.mock("#/utils/send-message-with-attachments", () => ({
   sendMessageWithAttachments: (...args: unknown[]) =>
     sendMessageWithAttachments(...args),
+}));
+
+vi.mock("#/utils/enqueue-home-task-pending-message", () => ({
+  enqueueHomeTaskPendingMessage: (...args: unknown[]) =>
+    enqueueHomeTaskPendingMessage(...args),
 }));
 
 vi.mock("#/stores/conversation-store", () => ({
@@ -220,6 +226,7 @@ describe("HomeChatLauncher", () => {
     mockImages = [];
     mockFiles = [];
     mockUseActiveBackend.mockReturnValue(localBackend);
+    enqueueHomeTaskPendingMessage.mockResolvedValue(undefined);
     sendMessageWithAttachments.mockResolvedValue({
       text: "hello world",
       content: "hello world",
@@ -362,5 +369,78 @@ describe("HomeChatLauncher", () => {
 
     await waitFor(() => expect(toastErrorSpy).toHaveBeenCalled());
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("enqueues an optimistic pending message when cloud returns a start task", async () => {
+    mockUseActiveBackend.mockReturnValue(cloudBackend);
+    const createSpy = vi
+      .spyOn(AgentServerConversationService, "createConversation")
+      .mockResolvedValue(
+        makeConversationResponse({
+          id: "start-task-1",
+          app_conversation_id: null,
+        }),
+      );
+
+    renderLauncher();
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("stub-chat-submit"));
+
+    await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(enqueueHomeTaskPendingMessage).toHaveBeenCalledWith({
+        conversationId: "task-start-task-1",
+        text: "hello world",
+        images: [],
+        imagesMarkedUploadAsFile: [],
+      }),
+    );
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/conversations/task-start-task-1",
+      ),
+    );
+  });
+
+  it("defers attachments and enqueues an optimistic pending message for cloud start tasks", async () => {
+    mockUseActiveBackend.mockReturnValue(cloudBackend);
+    mockImages = [new File(["x"], "shot.png", { type: "image/png" })];
+    const createSpy = vi
+      .spyOn(AgentServerConversationService, "createConversation")
+      .mockResolvedValue(
+        makeConversationResponse({
+          id: "start-task-2",
+          app_conversation_id: null,
+        }),
+      );
+
+    renderLauncher();
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("stub-chat-submit"));
+
+    await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1));
+    expect(createSpy).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      undefined,
+      null,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(sendMessageWithAttachments).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(enqueueHomeTaskPendingMessage).toHaveBeenCalledWith({
+        conversationId: "task-start-task-2",
+        text: "hello world",
+        images: mockImages,
+        imagesMarkedUploadAsFile: [],
+      }),
+    );
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/conversations/task-start-task-2",
+      ),
+    );
   });
 });
