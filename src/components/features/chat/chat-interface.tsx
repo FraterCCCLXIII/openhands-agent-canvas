@@ -220,11 +220,14 @@ export function ChatInterface() {
   );
 
   // Show V1 messages immediately if events exist in store (e.g., remount),
-  // or once loading completes. This replaces the old transition-observation
-  // pattern (useState + useEffect watching loading→loaded) which always showed
-  // skeleton on remount because local state initialized to false.
+  // if the user already has a locally-tracked pending bubble (home-page cloud
+  // submit while history/WS catch up), or once loading completes. This
+  // replaces the old transition-observation pattern (useState + useEffect
+  // watching loading→loaded) which always showed skeleton on remount because
+  // local state initialized to false.
   const showConversationMessages =
     allConversationEvents.length > 0 ||
+    hasPendingUserMessages ||
     !conversationWebSocket?.isLoadingHistory;
 
   const isReturningToConversation = !!conversationId;
