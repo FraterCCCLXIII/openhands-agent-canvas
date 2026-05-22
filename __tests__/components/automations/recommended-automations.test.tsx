@@ -15,8 +15,8 @@ import { ActiveBackendProvider } from "#/contexts/active-backend-context";
 import type { Backend } from "#/api/backend-registry/types";
 import {
   RecommendedAutomationsLauncher,
-  buildAutomationPrompt,
 } from "#/components/features/automations/recommended-automations-launcher";
+import { buildAutomationPrompt } from "#/components/features/automations/build-automation-prompt";
 import {
   RecommendedAutomationsSection,
   getAutomationsByPopularity,

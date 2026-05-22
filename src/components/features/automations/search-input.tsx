@@ -15,7 +15,7 @@ export function SearchInput({ value, onChange, className }: SearchInputProps) {
   return (
     <div
       className={cn(
-        "relative flex min-w-0 flex-1 items-center",
+        "relative flex min-w-0 w-full items-center",
         "h-9 rounded-lg border border-[var(--oh-border)] bg-base-secondary",
         "focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20",
         "transition-colors",

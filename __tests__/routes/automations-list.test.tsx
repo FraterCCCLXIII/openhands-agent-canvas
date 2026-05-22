@@ -105,7 +105,9 @@ describe("AutomationsList — Edit from the row kebab is local-only", () => {
     await screen.findByText(automation.name);
 
     // Act — open the row kebab and pick Edit.
-    await user.click(screen.getByLabelText("Automation actions"));
+    await user.click(
+      screen.getByRole("button", { name: I18nKey.AUTOMATIONS$ACTIONS_MENU }),
+    );
     await user.click(
       screen.getByRole("button", { name: I18nKey.AUTOMATIONS$EDIT }),
     );
@@ -131,7 +133,9 @@ describe("AutomationsList — Edit from the row kebab is local-only", () => {
     await screen.findByText(automation.name);
 
     // Act — open the row kebab.
-    await user.click(screen.getByLabelText("Automation actions"));
+    await user.click(
+      screen.getByRole("button", { name: I18nKey.AUTOMATIONS$ACTIONS_MENU }),
+    );
 
     // Assert — Edit must not appear on cloud; Delete still does, proving the
     // menu actually opened and we didn't merely fail to render it.

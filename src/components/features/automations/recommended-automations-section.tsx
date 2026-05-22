@@ -38,6 +38,7 @@ interface RecommendedAutomationsSectionProps {
   installedServers: MCPServerConfig[];
   query?: string;
   onSelect: (automation: RecommendedAutomation) => void;
+  showSectionHeader?: boolean;
 }
 
 export function getAutomationsByPopularity(
@@ -149,6 +150,7 @@ export function RecommendedAutomationsSection({
   installedServers,
   query = "",
   onSelect,
+  showSectionHeader = true,
 }: RecommendedAutomationsSectionProps) {
   const { t } = useTranslation("openhands");
 
@@ -164,17 +166,26 @@ export function RecommendedAutomationsSection({
 
   return (
     <section data-testid="recommended-automations-section">
-      <div className="flex items-center">
-        <h2 className="text-base font-semibold text-foreground">
-          {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
-        </h2>
-        <StatusBadge count={visibleAutomations.length} />
-      </div>
-      <p className="mt-1 text-sm text-muted">
-        {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
-      </p>
+      {showSectionHeader ? (
+        <>
+          <div className="flex items-center">
+            <h2 className="text-base font-semibold text-foreground">
+              {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
+            </h2>
+            <StatusBadge count={visibleAutomations.length} />
+          </div>
+          <p className="mt-1 text-sm text-muted">
+            {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
+          </p>
+        </>
+      ) : null}
 
-      <div className={cn("mt-3", extensionModuleCardGridContainerClassName)}>
+      <div
+        className={cn(
+          showSectionHeader ? "mt-3" : undefined,
+          extensionModuleCardGridContainerClassName,
+        )}
+      >
         <div className={extensionModuleCardGridClassName}>
           {visibleAutomations.map((automation) => {
             const requiredEntries = getRequiredEntries(automation);

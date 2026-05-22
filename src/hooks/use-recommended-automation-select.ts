@@ -1,0 +1,176 @@
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useActiveBackend } from "#/contexts/active-backend-context";
+import { useNavigation } from "#/context/navigation-context";
+import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
+import { useSettings } from "#/hooks/query/use-settings";
+import { useIsCreatingConversation } from "#/hooks/use-is-creating-conversation";
+import { useConversationStore } from "#/stores/conversation-store";
+import {
+  setConversationState,
+  setPendingTaskDraft,
+} from "#/utils/conversation-local-storage";
+import type { RecommendedAutomation } from "@openhands/extensions/automations";
+import { parseMcpConfig } from "#/utils/mcp-config";
+import { flattenMcpConfig } from "#/utils/mcp-installed-servers";
+import {
+  MCP_CATALOG as MCP_MARKETPLACE,
+  type McpCatalogEntry as MarketplaceEntry,
+} from "@openhands/extensions/mcps";
+import {
+  findInstalledMatch,
+  getMarketplaceEntryById,
+} from "#/utils/mcp-marketplace-utils";
+import { buildAutomationPrompt } from "#/components/features/automations/build-automation-prompt";
+
+function getRequiredEntries(automation: RecommendedAutomation) {
+  return automation.requiredMcpIds
+    .map((id) => getMarketplaceEntryById(id, MCP_MARKETPLACE))
+    .filter((entry): entry is MarketplaceEntry => !!entry);
+}
+
+export function useRecommendedAutomationSelect(onLaunched?: () => void) {
+  const activeBackend = useActiveBackend();
+  const { navigate } = useNavigation();
+  const { data: settings } = useSettings();
+  const createConversation = useCreateConversation();
+  const isCreatingConversation = useIsCreatingConversation();
+  const setMessageToSend = useConversationStore(
+    (state) => state.setMessageToSend,
+  );
+  const [pendingAutomation, setPendingAutomation] =
+    useState<RecommendedAutomation | null>(null);
+  const [installQueue, setInstallQueue] = useState<MarketplaceEntry[]>([]);
+  const completedInstallRef = useRef(false);
+  const launchInFlightRef = useRef(false);
+
+  const installedMcpServers = useMemo(
+    () =>
+      flattenMcpConfig(parseMcpConfig(settings?.agent_settings?.mcp_config)),
+    [settings?.agent_settings?.mcp_config],
+  );
+
+  const launchAutomation = useCallback(
+    (automation: RecommendedAutomation) => {
+      if (
+        launchInFlightRef.current ||
+        createConversation.isPending ||
+        isCreatingConversation
+      ) {
+        return;
+      }
+      launchInFlightRef.current = true;
+
+      const prompt = buildAutomationPrompt(
+        automation.prompt,
+        activeBackend.backend.kind,
+        activeBackend.backend.host,
+      );
+
+      createConversation.mutate(
+        {},
+        {
+          onSuccess: (conversation) => {
+            if (
+              conversation.conversation_id.startsWith("task-") &&
+              conversation.task_id
+            ) {
+              setPendingTaskDraft(conversation.task_id, prompt);
+            } else {
+              setConversationState(conversation.conversation_id, {
+                draftMessage: prompt,
+              });
+            }
+            onLaunched?.();
+            navigate?.(`/conversations/${conversation.conversation_id}`);
+            window.setTimeout(() => setMessageToSend(prompt), 0);
+          },
+          onError: () => {
+            launchInFlightRef.current = false;
+          },
+        },
+      );
+    },
+    [
+      activeBackend.backend.host,
+      activeBackend.backend.kind,
+      createConversation,
+      isCreatingConversation,
+      navigate,
+      onLaunched,
+      setMessageToSend,
+    ],
+  );
+
+  const getMissingEntries = useCallback(
+    (automation: RecommendedAutomation) =>
+      getRequiredEntries(automation).filter(
+        (entry) => !findInstalledMatch(entry.template, installedMcpServers),
+      ),
+    [installedMcpServers],
+  );
+
+  const handleSelectAutomation = useCallback(
+    (automation: RecommendedAutomation) => {
+      if (
+        launchInFlightRef.current ||
+        createConversation.isPending ||
+        isCreatingConversation ||
+        installQueue.length > 0
+      ) {
+        return;
+      }
+
+      const missingEntries = getMissingEntries(automation);
+      if (missingEntries.length === 0) {
+        launchAutomation(automation);
+        return;
+      }
+
+      setPendingAutomation(automation);
+      setInstallQueue(missingEntries);
+    },
+    [
+      createConversation.isPending,
+      getMissingEntries,
+      installQueue.length,
+      isCreatingConversation,
+      launchAutomation,
+    ],
+  );
+
+  const cancelInstallFlow = useCallback(() => {
+    if (completedInstallRef.current) {
+      completedInstallRef.current = false;
+      return;
+    }
+    setPendingAutomation(null);
+    setInstallQueue([]);
+  }, []);
+
+  const handleInstallSuccess = useCallback(() => {
+    completedInstallRef.current = true;
+
+    setInstallQueue((currentQueue) => {
+      const nextQueue = currentQueue.slice(1);
+
+      if (nextQueue.length === 0) {
+        const automation = pendingAutomation;
+        window.setTimeout(() => {
+          setPendingAutomation(null);
+          if (automation) launchAutomation(automation);
+        }, 0);
+      }
+
+      return nextQueue;
+    });
+  }, [launchAutomation, pendingAutomation]);
+
+  return {
+    backendKind: activeBackend.backend.kind,
+    installedMcpServers,
+    handleSelectAutomation,
+    installEntry: installQueue[0] ?? null,
+    cancelInstallFlow,
+    handleInstallSuccess,
+  };
+}

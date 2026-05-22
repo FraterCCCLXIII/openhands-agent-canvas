@@ -1,18 +1,19 @@
 import { InstallServerModal } from "#/components/features/mcp-page/install-server-modal";
 import { useRecommendedAutomationSelect } from "#/hooks/use-recommended-automation-select";
-import { RecommendedAutomationsSection } from "./recommended-automations-section";
+import { AutomationMarketplaceGrid } from "./automation-marketplace-grid";
+import type { MarketplaceSectionFilter } from "./marketplace-section-filter";
 
-interface RecommendedAutomationsLauncherProps {
+interface AutomationMarketplaceLauncherProps {
   query?: string;
+  sectionFilter?: MarketplaceSectionFilter;
   onLaunched?: () => void;
-  showSectionHeader?: boolean;
 }
 
-export function RecommendedAutomationsLauncher({
+export function AutomationMarketplaceLauncher({
   query,
+  sectionFilter,
   onLaunched,
-  showSectionHeader = true,
-}: RecommendedAutomationsLauncherProps) {
+}: AutomationMarketplaceLauncherProps) {
   const {
     backendKind,
     installedMcpServers,
@@ -24,12 +25,12 @@ export function RecommendedAutomationsLauncher({
 
   return (
     <>
-      <RecommendedAutomationsSection
+      <AutomationMarketplaceGrid
         backendKind={backendKind}
         installedServers={installedMcpServers}
         query={query}
+        sectionFilter={sectionFilter}
         onSelect={handleSelectAutomation}
-        showSectionHeader={showSectionHeader}
       />
 
       {installEntry ? (

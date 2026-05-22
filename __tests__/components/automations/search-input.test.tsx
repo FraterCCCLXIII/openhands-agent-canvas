@@ -21,4 +21,11 @@ describe("SearchInput", () => {
 
     expect(screen.getByRole("textbox")).toHaveValue("security");
   });
+
+  it("keeps a fixed 36px height without flex-1 growth in column layouts", () => {
+    render(<SearchInput value="" onChange={vi.fn()} />);
+
+    expect(screen.getByRole("textbox").parentElement).toHaveClass("h-9");
+    expect(screen.getByRole("textbox").parentElement).not.toHaveClass("flex-1");
+  });
 });
