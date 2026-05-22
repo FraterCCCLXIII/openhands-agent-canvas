@@ -2,9 +2,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import { extensionModuleCardPillClassName } from "#/utils/extension-module-card-classes";
 
-export const SKILL_CARD_PILL_CLASS =
-  "inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-full border border-[var(--oh-border)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[11px] leading-4 text-tertiary-light";
+/** @deprecated Use {@link extensionModuleCardPillClassName} from `#/utils/extension-module-card-classes`. */
+export const SKILL_CARD_PILL_CLASS = extensionModuleCardPillClassName;
 
 const PILL_GAP_PX = 6;
 const OVERFLOW_PILL_WIDTH_PX = 40;
@@ -100,7 +101,7 @@ export function SkillCardPillRow({ pills, testId }: SkillCardPillRowProps) {
           <span
             data-testid={`${testId}-overflow`}
             className={cn(
-              SKILL_CARD_PILL_CLASS,
+              extensionModuleCardPillClassName,
               "font-medium text-tertiary-alt",
             )}
             title={pills
