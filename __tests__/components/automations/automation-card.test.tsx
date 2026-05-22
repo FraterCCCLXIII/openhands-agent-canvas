@@ -59,6 +59,9 @@ describe("AutomationCard", () => {
     expect(
       screen.getByTestId("automation-run-now-automation-1"),
     ).toHaveTextContent("AUTOMATIONS$RUN_NOW");
+    expect(screen.getByTestId("automation-run-now-automation-1")).toHaveClass(
+      "h-8",
+    );
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
 
     await user.click(

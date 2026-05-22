@@ -14,6 +14,7 @@ import {
 } from "#/utils/extension-module-card-classes";
 import { buildAutomationMetadataPills } from "./build-automation-pills";
 import { buildAutomationMenuItems } from "./build-automation-menu-items";
+import { automationRunNowTextButtonClassName } from "./automation-action-button-classes";
 
 interface AutomationCardProps {
   automation: Automation;
@@ -23,9 +24,6 @@ interface AutomationCardProps {
   onDelete: (id: string) => void;
   onEdit?: (id: string) => void;
 }
-
-const cardRunNowButtonClassName =
-  "flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border-0 bg-transparent px-2 text-xs text-[var(--oh-muted)] transition-colors hover:bg-[var(--oh-interactive-hover)] hover:text-[var(--oh-foreground)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[var(--oh-muted)]";
 
 export function AutomationCard({
   automation,
@@ -104,7 +102,7 @@ export function AutomationCard({
                 event.stopPropagation();
                 onRunNow(automation.id);
               }}
-              className={cardRunNowButtonClassName}
+              className={automationRunNowTextButtonClassName}
             >
               <PlayIcon className="size-3.5 shrink-0" aria-hidden />
               {t(I18nKey.AUTOMATIONS$RUN_NOW)}
