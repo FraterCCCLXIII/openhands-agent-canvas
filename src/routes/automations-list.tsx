@@ -188,7 +188,7 @@ export default function AutomationsList() {
         </div>
 
         {/* Search */}
-        <div className="mt-6 flex items-center gap-3">
+        <div className="mt-6 flex items-stretch gap-2">
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
           <AutomationViewToggle
             view={viewMode}

@@ -49,6 +49,9 @@ describe("AutomationListRow", () => {
     expect(
       screen.getByTestId("automation-run-now-automation-1"),
     ).toHaveAttribute("aria-label", "AUTOMATIONS$RUN_NOW");
+    expect(screen.getByTestId("automation-run-now-automation-1")).toHaveClass(
+      "size-8",
+    );
   });
 
   it("opens the actions menu without triggering row navigation handlers", async () => {

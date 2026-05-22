@@ -15,8 +15,8 @@ export function writeStoredAutomationViewMode(view: AutomationViewMode): void {
   window.localStorage.setItem(AUTOMATIONS_VIEW_MODE_STORAGE_KEY, view);
 }
 
-export const automationListTableClassName =
-  "overflow-hidden rounded-md border border-[var(--oh-border)] bg-base-secondary";
-
-export const automationListRowClassName =
-  "border-t border-[var(--oh-border)] transition-colors hover:bg-base-tertiary focus-visible:outline-none focus-visible:bg-base-tertiary";
+export {
+  tableContainerClassName as automationListTableClassName,
+  tableRowInteractiveClassName as automationListRowClassName,
+  tableCellClassName as automationListCellClassName,
+} from "#/utils/table-row-classes";

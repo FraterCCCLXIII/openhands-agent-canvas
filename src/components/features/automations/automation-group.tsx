@@ -7,6 +7,10 @@ import {
   automationListTableClassName,
   type AutomationViewMode,
 } from "./automation-view-mode";
+import {
+  extensionModuleCardGridClassName,
+  extensionModuleCardGridContainerClassName,
+} from "#/utils/extension-module-card-classes";
 
 interface AutomationGroupProps {
   title: string;
@@ -40,18 +44,20 @@ export function AutomationGroup({
         <StatusBadge count={count} />
       </div>
       {view === "grid" ? (
-        <div className="mt-3 flex flex-col gap-3">
-          {automations.map((automation) => (
-            <AutomationCard
-              key={automation.id}
-              automation={automation}
-              onToggle={onToggle}
-              onRunNow={onRunNow}
-              isRunPending={runPendingId === automation.id}
-              onDelete={onDelete}
-              onEdit={onEdit}
-            />
-          ))}
+        <div className={cn("mt-3", extensionModuleCardGridContainerClassName)}>
+          <div className={extensionModuleCardGridClassName}>
+            {automations.map((automation) => (
+              <AutomationCard
+                key={automation.id}
+                automation={automation}
+                onToggle={onToggle}
+                onRunNow={onRunNow}
+                isRunPending={runPendingId === automation.id}
+                onDelete={onDelete}
+                onEdit={onEdit}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <div className={cn(automationListTableClassName, "mt-3")}>

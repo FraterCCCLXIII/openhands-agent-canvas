@@ -25,6 +25,8 @@ import {
 import { cn } from "#/utils/utils";
 import {
   extensionModuleCardInteractiveClassName,
+  extensionModuleCardGridClassName,
+  extensionModuleCardGridContainerClassName,
   extensionModuleCardPillClassName,
   extensionModuleCardSurfaceClassName,
 } from "#/utils/extension-module-card-classes";
@@ -172,63 +174,65 @@ export function RecommendedAutomationsSection({
         {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
       </p>
 
-      <div className="mt-3 flex flex-col gap-3">
-        {visibleAutomations.map((automation) => {
-          const requiredEntries = getRequiredEntries(automation);
-          const missingCount = requiredEntries.filter(
-            (entry) => !findInstalledMatch(entry.template, installedServers),
-          ).length;
+      <div className={cn("mt-3", extensionModuleCardGridContainerClassName)}>
+        <div className={extensionModuleCardGridClassName}>
+          {visibleAutomations.map((automation) => {
+            const requiredEntries = getRequiredEntries(automation);
+            const missingCount = requiredEntries.filter(
+              (entry) => !findInstalledMatch(entry.template, installedServers),
+            ).length;
 
-          return (
-            <button
-              key={automation.id}
-              type="button"
-              data-testid={`recommended-automation-card-${automation.id}`}
-              onClick={() => onSelect(automation)}
-              className={cn(
-                "flex min-w-0 overflow-hidden p-4 text-left",
-                extensionModuleCardSurfaceClassName,
-                extensionModuleCardInteractiveClassName,
-              )}
-            >
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <McpLogoStackBadge
-                  entries={requiredEntries}
-                  testId={`recommended-automation-icon-${automation.id}`}
-                />
-                <div className="flex min-w-0 flex-1 flex-col gap-3">
-                  <header className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-semibold text-white">
-                        {automation.name}
-                      </h3>
-                      <p className="mt-0.5 truncate text-xs text-tertiary-alt">
-                        {automation.category}
-                      </p>
-                    </div>
-                    <CirclePlusBadge
-                      testId={`recommended-automation-plus-${automation.id}`}
-                    />
-                  </header>
-                  <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
-                    {automation.description}
-                  </p>
-
-                  <SkillCardPillRow
-                    pills={buildRecommendedAutomationPills(
-                      automation,
-                      requiredEntries,
-                      installedServers,
-                      missingCount,
-                      t,
-                    )}
-                    testId={`recommended-automation-pills-${automation.id}`}
+            return (
+              <button
+                key={automation.id}
+                type="button"
+                data-testid={`recommended-automation-card-${automation.id}`}
+                onClick={() => onSelect(automation)}
+                className={cn(
+                  "flex min-w-0 overflow-hidden p-4 text-left",
+                  extensionModuleCardSurfaceClassName,
+                  extensionModuleCardInteractiveClassName,
+                )}
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <McpLogoStackBadge
+                    entries={requiredEntries}
+                    testId={`recommended-automation-icon-${automation.id}`}
                   />
+                  <div className="flex min-w-0 flex-1 flex-col gap-3">
+                    <header className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-semibold text-white">
+                          {automation.name}
+                        </h3>
+                        <p className="mt-0.5 truncate text-xs text-tertiary-alt">
+                          {automation.category}
+                        </p>
+                      </div>
+                      <CirclePlusBadge
+                        testId={`recommended-automation-plus-${automation.id}`}
+                      />
+                    </header>
+                    <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
+                      {automation.description}
+                    </p>
+
+                    <SkillCardPillRow
+                      pills={buildRecommendedAutomationPills(
+                        automation,
+                        requiredEntries,
+                        installedServers,
+                        missingCount,
+                        t,
+                      )}
+                      testId={`recommended-automation-pills-${automation.id}`}
+                    />
+                  </div>
                 </div>
-              </div>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

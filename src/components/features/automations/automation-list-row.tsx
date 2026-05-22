@@ -6,11 +6,16 @@ import { KebabMenu } from "./kebab-menu";
 import { useHasPermission } from "#/hooks/use-has-permission";
 import { useNavigation } from "#/context/navigation-context";
 import PlayIcon from "#/icons/play.svg?react";
+import { StyledTooltip } from "#/components/shared/buttons/styled-tooltip";
 import { SkillCardPillRow } from "#/components/features/skills/skill-card-pill-row";
 import { cn } from "#/utils/utils";
+import { automationIconActionButtonClassName } from "./automation-action-button-classes";
 import { buildAutomationMetadataPills } from "./build-automation-pills";
 import { buildAutomationMenuItems } from "./build-automation-menu-items";
-import { automationListRowClassName } from "./automation-view-mode";
+import {
+  automationListRowClassName,
+  automationListCellClassName,
+} from "./automation-view-mode";
 
 interface AutomationListRowProps {
   automation: Automation;
@@ -20,9 +25,6 @@ interface AutomationListRowProps {
   onDelete: (id: string) => void;
   onEdit?: (id: string) => void;
 }
-
-const listRunNowButtonClassName =
-  "inline-flex cursor-pointer items-center justify-center rounded-md border-0 bg-transparent p-1 text-muted transition-colors hover:bg-interactive-hover hover:text-white focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted";
 
 export function AutomationListRow({
   automation,
@@ -75,7 +77,7 @@ export function AutomationListRow({
       tabIndex={0}
       className={cn(automationListRowClassName, "cursor-pointer")}
     >
-      <td className="px-5 py-4">
+      <td className={automationListCellClassName}>
         <div className="flex min-w-0 items-center gap-1.5">
           <span
             className="max-w-[40%] shrink-0 truncate text-sm font-medium text-white"
@@ -94,23 +96,28 @@ export function AutomationListRow({
         </div>
       </td>
 
-      <td className="w-0 whitespace-nowrap px-5 py-4">
+      <td className={cn("w-0 whitespace-nowrap", automationListCellClassName)}>
         <div className="flex items-center justify-end gap-0.5">
           {canManage ? (
-            <button
-              type="button"
-              data-testid={`automation-run-now-${automation.id}`}
-              aria-label={t(I18nKey.AUTOMATIONS$RUN_NOW)}
-              aria-busy={isRunPending}
-              disabled={isRunPending}
-              onClick={(event) => {
-                event.stopPropagation();
-                onRunNow(automation.id);
-              }}
-              className={listRunNowButtonClassName}
+            <StyledTooltip
+              content={t(I18nKey.AUTOMATIONS$RUN_NOW)}
+              placement="top"
             >
-              <PlayIcon className="size-4 shrink-0" aria-hidden />
-            </button>
+              <button
+                type="button"
+                data-testid={`automation-run-now-${automation.id}`}
+                aria-label={t(I18nKey.AUTOMATIONS$RUN_NOW)}
+                aria-busy={isRunPending}
+                disabled={isRunPending}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRunNow(automation.id);
+                }}
+                className={automationIconActionButtonClassName}
+              >
+                <PlayIcon className="size-4 shrink-0" aria-hidden />
+              </button>
+            </StyledTooltip>
           ) : null}
           <KebabMenu items={menuItems} />
         </div>

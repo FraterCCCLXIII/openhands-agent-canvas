@@ -13,14 +13,26 @@ export function SearchInput({ value, onChange, className }: SearchInputProps) {
   const { t } = useTranslation("openhands");
 
   return (
-    <div className={cn("relative min-w-0 flex-1", className)}>
-      <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted" />
+    <div
+      className={cn(
+        "relative flex min-w-0 flex-1 items-center",
+        "h-9 rounded-lg border border-[var(--oh-border)] bg-base-secondary",
+        "focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20",
+        "transition-colors",
+        className,
+      )}
+    >
+      <SearchIcon
+        className="ml-3 size-4 shrink-0 text-tertiary-alt"
+        aria-hidden
+      />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER)}
-        className="w-full rounded-lg border border-[var(--oh-border)] bg-[var(--oh-surface)] py-2 pl-10 pr-3 text-sm text-white placeholder:text-muted focus:border-[var(--oh-border)] focus:outline-none"
+        aria-label={t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER)}
+        className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-white outline-none placeholder:text-tertiary-alt"
       />
     </div>
   );

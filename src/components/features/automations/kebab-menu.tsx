@@ -5,6 +5,7 @@ import KebabVerticalIcon from "#/icons/kebab-vertical.svg?react";
 import { ContextMenuListItem } from "#/components/features/context-menu/context-menu-list-item";
 import { I18nKey } from "#/i18n/declaration";
 import { ContextMenu } from "#/ui/context-menu";
+import { automationIconActionButtonClassName } from "./automation-action-button-classes";
 
 export interface KebabMenuItem {
   label: string;
@@ -126,12 +127,12 @@ export function KebabMenu({ items }: KebabMenuProps) {
           e.stopPropagation();
           setOpen((current) => !current);
         }}
-        className="flex h-6 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-[var(--oh-muted)] transition-colors hover:bg-[var(--oh-interactive-hover)] hover:text-[var(--oh-foreground)] focus-visible:outline-none"
+        className={automationIconActionButtonClassName}
         aria-label={t(I18nKey.AUTOMATIONS$ACTIONS_MENU)}
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        <KebabVerticalIcon className="size-3.5" />
+        <KebabVerticalIcon className="size-4" />
       </button>
 
       {open && portalStyle && typeof document !== "undefined"
