@@ -75,7 +75,7 @@ export function ManageWorkspacesModal({
           )}
         >
           <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--oh-border-input)]">
-            <span className="text-sm font-semibold text-white">
+            <span className="text-sm font-medium text-white">
               {t(I18nKey.HOME$MANAGE_WORKSPACES)}
             </span>
           </div>

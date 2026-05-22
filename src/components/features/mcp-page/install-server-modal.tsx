@@ -273,7 +273,7 @@ export function InstallServerModal({
         <div className="flex items-start gap-3">
           <McpLogoBadge entry={entry} />
           <div className="flex flex-col flex-1">
-            <h2 className="text-lg font-semibold">{entry.name}</h2>
+            <h2 className="text-lg font-medium">{entry.name}</h2>
             <p className="text-xs text-tertiary-alt">{entry.description}</p>
           </div>
         </div>

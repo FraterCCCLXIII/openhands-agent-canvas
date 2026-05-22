@@ -278,7 +278,7 @@ export function LlmSettingsLocalView() {
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-base font-semibold text-white">
+          <h2 className="text-base font-medium text-white">
             {profileEditorTitle}
           </h2>
         </div>

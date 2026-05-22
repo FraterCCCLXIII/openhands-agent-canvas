@@ -510,7 +510,7 @@ function CloudLoginColumn({ onClose }: { onClose: () => void }) {
       <OpenHandsLogoWhite width={56} height={56} aria-hidden />
 
       <h4
-        className="text-lg font-bold text-white"
+        className="text-lg font-medium text-white"
         data-testid="add-backend-cloud-title"
       >
         {t(I18nKey.BACKEND$CLOUD_TITLE)}
@@ -584,7 +584,7 @@ export function BackendFormModal({
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 pt-6 pb-2">
-            <h3 className="text-xl font-bold">
+            <h3 className="text-xl font-medium">
               {t(I18nKey.BACKEND$ADD_TITLE)}
             </h3>
             <button
@@ -636,7 +636,7 @@ export function BackendFormModal({
         data-testid={`${testIdRoot}-modal`}
         className="bg-base-secondary p-6 rounded-xl flex flex-col gap-4 border border-[var(--oh-border)] w-[480px]"
       >
-        <h3 className="text-xl font-bold">{t(I18nKey.BACKEND$EDIT_TITLE)}</h3>
+        <h3 className="text-xl font-medium">{t(I18nKey.BACKEND$EDIT_TITLE)}</h3>
         <BackendForm
           mode="edit"
           backend={backend}

@@ -14,7 +14,7 @@ interface BaseModalTitleProps {
 
 export function BaseModalTitle({ title }: BaseModalTitleProps) {
   return (
-    <span className="text-xl leading-6 -tracking-[0.01em] font-semibold text-content-2">
+    <span className="text-xl leading-6 -tracking-[0.01em] font-medium text-content-2">
       {title}
     </span>
   );

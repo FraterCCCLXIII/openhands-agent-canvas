@@ -96,7 +96,7 @@ export function RecommendedAutomationsSection({
   return (
     <section data-testid="recommended-automations-section">
       <div className="flex items-center">
-        <h2 className="text-sm font-semibold text-white">
+        <h2 className="text-sm font-medium text-white">
           {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
         </h2>
         <StatusBadge count={visibleAutomations.length} />
