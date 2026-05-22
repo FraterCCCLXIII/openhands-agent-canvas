@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft } from "lucide-react";
 import { useSearchSecrets } from "#/hooks/query/use-get-secrets";
 import { useDeleteSecret } from "#/hooks/mutation/use-delete-secret";
 import { SecretForm } from "#/components/features/settings/secrets-settings/secret-form";
@@ -86,19 +87,30 @@ export function SecretsSettingsScreen() {
     setConfirmationModalIsVisible(false);
   };
 
+  const handleBackToList = () => {
+    setView("list");
+    setSelectedSecret(null);
+  };
+
+  const isFormView = view === "add-secret-form" || view === "edit-secret-form";
+  const formTitle =
+    view === "add-secret-form"
+      ? t(I18nKey.SECRETS$ADD_A_SECRET)
+      : t(I18nKey.SECRETS$EDIT_A_SECRET);
+
   return (
     <div data-testid="secrets-settings-screen" className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1">
-          <Typography.H2>{t(I18nKey.SETTINGS$NAV_SECRETS)}</Typography.H2>
-          <p
-            data-testid="settings-page-subtitle"
-            className="text-sm leading-5 text-tertiary-light"
-          >
-            {t(I18nKey.SETTINGS$PAGE_SECRETS_SUBLINE)}
-          </p>
-        </div>
-        {view === "list" ? (
+      {view === "list" ? (
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1">
+            <Typography.H2>{t(I18nKey.SETTINGS$NAV_SECRETS)}</Typography.H2>
+            <p
+              data-testid="settings-page-subtitle"
+              className="text-sm leading-5 text-tertiary-light"
+            >
+              {t(I18nKey.SETTINGS$PAGE_SECRETS_SUBLINE)}
+            </p>
+          </div>
           <BrandButton
             testId="add-secret-button"
             type="button"
@@ -109,8 +121,25 @@ export function SecretsSettingsScreen() {
           >
             {t("SECRETS$ADD_NEW_SECRET")}
           </BrandButton>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
+
+      {isFormView ? (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleBackToList}
+            className="flex items-center gap-2 self-start rounded-lg p-2 text-[var(--oh-muted)] transition-colors hover:bg-tertiary hover:text-white"
+            data-testid="back-to-secrets"
+          >
+            <ArrowLeft size={20} aria-hidden />
+            <span className="text-sm leading-5">{t(I18nKey.BUTTON$BACK)}</span>
+          </button>
+          <Typography.H2 testId="secret-editor-title">
+            {formTitle}
+          </Typography.H2>
+        </div>
+      ) : null}
 
       {isLoadingSecrets && view === "list" && (
         <ul>
@@ -180,7 +209,7 @@ export function SecretsSettingsScreen() {
         <SecretForm
           mode={view === "add-secret-form" ? "add" : "edit"}
           selectedSecret={selectedSecret}
-          onCancel={() => setView("list")}
+          onCancel={handleBackToList}
         />
       )}
 
