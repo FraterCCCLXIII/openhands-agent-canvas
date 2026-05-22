@@ -419,7 +419,7 @@ export function ConversationPanel({
           key={conversation.id}
           to={`/conversations/${conversation.id}`}
           onClick={onClose}
-          className="block py-0.5"
+          className="block"
         >
           <ConversationCard
             onDelete={() =>
@@ -648,7 +648,9 @@ export function ConversationPanel({
         {!showInitialSkeleton &&
         !compact &&
         organizeMode === "chronological" ? (
-          <>{sortedVisibleConversations.map(renderConversationCard)}</>
+          <div className="space-y-0.5">
+            {sortedVisibleConversations.map(renderConversationCard)}
+          </div>
         ) : null}
 
         {/* Explicit "Load more" trigger. Only shown when more pages exist
