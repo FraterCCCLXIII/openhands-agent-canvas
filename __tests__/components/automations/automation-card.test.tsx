@@ -37,7 +37,7 @@ describe("AutomationCard", () => {
 
     const card = screen.getByTestId("automation-card-automation-1");
     expect(card.className).toContain("hover:border-white/40");
-    expect(card.className).toContain("hover:bg-surface-raised");
-    expect(card.className).toContain("hover:ring-white/20");
+    expect(card.className).not.toContain("hover:bg-surface-raised");
+    expect(card.className).not.toContain("hover:ring");
   });
 });
