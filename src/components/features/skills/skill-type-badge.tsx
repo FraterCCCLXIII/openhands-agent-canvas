@@ -17,7 +17,7 @@ const TYPE_CONFIG: Record<
   agentskills: {
     labelKey: I18nKey.SETTINGS$SKILLS_TYPE_AGENTSKILLS,
     className:
-      "bg-[rgba(247,206,109,0.12)] text-primary border border-[rgba(247,206,109,0.35)]",
+      "bg-[rgba(195,205,220,0.12)] text-tertiary-light border border-[rgba(195,205,220,0.35)]",
   },
   knowledge: {
     labelKey: I18nKey.SETTINGS$SKILLS_TYPE_KNOWLEDGE,
