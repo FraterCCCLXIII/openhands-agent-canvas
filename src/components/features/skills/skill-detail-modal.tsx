@@ -153,7 +153,7 @@ export function SkillDetailModal({
         {description ? (
           <p
             data-testid={`skill-modal-description-${skill.name}`}
-            className="text-xs text-content-2"
+            className="text-xs text-tertiary-alt"
           >
             {description}
           </p>

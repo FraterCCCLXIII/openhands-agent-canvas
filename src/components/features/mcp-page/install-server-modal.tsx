@@ -285,7 +285,7 @@ export function InstallServerModal({
         </div>
 
         {entry.installHint && (
-          <p className="text-xs text-content-2">{entry.installHint}</p>
+          <p className="text-xs text-tertiary-alt">{entry.installHint}</p>
         )}
 
         {entry.docsUrl && (

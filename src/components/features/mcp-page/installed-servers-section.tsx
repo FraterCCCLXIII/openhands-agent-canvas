@@ -50,7 +50,7 @@ export function InstalledServersSection({
         data-testid="mcp-installed-empty"
         className="rounded-xl border border-[var(--oh-border)] p-8 text-center"
       >
-        <p className="text-sm text-content-2">
+        <p className="text-sm text-tertiary-alt">
           {t(I18nKey.MCP$INSTALLED_EMPTY_TITLE)}
         </p>
         <p className="text-xs text-tertiary-alt mt-1">

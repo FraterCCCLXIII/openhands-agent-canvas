@@ -65,7 +65,7 @@ export function MarketplaceCard({
               disableLabelKey={I18nKey.MCP$TOGGLE_ADD_SERVER}
             />
           </header>
-          <p className="line-clamp-3 text-xs leading-relaxed text-content-2">
+          <p className="line-clamp-3 text-xs leading-relaxed text-tertiary-alt">
             {entry.description}
           </p>
         </div>
