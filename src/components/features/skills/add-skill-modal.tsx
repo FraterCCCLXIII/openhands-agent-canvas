@@ -7,12 +7,10 @@ import {
   ADD_SKILL_DOCS_URL,
   ADD_SKILL_EXAMPLE_COMMAND,
 } from "#/constants/skills-docs";
-import { useLaunchSkillInChat } from "#/hooks/use-launch-skill-in-chat";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 import CheckmarkIcon from "#/icons/checkmark.svg?react";
 import CopyIcon from "#/icons/copy.svg?react";
-import MessageSquareShareIcon from "#/icons/message-square-share.svg?react";
 
 interface AddSkillModalProps {
   onClose: () => void;
@@ -114,11 +112,6 @@ function AddSkillTransParagraph({
 
 export function AddSkillModal({ onClose }: AddSkillModalProps) {
   const { t } = useTranslation("openhands");
-  const launchSkillInChat = useLaunchSkillInChat();
-
-  const handleUseSkill = () => {
-    launchSkillInChat(ADD_SKILL_EXAMPLE_COMMAND, onClose);
-  };
 
   return (
     <ModalBackdrop
@@ -209,17 +202,6 @@ export function AddSkillModal({ onClose }: AddSkillModalProps) {
             testId="add-skill-modal-dismiss"
           >
             {t(I18nKey.BUTTON$CLOSE)}
-          </BrandButton>
-          <BrandButton
-            type="button"
-            variant="primary"
-            onClick={handleUseSkill}
-            testId="add-skill-modal-use-skill"
-            startContent={
-              <MessageSquareShareIcon className="size-4" aria-hidden />
-            }
-          >
-            {t(I18nKey.SETTINGS$SKILLS_USE_SKILL_BUTTON)}
           </BrandButton>
         </footer>
       </div>

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SkillsSettingsScreen from "#/routes/skills-settings";
@@ -12,7 +12,6 @@ import {
 import { MOCK_DEFAULT_USER_SETTINGS } from "#/mocks/handlers";
 import { Settings, SkillInfo } from "#/types/settings";
 import { ActiveBackendProvider } from "#/contexts/active-backend-context";
-import { useConversationStore } from "#/stores/conversation-store";
 
 const navigateMock = vi.fn();
 
@@ -346,24 +345,5 @@ Full skill body.`,
     await user.click(screen.getByTestId("add-skill-modal-example-copy"));
 
     expect(writeText).toHaveBeenCalledWith(ADD_SKILL_EXAMPLE_COMMAND);
-  });
-
-  it("opens a new chat with the add-skill command when Use skill is clicked", async () => {
-    const user = userEvent.setup();
-    const setMessageToSend = vi.fn();
-    useConversationStore.setState({ setMessageToSend });
-    vi.spyOn(SkillsService, "getSkills").mockResolvedValue([]);
-
-    renderSkillsSettingsScreen();
-    await user.click(await screen.findByTestId("skills-add-skill-button"));
-    await screen.findByTestId("add-skill-modal");
-
-    await user.click(screen.getByTestId("add-skill-modal-use-skill"));
-
-    expect(screen.queryByTestId("add-skill-modal")).not.toBeInTheDocument();
-    expect(navigateMock).toHaveBeenCalledWith("/conversations");
-    await waitFor(() => {
-      expect(setMessageToSend).toHaveBeenCalledWith(ADD_SKILL_EXAMPLE_COMMAND);
-    });
   });
 });
