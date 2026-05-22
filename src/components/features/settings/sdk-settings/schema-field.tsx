@@ -14,6 +14,7 @@ import {
   resolveSchemaFieldLabel,
 } from "#/utils/sdk-settings-field-metadata";
 import { cn } from "#/utils/utils";
+import { formControlMultilineFieldClassName } from "#/utils/form-control-classes";
 
 // ---------------------------------------------------------------------------
 // Help links – UI-only mapping from field keys to user-facing guidance.
@@ -167,9 +168,9 @@ export function SchemaField({
           disabled={isDisabled}
           onChange={(event) => onChange(event.target.value)}
           className={cn(
-            "bg-tertiary border border-[var(--oh-border-input)] min-h-32 w-full min-w-0 rounded-sm p-2 font-mono text-sm",
-            "placeholder:italic placeholder:text-tertiary-alt",
-            "disabled:bg-[var(--oh-surface-raised)] disabled:border-[var(--oh-border-subtle)] disabled:cursor-not-allowed",
+            formControlMultilineFieldClassName,
+            "min-h-32 font-mono placeholder:italic",
+            "disabled:bg-[var(--oh-surface-raised)] disabled:border-[var(--oh-border-subtle)]",
           )}
         />
         <FieldHelp field={field} />

@@ -1,0 +1,85 @@
+import { cn } from "#/utils/utils";
+
+/** 36px control height — shared by fields, dropdowns, and buttons. */
+export const formControlHeightClassName = "h-9 min-h-9";
+
+export const formControlRadiusClassName = "rounded-lg";
+
+export const formControlBorderClassName = "border border-[var(--oh-border)]";
+
+export const formControlSurfaceClassName = "bg-base-secondary";
+
+export const formControlTransitionClassName = "transition-colors";
+
+export const formControlFocusClassName =
+  "focus:border-white/40 focus:ring-1 focus:ring-white/20 focus:outline-none";
+
+export const formControlFocusWithinClassName =
+  "focus-within:border-white/40 focus-within:ring-1 focus-within:ring-white/20";
+
+export const formControlDisabledClassName =
+  "disabled:cursor-not-allowed disabled:opacity-60";
+
+/** Native text inputs and HeroUI Autocomplete wrappers. */
+export const formControlFieldClassName = cn(
+  formControlHeightClassName,
+  formControlRadiusClassName,
+  formControlBorderClassName,
+  formControlSurfaceClassName,
+  formControlTransitionClassName,
+  formControlFocusClassName,
+  formControlDisabledClassName,
+  "w-full min-w-0 px-3 text-sm text-white placeholder:text-tertiary-alt",
+);
+
+/** Settings screens keep italic placeholders on form controls. */
+export const formControlSettingsFieldClassName = cn(
+  formControlFieldClassName,
+  "placeholder:italic",
+);
+
+/** Multiline fields share border/radius/focus styling without a fixed height. */
+export const formControlMultilineFieldClassName = cn(
+  formControlRadiusClassName,
+  formControlBorderClassName,
+  formControlSurfaceClassName,
+  formControlTransitionClassName,
+  formControlFocusClassName,
+  formControlDisabledClassName,
+  "w-full min-w-0 px-3 py-2 text-sm text-white placeholder:text-tertiary-alt",
+);
+
+/** Combobox / search shell (icon + input), e.g. skills toolbar. */
+export const formControlShellClassName = cn(
+  formControlHeightClassName,
+  "relative flex min-w-0 items-center",
+  formControlRadiusClassName,
+  formControlBorderClassName,
+  formControlSurfaceClassName,
+  formControlTransitionClassName,
+  formControlFocusWithinClassName,
+);
+
+/** Borderless input nested inside {@link formControlShellClassName}. */
+export const formControlInlineInputClassName = cn(
+  "min-w-0 flex-1 border-0 bg-transparent px-3 text-sm outline-none",
+  "placeholder:text-tertiary-alt",
+  "[&::-webkit-search-cancel-button]:hidden",
+);
+
+/** Primary/secondary/danger action buttons. */
+export const formControlButtonClassName = cn(
+  formControlHeightClassName,
+  "inline-flex w-fit cursor-pointer items-center justify-center gap-2 px-3",
+  formControlRadiusClassName,
+  formControlTransitionClassName,
+  "text-sm disabled:cursor-not-allowed disabled:opacity-30",
+);
+
+/** Filter / enum dropdown triggers beside search toolbars. */
+export const formControlFilterTriggerClassName = cn(
+  formControlButtonClassName,
+  formControlBorderClassName,
+  formControlSurfaceClassName,
+  "shrink-0 font-medium text-white",
+);

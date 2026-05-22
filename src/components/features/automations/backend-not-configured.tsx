@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import ExclamationCircleIcon from "#/icons/exclamation-circle.svg?react";
+import { BrandButton } from "#/components/features/settings/brand-button";
 
 interface BackendUnavailableProps {
   onRetry: () => void;
@@ -18,13 +19,14 @@ export function BackendUnavailable({ onRetry }: BackendUnavailableProps) {
       <p className="mt-2 text-sm text-muted text-center max-w-md">
         {t(I18nKey.AUTOMATIONS$BACKEND_UNAVAILABLE_MESSAGE)}
       </p>
-      <button
+      <BrandButton
         type="button"
+        variant="secondary"
+        className="mt-6"
         onClick={onRetry}
-        className="mt-6 rounded-lg border border-[var(--oh-border)] px-4 py-2 text-sm text-white hover:bg-surface-raised"
       >
         {t(I18nKey.AUTOMATIONS$BACKEND_UNAVAILABLE_RETRY)}
-      </button>
+      </BrandButton>
     </div>
   );
 }

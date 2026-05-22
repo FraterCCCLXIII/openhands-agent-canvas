@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useCombobox } from "downshift";
 import { cn } from "#/utils/utils";
 import { DropdownOption } from "./types";
+import { formControlShellClassName } from "#/utils/form-control-classes";
 import { LoadingSpinner } from "./loading-spinner";
 import { ClearButton } from "./clear-button";
 import { ToggleButton } from "./toggle-button";
@@ -167,8 +168,8 @@ export function Dropdown({
       {!hideTrigger ? (
         <div
           className={cn(
-            "bg-tertiary border border-[var(--oh-border-input)] rounded w-full p-2",
-            "flex items-center gap-2",
+            formControlShellClassName,
+            "w-full gap-2 px-3",
             isDisabled && "cursor-not-allowed opacity-60",
             className,
           )}

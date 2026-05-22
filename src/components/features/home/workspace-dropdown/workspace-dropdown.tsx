@@ -3,6 +3,7 @@ import { useCombobox } from "downshift";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "#/utils/utils";
+import { formControlFieldClassName } from "#/utils/form-control-classes";
 import { LocalWorkspace } from "#/types/workspace";
 import { I18nKey } from "#/i18n/declaration";
 import RepoIcon from "#/icons/repo.svg?react";
@@ -177,11 +178,10 @@ export function WorkspaceDropdown({
             disabled,
             placeholder: placeholder ?? t(I18nKey.HOME$WORKSPACE_PLACEHOLDER),
             className: cn(
-              "w-full px-3 py-2 border border-[var(--oh-border-input)] rounded-sm shadow-none h-[42px] min-h-[42px] max-h-[42px]",
-              "bg-tertiary text-[var(--oh-muted)] placeholder:text-[var(--oh-muted)]",
-              "focus:outline-none focus:ring-0 focus:border-[var(--oh-border-input)]",
-              "disabled:bg-tertiary disabled:cursor-not-allowed disabled:opacity-60",
-              "pl-7 pr-16 text-sm font-normal leading-5",
+              formControlFieldClassName,
+              "shadow-none pl-7 pr-16 text-sm font-normal leading-5",
+              "text-[var(--oh-muted)] placeholder:text-[var(--oh-muted)]",
+              "disabled:cursor-not-allowed disabled:opacity-60",
             ),
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
               setInputValue(e.target.value);

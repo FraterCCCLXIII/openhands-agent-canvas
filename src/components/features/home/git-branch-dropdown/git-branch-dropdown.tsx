@@ -10,6 +10,7 @@ import { Branch } from "#/types/git";
 import { Provider } from "#/types/settings";
 import { useDebounce } from "#/hooks/use-debounce";
 import { cn } from "#/utils/utils";
+import { formControlFieldClassName } from "#/utils/form-control-classes";
 import { useBranchData } from "#/hooks/query/use-branch-data";
 
 import { ClearButton } from "../shared/clear-button";
@@ -196,11 +197,10 @@ export function GitBranchDropdown({
             disabled: disabled || !repository,
             placeholder,
             className: cn(
-              "w-full px-3 py-2 border border-[var(--oh-border-input)] rounded-sm shadow-none h-[42px] min-h-[42px] max-h-[42px]",
-              "bg-tertiary text-[var(--oh-muted)] placeholder:text-[var(--oh-muted)]",
-              "focus:outline-none focus:ring-0 focus:border-[var(--oh-border-input)]",
-              "disabled:bg-tertiary disabled:cursor-not-allowed disabled:opacity-60",
-              "pl-7 pr-16 text-sm font-normal leading-5", // Space for clear and toggle buttons
+              formControlFieldClassName,
+              "shadow-none pl-7 pr-16 text-sm font-normal leading-5",
+              "text-[var(--oh-muted)] placeholder:text-[var(--oh-muted)]",
+              "disabled:cursor-not-allowed disabled:opacity-60",
             ),
             // Direct onChange for cursor position preservation
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
