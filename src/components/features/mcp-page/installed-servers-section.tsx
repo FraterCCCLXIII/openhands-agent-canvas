@@ -5,6 +5,7 @@ import { InstalledServerCard } from "./installed-server-card";
 import {
   extensionModuleCardGridClassName,
   extensionModuleCardGridContainerClassName,
+  extensionModuleEmptyStateClassName,
 } from "#/utils/extension-module-card-classes";
 
 interface InstalledServersSectionProps {
@@ -52,9 +53,9 @@ export function InstalledServersSection({
     return (
       <div
         data-testid="mcp-installed-empty"
-        className="rounded-xl border border-[var(--oh-border)] p-8 text-center"
+        className={extensionModuleEmptyStateClassName}
       >
-        <p className="text-sm text-tertiary-light">
+        <p className="text-sm text-white">
           {t(I18nKey.MCP$INSTALLED_EMPTY_TITLE)}
         </p>
         <p className="text-xs text-tertiary-light mt-1">
