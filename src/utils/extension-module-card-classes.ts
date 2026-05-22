@@ -19,3 +19,7 @@ export const extensionModuleCardGridContainerClassName =
 /** Single column in narrow content columns; two columns from 600px container width up. */
 export const extensionModuleCardGridClassName =
   "grid min-w-0 grid-cols-1 gap-3 @min-[600px]:grid-cols-2";
+
+/** Bordered empty-state panel used on MCP Installed and Automations list pages. */
+export const extensionModuleEmptyStateClassName =
+  "rounded-xl border border-[var(--oh-border)] p-8 text-center";
