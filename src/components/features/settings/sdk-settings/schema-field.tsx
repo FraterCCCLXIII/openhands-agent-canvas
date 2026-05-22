@@ -14,7 +14,10 @@ import {
   resolveSchemaFieldLabel,
 } from "#/utils/sdk-settings-field-metadata";
 import { cn } from "#/utils/utils";
-import { formControlMultilineFieldClassName } from "#/utils/form-control-classes";
+import {
+  formControlMultilineFieldClassName,
+  formControlSwitchDescriptionClassName,
+} from "#/utils/form-control-classes";
 
 // ---------------------------------------------------------------------------
 // Help links – UI-only mapping from field keys to user-facing guidance.
@@ -118,7 +121,9 @@ export function SchemaField({
         >
           {label}
         </SettingsSwitch>
-        <FieldHelp field={field} />
+        <div className={formControlSwitchDescriptionClassName}>
+          <FieldHelp field={field} />
+        </div>
       </div>
     );
   }
