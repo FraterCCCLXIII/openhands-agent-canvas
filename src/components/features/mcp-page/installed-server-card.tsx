@@ -37,7 +37,7 @@ function getServerTitle(server: MCPServerConfig): string {
   return server.url ?? "";
 }
 
-function getServerSubtitle(server: MCPServerConfig): string {
+function getServerDetailLine(server: MCPServerConfig): string {
   if (server.type === "stdio") {
     const args =
       server.args && server.args.length > 0 ? ` ${server.args.join(" ")}` : "";
@@ -55,7 +55,7 @@ export function InstalledServerCard({
   const catalog = findCatalogEntryForServer(server, MCP_MARKETPLACE);
 
   const title = catalog?.name ?? getServerTitle(server);
-  const subtitle = getServerSubtitle(server);
+  const detailLine = getServerDetailLine(server);
   const transport = getServerTransportLabel(server.type);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -75,41 +75,47 @@ export function InstalledServerCard({
       onKeyDown={handleKeyDown}
       aria-label={t(I18nKey.MCP$EDIT_SERVER_ARIA, { name: title })}
       className={cn(
-        "flex items-start gap-3 p-4",
+        "flex min-h-[132px] flex-col overflow-hidden p-4 text-left",
         extensionModuleCardSurfaceClassName,
         extensionModuleCardInteractiveClassName,
       )}
     >
-      <McpLogoBadge entry={catalog} fallback={<Puzzle strokeWidth={2.25} />} />
+      <div className="flex items-start gap-3">
+        <McpLogoBadge
+          entry={catalog}
+          fallback={<Puzzle strokeWidth={2.25} />}
+        />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <header className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
               <h3 className="truncate text-sm font-semibold" title={title}>
                 {title}
               </h3>
-              <span className="shrink-0 rounded-full bg-tertiary px-2 py-0.5 text-[10px] font-medium uppercase text-tertiary-alt">
-                {transport}
-              </span>
+              <p className="mt-0.5 text-xs text-tertiary-alt">{transport}</p>
             </div>
-            {subtitle ? (
-              <p className="truncate text-xs text-content-2" title={subtitle}>
-                {subtitle}
-              </p>
-            ) : null}
-          </div>
-          <CirclePlusCheckToggle
-            testId={`mcp-installed-toggle-${server.id}`}
-            isSelected
-            onToggle={(selected) => {
-              if (!selected) {
-                onDelete();
-              }
-            }}
-            enableLabelKey={I18nKey.MCP$TOGGLE_ADD_SERVER}
-            disableLabelKey={I18nKey.MCP$TOGGLE_REMOVE_SERVER}
-          />
+            <CirclePlusCheckToggle
+              testId={`mcp-installed-toggle-${server.id}`}
+              isSelected
+              onToggle={(selected) => {
+                if (!selected) {
+                  onDelete();
+                }
+              }}
+              enableLabelKey={I18nKey.MCP$TOGGLE_ADD_SERVER}
+              disableLabelKey={I18nKey.MCP$TOGGLE_REMOVE_SERVER}
+            />
+          </header>
+
+          {detailLine ? (
+            <p
+              data-testid={`mcp-server-detail-${server.id}`}
+              className="truncate text-xs text-content-2"
+              title={detailLine}
+            >
+              {detailLine}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
