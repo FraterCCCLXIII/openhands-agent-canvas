@@ -1,7 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { CirclePlusCheckToggle } from "#/components/shared/buttons/circle-plus-check-toggle";
+import {
+  CirclePlusBadge,
+  CirclePlusCheckToggle,
+} from "#/components/shared/buttons/circle-plus-check-toggle";
+
+describe("CirclePlusBadge", () => {
+  it("renders a decorative plus with hover styles and tooltip", () => {
+    render(
+      <CirclePlusBadge testId="automation-plus" />,
+    );
+
+    const plusBadge = screen.getByTestId("automation-plus");
+    expect(plusBadge.tagName).toBe("SPAN");
+    expect(plusBadge).toHaveAttribute("aria-hidden", "true");
+    expect(plusBadge.className).toContain("hover:bg-[var(--oh-interactive-hover)]");
+    expect(plusBadge.className).toContain(
+      "group-hover/card:bg-[var(--oh-interactive-hover)]",
+    );
+  });
+});
 
 describe("CirclePlusCheckToggle", () => {
   it("toggles between plus and checkmark states", async () => {

@@ -229,6 +229,8 @@ describe("recommended automations", () => {
       class {
         observe() {}
 
+        unobserve() {}
+
         disconnect() {}
       },
     );
@@ -279,6 +281,7 @@ describe("recommended automations", () => {
     );
     expect(plusBadge.tagName).toBe("SPAN");
     expect(plusBadge).toHaveAttribute("aria-hidden", "true");
+    expect(plusBadge.className).toContain("hover:bg-[var(--oh-interactive-hover)]");
     expect(
       plusBadge.querySelector('[role="switch"]'),
     ).not.toBeInTheDocument();

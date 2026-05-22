@@ -22,21 +22,27 @@ interface CirclePlusCheckToggleProps {
 export function CirclePlusBadge({
   className,
   testId,
+  tooltipKey = I18nKey.RECOMMENDED_AUTOMATIONS$LAUNCH_CONVERSATION,
 }: {
   className?: string;
   testId?: string;
+  tooltipKey?: I18nKey;
 }) {
+  const { t } = useTranslation("openhands");
+
   return (
-    <span
-      aria-hidden="true"
-      data-testid={testId}
-      className={cn(
-        "inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-raised text-white",
-        className,
-      )}
-    >
-      <PlusIcon className="size-3" />
-    </span>
+    <StyledTooltip content={t(tooltipKey)} placement="top">
+      <span
+        aria-hidden="true"
+        data-testid={testId}
+        className={cn(
+          "inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-raised text-white transition-colors hover:bg-[var(--oh-interactive-hover)] group-hover/card:bg-[var(--oh-interactive-hover)]",
+          className,
+        )}
+      >
+        <PlusIcon className="size-3" />
+      </span>
+    </StyledTooltip>
   );
 }
 
