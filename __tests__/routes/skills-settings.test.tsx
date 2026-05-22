@@ -1,14 +1,30 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SkillsSettingsScreen from "#/routes/skills-settings";
 import SettingsService from "#/api/settings-service/settings-service.api";
 import SkillsService from "#/api/skills-service";
-import { ADD_SKILL_DOCS_URL } from "#/constants/skills-docs";
+import {
+  ADD_SKILL_DOCS_URL,
+  ADD_SKILL_EXAMPLE_COMMAND,
+} from "#/constants/skills-docs";
 import { MOCK_DEFAULT_USER_SETTINGS } from "#/mocks/handlers";
 import { Settings, SkillInfo } from "#/types/settings";
 import { ActiveBackendProvider } from "#/contexts/active-backend-context";
+import { useConversationStore } from "#/stores/conversation-store";
+
+const navigateMock = vi.fn();
+
+vi.mock("#/context/navigation-context", () => ({
+  useNavigation: () => ({
+    navigate: navigateMock,
+    currentPath: "/skills",
+    conversationId: null,
+    isNavigating: false,
+  }),
+  NavigationProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 function buildSettings(overrides: Partial<Settings> = {}): Settings {
   return {
@@ -59,6 +75,7 @@ function renderSkillsSettingsScreen() {
 describe("SkillsSettingsScreen", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    navigateMock.mockReset();
     vi.spyOn(SettingsService, "getSettings").mockResolvedValue(buildSettings());
   });
 
@@ -313,8 +330,25 @@ Full skill body.`,
 
     await user.click(screen.getByTestId("add-skill-modal-example-copy"));
 
-    expect(writeText).toHaveBeenCalledWith(
-      "/add-skill https://github.com/OpenHands/extensions/tree/main/skills/codereview",
-    );
+    expect(writeText).toHaveBeenCalledWith(ADD_SKILL_EXAMPLE_COMMAND);
+  });
+
+  it("opens a new chat with the add-skill command when Use skill is clicked", async () => {
+    const user = userEvent.setup();
+    const setMessageToSend = vi.fn();
+    useConversationStore.setState({ setMessageToSend });
+    vi.spyOn(SkillsService, "getSkills").mockResolvedValue([]);
+
+    renderSkillsSettingsScreen();
+    await user.click(await screen.findByTestId("skills-add-skill-button"));
+    await screen.findByTestId("add-skill-modal");
+
+    await user.click(screen.getByTestId("add-skill-modal-use-skill"));
+
+    expect(screen.queryByTestId("add-skill-modal")).not.toBeInTheDocument();
+    expect(navigateMock).toHaveBeenCalledWith("/conversations");
+    await waitFor(() => {
+      expect(setMessageToSend).toHaveBeenCalledWith(ADD_SKILL_EXAMPLE_COMMAND);
+    });
   });
 });

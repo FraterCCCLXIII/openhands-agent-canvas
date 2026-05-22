@@ -27726,6 +27726,23 @@
     "uk": "Додати навичку",
     "ca": "Afegir habilitat"
   },
+  "SETTINGS$SKILLS_USE_SKILL_BUTTON": {
+    "en": "Use skill",
+    "ja": "スキルを使う",
+    "zh-CN": "使用技能",
+    "zh-TW": "使用技能",
+    "ko-KR": "스킬 사용",
+    "no": "Bruk ferdighet",
+    "ar": "استخدام المهارة",
+    "de": "Skill verwenden",
+    "fr": "Utiliser la compétence",
+    "it": "Usa competenza",
+    "pt": "Usar habilidade",
+    "es": "Usar habilidad",
+    "tr": "Yeteneği kullan",
+    "uk": "Використати навичку",
+    "ca": "Utilitzar habilitat"
+  },
   "SETTINGS$SKILLS_ADD_MODAL_TITLE": {
     "en": "Add a skill",
     "ja": "スキルを追加",

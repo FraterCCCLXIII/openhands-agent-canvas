@@ -9,9 +9,12 @@ import type { SkillInfo } from "#/types/settings";
 import { cn } from "#/utils/utils";
 import CopyIcon from "#/icons/copy.svg?react";
 import CheckmarkIcon from "#/icons/checkmark.svg?react";
+import MessageSquareShareIcon from "#/icons/message-square-share.svg?react";
 import { SkillIconBadge } from "./skill-icon-badge";
 import { getSkillCardDescription } from "./get-skill-card-description";
 import { buildSkillPills } from "./build-skill-pills";
+import { getSkillChatLaunchMessage } from "./get-skill-chat-launch-message";
+import { useLaunchSkillInChat } from "#/hooks/use-launch-skill-in-chat";
 
 interface SkillDetailModalProps {
   skill: SkillInfo;
@@ -53,7 +56,12 @@ export function SkillDetailModal({
   onClose,
 }: SkillDetailModalProps) {
   const { t } = useTranslation("openhands");
+  const launchSkillInChat = useLaunchSkillInChat();
   const [sourceCopied, setSourceCopied] = React.useState(false);
+  const chatLaunchMessage = React.useMemo(
+    () => getSkillChatLaunchMessage(skill),
+    [skill],
+  );
 
   const description = getSkillCardDescription(skill);
   const pills = React.useMemo(
@@ -186,6 +194,18 @@ export function SkillDetailModal({
             testId="skill-detail-close"
           >
             {t(I18nKey.BUTTON$CLOSE)}
+          </BrandButton>
+          <BrandButton
+            type="button"
+            variant="primary"
+            isDisabled={!enabled}
+            onClick={() => launchSkillInChat(chatLaunchMessage, onClose)}
+            testId={`skill-detail-use-skill-${skill.name}`}
+            startContent={
+              <MessageSquareShareIcon className="size-4" aria-hidden />
+            }
+          >
+            {t(I18nKey.SETTINGS$SKILLS_USE_SKILL_BUTTON)}
           </BrandButton>
         </div>
       </div>
