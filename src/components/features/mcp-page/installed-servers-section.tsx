@@ -2,6 +2,10 @@ import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import { MCPServerConfig } from "#/types/mcp-server";
 import { InstalledServerCard } from "./installed-server-card";
+import {
+  extensionModuleCardGridClassName,
+  extensionModuleCardGridContainerClassName,
+} from "#/utils/extension-module-card-classes";
 
 interface InstalledServersSectionProps {
   /** Already-filtered list — search filtering happens upstream. */
@@ -61,18 +65,20 @@ export function InstalledServersSection({
   }
 
   return (
-    <div
-      data-testid="mcp-installed-list"
-      className="grid gap-3 grid-cols-1 md:grid-cols-2"
-    >
-      {servers.map((server) => (
-        <InstalledServerCard
-          key={server.id}
-          server={server}
-          onEdit={() => onEdit(server)}
-          onDelete={() => onDelete(server.id)}
-        />
-      ))}
+    <div className={extensionModuleCardGridContainerClassName}>
+      <div
+        data-testid="mcp-installed-list"
+        className={extensionModuleCardGridClassName}
+      >
+        {servers.map((server) => (
+          <InstalledServerCard
+            key={server.id}
+            server={server}
+            onEdit={() => onEdit(server)}
+            onDelete={() => onDelete(server.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }

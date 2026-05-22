@@ -10,6 +10,10 @@ import {
   marketplaceEntryMatchesQuery,
 } from "#/utils/mcp-marketplace-utils";
 import { MarketplaceCard } from "./marketplace-card";
+import {
+  extensionModuleCardGridClassName,
+  extensionModuleCardGridContainerClassName,
+} from "#/utils/extension-module-card-classes";
 
 interface MarketplaceSectionProps {
   backendKind: "local" | "cloud";
@@ -54,18 +58,20 @@ export function MarketplaceSection({
           </p>
         </div>
       ) : (
-        <div
-          data-testid="mcp-marketplace-grid"
-          className="grid gap-3 grid-cols-1 md:grid-cols-2"
-        >
-          {visibleEntries.map((entry) => (
-            <MarketplaceCard
-              key={entry.id}
-              entry={entry}
-              onClick={() => onSelect(entry)}
-              onAdd={() => onAdd(entry)}
-            />
-          ))}
+        <div className={extensionModuleCardGridContainerClassName}>
+          <div
+            data-testid="mcp-marketplace-grid"
+            className={extensionModuleCardGridClassName}
+          >
+            {visibleEntries.map((entry) => (
+              <MarketplaceCard
+                key={entry.id}
+                entry={entry}
+                onClick={() => onSelect(entry)}
+                onAdd={() => onAdd(entry)}
+              />
+            ))}
+          </div>
         </div>
       )}
     </section>

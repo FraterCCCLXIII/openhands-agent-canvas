@@ -15,6 +15,10 @@ import { displayErrorToast } from "#/utils/custom-toast-handlers";
 import { retrieveAxiosErrorMessage } from "#/utils/retrieve-axios-error-message";
 import { cn } from "#/utils/utils";
 import { settingsLikeMainScrollClassName } from "#/utils/settings-like-page-layout-classes";
+import {
+  extensionModuleCardGridClassName,
+  extensionModuleCardGridContainerClassName,
+} from "#/utils/extension-module-card-classes";
 import type { SkillInfo } from "#/types/settings";
 import { getSkillCardDescription } from "#/components/features/skills/get-skill-card-description";
 
@@ -157,8 +161,13 @@ function SkillsSettingsScreen() {
                   {t(I18nKey.SETTINGS$SKILLS_NO_MATCH)}
                 </p>
               ) : (
-                <section className="flex min-w-0 flex-col gap-3">
-                  <div className="grid min-w-0 grid-cols-2 gap-3">
+                <section
+                  className={cn(
+                    "flex min-w-0 flex-col gap-3",
+                    extensionModuleCardGridContainerClassName,
+                  )}
+                >
+                  <div className={extensionModuleCardGridClassName}>
                     {filteredSkills.map((skill) => (
                       <SkillCard
                         key={skill.name}
