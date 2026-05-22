@@ -166,9 +166,16 @@ export function AutomationCard({
       )}
     >
       <header className="flex items-start justify-between gap-3">
-        <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-white">
-          {automation.name}
-        </h3>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <h3 className="truncate text-sm font-semibold text-white">
+            {automation.name}
+          </h3>
+          {automation.prompt ? (
+            <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
+              {automation.prompt}
+            </p>
+          ) : null}
+        </div>
 
         <div className="flex shrink-0 items-center gap-0.5">
           {canManage ? (
@@ -190,12 +197,6 @@ export function AutomationCard({
           <KebabMenu items={menuItems} />
         </div>
       </header>
-
-      {automation.prompt ? (
-        <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
-          {automation.prompt}
-        </p>
-      ) : null}
 
       {pills.length > 0 ? (
         <SkillCardPillRow
