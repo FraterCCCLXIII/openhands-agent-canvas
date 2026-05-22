@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import {
   TOAST_OPTIONS,
-  ERROR_TOAST_OPTIONS,
+  displayErrorToast,
 } from "#/utils/custom-toast-handlers";
 import { useNavigation } from "#/context/navigation-context";
 import { I18nKey } from "#/i18n/declaration";
@@ -40,7 +40,7 @@ export const useUnifiedPauseConversation = () => {
       if (context?.toastId) {
         toast.dismiss(context.toastId);
       }
-      toast(t(I18nKey.TOAST$FAILED_TO_STOP_CONVERSATION), ERROR_TOAST_OPTIONS);
+      displayErrorToast(t(I18nKey.TOAST$FAILED_TO_STOP_CONVERSATION));
 
       if (context?.previousConversations) {
         queryClient.setQueryData(

@@ -84,18 +84,11 @@ describe("custom-toast-handlers", () => {
         expect.objectContaining({
           duration: 4000, // Should use minimum duration of 4000ms for errors
           position: "top-right",
-          icon: expect.anything(),
-          iconTheme: {
-            primary: "var(--oh-status-error)",
-            secondary: "var(--oh-color-base)",
-          },
+          icon: null,
           style: expect.objectContaining({
             borderRadius: "var(--oh-radius)",
             maxWidth: "400px",
             wordBreak: "break-word",
-            alignItems: "flex-start",
-            fontSize: "0.875rem",
-            lineHeight: "1.25rem",
             color: "var(--oh-muted)",
           }),
         }),
@@ -112,18 +105,11 @@ describe("custom-toast-handlers", () => {
         expect.objectContaining({
           duration: expect.any(Number),
           position: "top-right",
-          icon: expect.anything(),
-          iconTheme: {
-            primary: "var(--oh-status-error)",
-            secondary: "var(--oh-color-base)",
-          },
+          icon: null,
           style: expect.objectContaining({
             borderRadius: "var(--oh-radius)",
             maxWidth: "400px",
             wordBreak: "break-word",
-            alignItems: "flex-start",
-            fontSize: "0.875rem",
-            lineHeight: "1.25rem",
             color: "var(--oh-muted)",
           }),
         }),

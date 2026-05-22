@@ -1,8 +1,9 @@
-import { CSSProperties } from "react";
+import React, { CSSProperties, ReactNode } from "react";
 import { CircleX } from "lucide-react";
 import toast, { ToastOptions } from "react-hot-toast";
 import { OH_STATUS_ERROR_COLOR } from "#/constants/status-colors";
 import { calculateToastDuration } from "./toast-duration";
+import { cn } from "#/utils/utils";
 import i18n from "#/i18n";
 
 // react-hot-toast accepts only CSSProperties via the style option — cannot use className
@@ -24,41 +25,76 @@ export const TOAST_OPTIONS: ToastOptions = {
 
 const ERROR_TOAST_STYLE: CSSProperties = {
   ...TOAST_STYLE,
-  alignItems: "flex-start",
-  fontSize: "0.875rem",
-  lineHeight: "1.25rem",
   color: "var(--oh-muted)",
 };
 
-const ERROR_TOAST_ICON = (
-  <CircleX
-    aria-hidden
-    size={16}
-    strokeWidth={2}
-    className="mt-0.5 shrink-0"
-    style={{ color: OH_STATUS_ERROR_COLOR }}
-  />
-);
+/** Icon + message row; center icon for single-line text, top-align when wrapped. */
+export function ErrorToastContent({ message }: { message: ReactNode }) {
+  const contentRef = React.useRef<HTMLSpanElement>(null);
+  const [isMultiLine, setIsMultiLine] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) {
+      return undefined;
+    }
+
+    const updateIsMultiLine = () => {
+      const lineHeight = Number.parseFloat(
+        getComputedStyle(content).lineHeight,
+      );
+      if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+        setIsMultiLine(false);
+        return;
+      }
+
+      setIsMultiLine(content.getBoundingClientRect().height > lineHeight * 1.5);
+    };
+
+    updateIsMultiLine();
+
+    const observer = new ResizeObserver(updateIsMultiLine);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [message]);
+
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 gap-2",
+        isMultiLine ? "items-start" : "items-center",
+      )}
+    >
+      <CircleX
+        aria-hidden
+        className="h-4 w-4 shrink-0"
+        strokeWidth={2}
+        style={{ color: OH_STATUS_ERROR_COLOR }}
+      />
+      <span
+        ref={contentRef}
+        className="min-w-0 flex-1 text-sm leading-5 [word-break:break-word] [overflow-wrap:anywhere]"
+      >
+        {message}
+      </span>
+    </div>
+  );
+}
 
 export const ERROR_TOAST_OPTIONS: ToastOptions = {
   ...TOAST_OPTIONS,
-  icon: ERROR_TOAST_ICON,
-  iconTheme: {
-    primary: OH_STATUS_ERROR_COLOR,
-    secondary: "var(--oh-color-base)",
-  },
+  icon: null,
   style: ERROR_TOAST_STYLE,
 };
 
 export const displayErrorToast = (error: string | null | undefined) => {
   const errorMessage = error || i18n.t("STATUS$ERROR");
   const duration = calculateToastDuration(errorMessage, 4000);
-  toast(
-    <span className="[word-break:break-word] [overflow-wrap:anywhere]">
-      {errorMessage}
-    </span>,
-    { ...ERROR_TOAST_OPTIONS, duration },
-  );
+  toast(<ErrorToastContent message={errorMessage} />, {
+    ...ERROR_TOAST_OPTIONS,
+    duration,
+  });
 };
 
 export const displaySuccessToast = (message: string) => {
