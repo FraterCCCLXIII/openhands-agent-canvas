@@ -17,6 +17,11 @@ import {
 } from "#/utils/mcp-marketplace-utils";
 import ClockIcon from "#/icons/clock.svg?react";
 import { StatusBadge } from "./status-badge";
+import { cn } from "#/utils/utils";
+import {
+  extensionModuleCardInteractiveClassName,
+  extensionModuleCardSurfaceClassName,
+} from "#/utils/extension-module-card-classes";
 
 interface RecommendedAutomationsSectionProps {
   backendKind: "local" | "cloud";
@@ -118,7 +123,11 @@ export function RecommendedAutomationsSection({
               type="button"
               data-testid={`recommended-automation-card-${automation.id}`}
               onClick={() => onSelect(automation)}
-              className="cursor-pointer rounded-2xl border border-[var(--oh-border)] bg-[var(--oh-surface)] p-5 text-left transition-colors hover:border-[var(--oh-border)] focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className={cn(
+                "p-5 text-left",
+                extensionModuleCardSurfaceClassName,
+                extensionModuleCardInteractiveClassName,
+              )}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -138,7 +147,7 @@ export function RecommendedAutomationsSection({
                       key={entry.id}
                       entry={entry}
                       size="sm"
-                      className="ring-2 ring-[var(--oh-surface)]"
+                      className="ring-2 ring-base-secondary"
                     />
                   ))}
                 </div>
