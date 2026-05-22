@@ -14,7 +14,10 @@ import PowerIcon from "#/icons/power.svg?react";
 import TrashIcon from "#/icons/trash.svg?react";
 import EditIcon from "#/icons/u-edit.svg?react";
 import { cn } from "#/utils/utils";
-import { extensionModuleCardInteractiveClassName } from "#/utils/extension-module-card-classes";
+import {
+  automationCardSurfaceClassName,
+  extensionModuleCardInteractiveClassName,
+} from "#/utils/extension-module-card-classes";
 
 interface AutomationCardProps {
   automation: Automation;
@@ -69,12 +72,14 @@ export function AutomationCard({
     <div
       role="link"
       tabIndex={0}
+      data-testid={`automation-card-${automation.id}`}
       onClick={handleCardClick}
       onKeyDown={(e) => {
         if (e.key === "Enter") handleCardClick();
       }}
       className={cn(
-        "rounded-2xl border border-[var(--oh-border)] bg-[var(--oh-surface)] p-5",
+        "overflow-hidden p-5 text-left",
+        automationCardSurfaceClassName,
         extensionModuleCardInteractiveClassName,
       )}
     >
