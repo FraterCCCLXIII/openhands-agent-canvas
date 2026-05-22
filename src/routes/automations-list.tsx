@@ -5,6 +5,7 @@ import {
   useAutomations,
   useToggleAutomation,
   useDeleteAutomation,
+  useDispatchAutomation,
 } from "#/hooks/query/use-automations";
 import { useAutomationHealth } from "#/hooks/query/use-automation-health";
 import { useActiveBackend } from "#/contexts/active-backend-context";
@@ -55,6 +56,7 @@ export default function AutomationsList() {
   });
   const toggleMutation = useToggleAutomation();
   const deleteMutation = useDeleteAutomation();
+  const dispatchMutation = useDispatchAutomation();
 
   const filtered = useMemo(() => {
     if (!data?.automations) return [];
@@ -80,6 +82,10 @@ export default function AutomationsList() {
 
   const handleToggle = (id: string, currentEnabled: boolean) => {
     toggleMutation.mutate({ id, enabled: !currentEnabled });
+  };
+
+  const handleRunNow = (id: string) => {
+    dispatchMutation.mutate(id);
   };
 
   const handleDeleteRequest = (id: string) => {
@@ -195,6 +201,12 @@ export default function AutomationsList() {
                 count={activeAutomations.length}
                 automations={activeAutomations}
                 onToggle={handleToggle}
+                onRunNow={handleRunNow}
+                runPendingId={
+                  dispatchMutation.isPending
+                    ? (dispatchMutation.variables ?? null)
+                    : null
+                }
                 onDelete={handleDeleteRequest}
                 onEdit={canEdit ? handleEditRequest : undefined}
               />
@@ -203,6 +215,12 @@ export default function AutomationsList() {
                 count={inactive.length}
                 automations={inactive}
                 onToggle={handleToggle}
+                onRunNow={handleRunNow}
+                runPendingId={
+                  dispatchMutation.isPending
+                    ? (dispatchMutation.variables ?? null)
+                    : null
+                }
                 onDelete={handleDeleteRequest}
                 onEdit={canEdit ? handleEditRequest : undefined}
               />

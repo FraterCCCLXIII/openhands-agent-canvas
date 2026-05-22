@@ -7,6 +7,8 @@ interface AutomationGroupProps {
   count: number;
   automations: Automation[];
   onToggle: (id: string, enabled: boolean) => void;
+  onRunNow: (id: string) => void;
+  runPendingId?: string | null;
   onDelete: (id: string) => void;
   onEdit?: (id: string) => void;
 }
@@ -16,6 +18,8 @@ export function AutomationGroup({
   count,
   automations,
   onToggle,
+  onRunNow,
+  runPendingId = null,
   onDelete,
   onEdit,
 }: AutomationGroupProps) {
@@ -33,6 +37,8 @@ export function AutomationGroup({
             key={automation.id}
             automation={automation}
             onToggle={onToggle}
+            onRunNow={onRunNow}
+            isRunPending={runPendingId === automation.id}
             onDelete={onDelete}
             onEdit={onEdit}
           />
