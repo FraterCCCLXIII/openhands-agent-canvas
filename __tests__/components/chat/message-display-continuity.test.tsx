@@ -145,6 +145,7 @@ describe("ChatInterface – message display continuity (spec 3.1)", () => {
         isLoadingHistory: true,
         connectionState: "OPEN",
         sendMessage: vi.fn(),
+        reconnect: vi.fn(),
       });
 
       // Put agent-server user events in the store
@@ -174,6 +175,7 @@ describe("ChatInterface – message display continuity (spec 3.1)", () => {
         isLoadingHistory: true,
         connectionState: "OPEN",
         sendMessage: vi.fn(),
+        reconnect: vi.fn(),
       });
 
       // Store is empty
@@ -194,6 +196,7 @@ describe("ChatInterface – message display continuity (spec 3.1)", () => {
         isLoadingHistory: true,
         connectionState: "OPEN",
         sendMessage: vi.fn(),
+        reconnect: vi.fn(),
       });
 
       useEventStore.setState({
@@ -223,6 +226,7 @@ describe("ChatInterface – message display continuity (spec 3.1)", () => {
         isLoadingHistory: false,
         connectionState: "OPEN",
         sendMessage: vi.fn(),
+        reconnect: vi.fn(),
       });
 
       // agent-server events in store
