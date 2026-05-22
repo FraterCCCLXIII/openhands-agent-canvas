@@ -346,7 +346,7 @@ export function BackendSelector({
               className={
                 isSettingsActive
                   ? cn(
-                      "inline-flex items-center justify-center shrink-0 w-9 h-9 rounded-md bg-tertiary text-white font-medium cursor-pointer",
+                      "inline-flex items-center justify-center shrink-0 w-9 h-9 rounded-md bg-tertiary text-white font-normal cursor-pointer",
                       formControlTransitionClassName,
                     )
                   : cn(

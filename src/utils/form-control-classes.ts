@@ -80,7 +80,7 @@ export const formControlButtonClassName = cn(
   "inline-flex w-fit cursor-pointer items-center justify-center gap-2 px-3",
   formControlRadiusClassName,
   formControlTransitionClassName,
-  "text-sm disabled:cursor-not-allowed disabled:opacity-30",
+  "text-sm font-normal disabled:cursor-not-allowed disabled:opacity-30",
 );
 
 /** Helper text under a left-aligned {@link SettingsSwitch} (40px track + gap-2). */
@@ -91,5 +91,5 @@ export const formControlFilterTriggerClassName = cn(
   formControlButtonClassName,
   formControlBorderClassName,
   formControlSurfaceClassName,
-  "shrink-0 font-medium text-white",
+  "shrink-0 text-white",
 );

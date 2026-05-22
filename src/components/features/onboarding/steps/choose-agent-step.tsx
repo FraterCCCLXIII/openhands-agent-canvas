@@ -221,7 +221,7 @@ export function ChooseAgentStep({
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex min-w-0 items-center gap-2">
                   <AgentOptionIcon id={option.id} muted={false} />
-                  <span className="truncate text-base font-medium text-white">
+                  <span className="truncate text-base font-normal text-white">
                     {option.label}
                   </span>
                 </div>

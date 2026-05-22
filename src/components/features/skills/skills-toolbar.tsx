@@ -83,7 +83,7 @@ export function SkillsToolbar({
                 aria-pressed={active}
                 onClick={() => onTypeFilterChange(option)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer",
+                  "rounded-full border px-3 py-1 text-xs font-normal transition-colors cursor-pointer",
                   active
                     ? "border-white/60 bg-white/10 text-white"
                     : "border-[var(--oh-border)] bg-transparent text-tertiary-light hover:border-[var(--cool-grey-500)] hover:text-white",

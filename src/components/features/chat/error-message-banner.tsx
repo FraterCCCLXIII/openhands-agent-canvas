@@ -86,7 +86,7 @@ export function ErrorMessageBanner({
         {shouldShowToggle && (
           <button
             type="button"
-            className="mt-1 cursor-pointer text-xs font-semibold text-[var(--oh-foreground)] underline"
+            className="mt-1 cursor-pointer text-xs font-normal text-[var(--oh-foreground)] underline"
             onClick={() => setIsExpanded((prev) => !prev)}
             data-testid="error-message-banner-toggle"
           >
@@ -107,7 +107,7 @@ export function ErrorMessageBanner({
           <button
             type="button"
             onClick={onRetry}
-            className="cursor-pointer rounded-md border border-[var(--oh-border)] px-2 py-1 text-xs font-medium text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]"
+            className="cursor-pointer rounded-md border border-[var(--oh-border)] px-2 py-1 text-xs font-normal text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]"
             data-testid="error-message-banner-retry"
           >
             {t(I18nKey.CHAT_INTERFACE$MESSAGE_RETRY)}

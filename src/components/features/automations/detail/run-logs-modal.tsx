@@ -97,7 +97,7 @@ export function RunLogsModal({
   const activeBody = activeTab === "stdout" ? stdout : stderr;
 
   const tabBaseClass =
-    "border-b-2 px-3 py-2 text-sm font-medium transition-colors focus:outline-none";
+    "border-b-2 px-3 py-2 text-sm font-normal transition-colors focus:outline-none";
   const tabActiveClass = "border-[var(--oh-primary)] text-white";
   const tabInactiveClass = "border-transparent text-muted hover:text-content";
 
