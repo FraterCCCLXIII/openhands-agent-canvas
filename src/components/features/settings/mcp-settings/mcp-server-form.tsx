@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Trash2 } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { SettingsInput } from "../settings-input";
 import { SettingsDropdownInput } from "../settings-dropdown-input";
@@ -422,9 +423,12 @@ export function MCPServerForm({
           <BrandButton
             testId="mcp-custom-editor-delete"
             type="button"
-            variant="ghost-danger"
+            variant="secondary"
             onClick={onDelete}
             isDisabled={isActionDisabled}
+            startContent={
+              <Trash2 aria-hidden className="size-4" strokeWidth={2} />
+            }
           >
             {t(I18nKey.BUTTON$DELETE)}
           </BrandButton>
