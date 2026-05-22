@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { Grid2x2, Rows3 } from "lucide-react";
+import { Check, Grid2x2, Rows3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ContextMenuListItem } from "#/components/features/context-menu/context-menu-list-item";
 import { I18nKey } from "#/i18n/declaration";
@@ -51,9 +51,7 @@ function ViewMenuItemContent({
         <Icon />
       </span>
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      {isSelected ? (
-        <span className="size-1.5 shrink-0 rounded-full bg-white" aria-hidden />
-      ) : null}
+      {isSelected ? <Check className="size-4 shrink-0" aria-hidden /> : null}
     </span>
   );
 }
