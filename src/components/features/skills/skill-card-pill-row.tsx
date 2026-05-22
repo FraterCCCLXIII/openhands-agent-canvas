@@ -4,7 +4,7 @@ import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 
 export const SKILL_CARD_PILL_CLASS =
-  "inline-flex shrink-0 items-center rounded-full border border-[var(--oh-border)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[11px] text-tertiary-light";
+  "inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-full border border-[var(--oh-border)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[11px] leading-4 text-tertiary-light";
 
 const PILL_GAP_PX = 6;
 const OVERFLOW_PILL_WIDTH_PX = 40;
@@ -81,7 +81,9 @@ export function SkillCardPillRow({ pills, testId }: SkillCardPillRowProps) {
         className="pointer-events-none fixed top-0 -left-[10000px] z-[-1] flex flex-nowrap items-center gap-1.5 opacity-0"
       >
         {pills.map((pill) => (
-          <span key={pill.id}>{pill.node}</span>
+          <span key={pill.id} className="inline-flex shrink-0">
+            {pill.node}
+          </span>
         ))}
       </div>
       <div
@@ -90,7 +92,9 @@ export function SkillCardPillRow({ pills, testId }: SkillCardPillRowProps) {
         className="flex w-full min-w-0 max-w-full flex-nowrap items-center gap-1.5 overflow-hidden"
       >
         {pills.slice(0, visibleCount).map((pill) => (
-          <span key={pill.id}>{pill.node}</span>
+          <span key={pill.id} className="inline-flex shrink-0">
+            {pill.node}
+          </span>
         ))}
         {hiddenCount > 0 ? (
           <span

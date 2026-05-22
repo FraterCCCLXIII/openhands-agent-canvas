@@ -13,6 +13,7 @@ import MessageSquareShareIcon from "#/icons/message-square-share.svg?react";
 import { SkillIconBadge } from "./skill-icon-badge";
 import { getSkillCardDescription } from "./get-skill-card-description";
 import { buildSkillPills } from "./build-skill-pills";
+import { SkillCardPillRow } from "./skill-card-pill-row";
 import { getSkillChatLaunchMessage } from "./get-skill-chat-launch-message";
 import { useLaunchSkillInChat } from "#/hooks/use-launch-skill-in-chat";
 
@@ -168,14 +169,10 @@ export function SkillDetailModal({
         ) : null}
 
         {pills.length > 0 ? (
-          <div
-            data-testid={`skill-modal-pills-${skill.name}`}
-            className="flex flex-wrap gap-1.5"
-          >
-            {pills.map((pill) => (
-              <React.Fragment key={pill.id}>{pill.node}</React.Fragment>
-            ))}
-          </div>
+          <SkillCardPillRow
+            pills={pills}
+            testId={`skill-modal-pills-${skill.name}`}
+          />
         ) : null}
 
         {skill.content ? (
