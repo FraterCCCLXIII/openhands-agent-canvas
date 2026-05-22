@@ -1,17 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
+import { cn } from "#/utils/utils";
 import SearchIcon from "#/icons/search.svg?react";
 
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
+  className?: string;
 }
 
-export function SearchInput({ value, onChange }: SearchInputProps) {
+export function SearchInput({ value, onChange, className }: SearchInputProps) {
   const { t } = useTranslation("openhands");
 
   return (
-    <div className="relative w-full">
+    <div className={cn("relative min-w-0 flex-1", className)}>
       <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted" />
       <input
         type="text"

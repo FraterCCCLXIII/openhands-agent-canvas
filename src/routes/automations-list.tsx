@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import {
@@ -11,6 +11,12 @@ import { useAutomationHealth } from "#/hooks/query/use-automation-health";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { SearchInput } from "#/components/features/automations/search-input";
 import { AutomationGroup } from "#/components/features/automations/automation-group";
+import { AutomationViewToggle } from "#/components/features/automations/automation-view-toggle";
+import {
+  readStoredAutomationViewMode,
+  writeStoredAutomationViewMode,
+  type AutomationViewMode,
+} from "#/components/features/automations/automation-view-mode";
 import { AutomationCardSkeleton } from "#/components/features/automations/automation-card-skeleton";
 import { EmptyState } from "#/components/features/automations/empty-state";
 import { ErrorState } from "#/components/features/automations/error-state";
@@ -27,6 +33,9 @@ const PAGE_SIZE = 50;
 export default function AutomationsList() {
   const { t } = useTranslation("openhands");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<AutomationViewMode>(() =>
+    readStoredAutomationViewMode(),
+  );
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
@@ -109,6 +118,11 @@ export default function AutomationsList() {
     }
   };
 
+  const handleViewModeChange = useCallback((view: AutomationViewMode) => {
+    setViewMode(view);
+    writeStoredAutomationViewMode(view);
+  }, []);
+
   const hasMore = data ? data.total > data.automations.length : false;
 
   // Show loading state while checking health
@@ -174,8 +188,12 @@ export default function AutomationsList() {
         </div>
 
         {/* Search */}
-        <div className="mt-6">
+        <div className="mt-6 flex items-center gap-3">
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
+          <AutomationViewToggle
+            view={viewMode}
+            onChange={handleViewModeChange}
+          />
         </div>
 
         {/* Content */}
@@ -200,6 +218,7 @@ export default function AutomationsList() {
                 title={t(I18nKey.AUTOMATIONS$ACTIVE)}
                 count={activeAutomations.length}
                 automations={activeAutomations}
+                view={viewMode}
                 onToggle={handleToggle}
                 onRunNow={handleRunNow}
                 runPendingId={
@@ -214,6 +233,7 @@ export default function AutomationsList() {
                 title={t(I18nKey.AUTOMATIONS$INACTIVE)}
                 count={inactive.length}
                 automations={inactive}
+                view={viewMode}
                 onToggle={handleToggle}
                 onRunNow={handleRunNow}
                 runPendingId={

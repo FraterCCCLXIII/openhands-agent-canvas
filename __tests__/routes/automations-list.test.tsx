@@ -143,3 +143,24 @@ describe("AutomationsList — Edit from the row kebab is local-only", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("AutomationsList — view mode toggle", () => {
+  it("switches saved automations from cards to table rows", async () => {
+    const user = userEvent.setup();
+    renderList();
+    await waitFor(() => {
+      expect(AutomationService.getAutomations).toHaveBeenCalledTimes(1);
+    });
+    await screen.findByTestId("automation-card-auto-1");
+
+    await user.click(screen.getByTestId("automations-view-toggle-list"));
+
+    expect(
+      screen.queryByTestId("automation-card-auto-1"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("automation-list-row-auto-1")).toBeInTheDocument();
+    expect(window.localStorage.getItem("openhands-automations-view")).toBe(
+      "list",
+    );
+  });
+});
