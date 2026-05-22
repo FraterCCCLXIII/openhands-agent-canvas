@@ -61,4 +61,21 @@ describe("SkillDetailModal", () => {
     await user.click(within(modal).getByTestId("skill-detail-close"));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("closes from the top-right close button", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    render(
+      <SkillDetailModal
+        skill={buildSkill()}
+        enabled
+        onToggle={vi.fn()}
+        onClose={onClose}
+      />,
+    );
+
+    await user.click(screen.getByTestId("skill-detail-modal-close"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });

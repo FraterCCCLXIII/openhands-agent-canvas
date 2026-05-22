@@ -86,4 +86,13 @@ describe("CustomServerEditor", () => {
       expect(onClose).not.toHaveBeenCalled();
     });
   });
+
+  it("closes from the top-right close button", async () => {
+    const onClose = vi.fn();
+    renderWith(<EditorOnceSettingsLoaded onClose={onClose} />);
+    await screen.findByTestId("mcp-custom-editor");
+
+    fireEvent.click(screen.getByTestId("mcp-custom-editor-close"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
