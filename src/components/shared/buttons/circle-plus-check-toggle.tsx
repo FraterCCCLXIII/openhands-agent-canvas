@@ -22,7 +22,7 @@ interface CirclePlusCheckToggleProps {
 export function CirclePlusBadge({
   className,
   testId,
-  tooltipKey = I18nKey.RECOMMENDED_AUTOMATIONS$LAUNCH_CONVERSATION,
+  tooltipKey = I18nKey.AUTOMATIONS$ADD_AUTOMATION,
 }: {
   className?: string;
   testId?: string;
