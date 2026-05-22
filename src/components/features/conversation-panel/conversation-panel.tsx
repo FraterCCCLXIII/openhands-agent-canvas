@@ -187,8 +187,14 @@ export function ConversationPanel({
     string | null
   >(null);
 
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    usePaginatedConversations();
+  const {
+    data,
+    isLoading,
+    isFetched,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = usePaginatedConversations();
 
   // Fetch in-progress start tasks
   const { data: startTasks } = useStartTasks();
@@ -492,13 +498,16 @@ export function ConversationPanel({
   // child fills the panel and scrolls when its content overflows. Modals are
   // siblings of the scroll element and are `position: fixed`, so they don't
   // participate in the panel's scroll geometry.
-  // Gate on `isLoading` (true only during the first fetch with no cached
-  // data), not `isFetching` — the latter flips back to true on every 10s
-  // background refetch, causing the skeleton/empty-state to flicker when
-  // the list is empty.
-  const showInitialSkeleton = isLoading;
+  // Gate on `isLoading` / `!isFetched` (true only until the first fetch settles),
+  // not `isFetching` — the latter flips back to true on every 10s background
+  // refetch, causing the skeleton/empty-state to flicker when the list is empty.
+  const showInitialSkeleton = isLoading || !isFetched;
   const showEmptyState =
-    !isLoading && !compact && listIsEffectivelyEmpty && !startTasks?.length;
+    isFetched &&
+    !isLoading &&
+    !compact &&
+    listIsEffectivelyEmpty &&
+    !startTasks?.length;
 
   const showConversationHeader = !compact;
 
@@ -567,8 +576,11 @@ export function ConversationPanel({
         {showInitialSkeleton && <ConversationCardSkeleton compact={compact} />}
 
         {!compact && showEmptyState && (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-8">
-            <p className="text-[var(--oh-muted)]">
+          <div
+            data-testid="conversation-panel-empty-state"
+            className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-8"
+          >
+            <p className="text-xs text-[var(--oh-muted)]">
               {t(I18nKey.CONVERSATION$NO_CONVERSATIONS)}
             </p>
           </div>
