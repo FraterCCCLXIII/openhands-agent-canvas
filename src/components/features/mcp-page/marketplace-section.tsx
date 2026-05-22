@@ -12,19 +12,17 @@ import {
 import { MarketplaceCard } from "./marketplace-card";
 
 interface MarketplaceSectionProps {
-  isInstalled: (entry: MarketplaceEntry) => boolean;
   backendKind: "local" | "cloud";
   onSelect: (entry: MarketplaceEntry) => void;
-  onToggle: (entry: MarketplaceEntry, selected: boolean) => void;
+  onAdd: (entry: MarketplaceEntry) => void;
   /** Empty string = no filter. */
   query?: string;
 }
 
 export function MarketplaceSection({
-  isInstalled,
   backendKind,
   onSelect,
-  onToggle,
+  onAdd,
   query = "",
 }: MarketplaceSectionProps) {
   const { t } = useTranslation("openhands");
@@ -64,9 +62,8 @@ export function MarketplaceSection({
             <MarketplaceCard
               key={entry.id}
               entry={entry}
-              installed={isInstalled(entry)}
               onClick={() => onSelect(entry)}
-              onToggle={(selected) => onToggle(entry, selected)}
+              onAdd={() => onAdd(entry)}
             />
           ))}
         </div>

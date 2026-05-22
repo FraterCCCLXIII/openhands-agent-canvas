@@ -18,7 +18,6 @@ import { retrieveAxiosErrorMessage } from "#/utils/retrieve-axios-error-message"
 import { settingsLikeMainScrollClassName } from "#/utils/settings-like-page-layout-classes";
 import {
   findCatalogEntryForServer,
-  findInstalledMatch,
   installedServerMatchesQuery,
 } from "#/utils/mcp-marketplace-utils";
 import {
@@ -68,9 +67,6 @@ export default function MCPPage() {
   const mcpConfig = parseMcpConfig(settings?.agent_settings?.mcp_config);
   const allServers = flattenMcpConfig(mcpConfig);
 
-  const isInstalled = (entry: MarketplaceEntry) =>
-    !!findInstalledMatch(entry.template, allServers);
-
   // Filter installed servers by the search query. We pair each server
   // with its catalog entry (if any) so the search can match friendly
   // names like "Slack" against a stdio server whose own `.name` is
@@ -83,23 +79,8 @@ export default function MCPPage() {
     ),
   );
 
-  const handleMarketplaceClick = (entry: MarketplaceEntry) => {
+  const handleMarketplaceInstall = (entry: MarketplaceEntry) => {
     setInstallEntry(entry);
-  };
-
-  const handleMarketplaceToggle = (
-    entry: MarketplaceEntry,
-    selected: boolean,
-  ) => {
-    if (selected) {
-      setInstallEntry(entry);
-      return;
-    }
-
-    const match = findInstalledMatch(entry.template, allServers);
-    if (match) {
-      setServerToDelete(match);
-    }
   };
 
   const handleEdit = (server: MCPServerConfig) => {
@@ -192,10 +173,9 @@ export default function MCPPage() {
 
           {sectionFilter !== "installed" ? (
             <MarketplaceSection
-              isInstalled={isInstalled}
               backendKind={backendKind}
-              onSelect={handleMarketplaceClick}
-              onToggle={handleMarketplaceToggle}
+              onSelect={handleMarketplaceInstall}
+              onAdd={handleMarketplaceInstall}
               query={searchQuery}
             />
           ) : null}

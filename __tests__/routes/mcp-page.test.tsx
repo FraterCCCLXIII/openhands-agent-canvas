@@ -299,11 +299,9 @@ describe("MCPPage", () => {
     );
   });
 
-  it("shows Tavily as selected in the marketplace toggle when installed", async () => {
-    // Tavily is now a regular stdio MCP entry (it used to claim to be
-    // a built-in driven by search_api_key, but that field was never
-    // forwarded to either backend). Installation status comes from
-    // the same mcp_config lookup as every other entry.
+  it("shows Tavily marketplace toggle as add-only when installed", async () => {
+    // Library cards always show the add (+) affordance so users can
+    // install multiple instances of the same template.
     vi.spyOn(SettingsService, "getSettings").mockResolvedValue(
       buildSettings({
         agent_settings: {
@@ -326,7 +324,7 @@ describe("MCPPage", () => {
     await screen.findByTestId("mcp-marketplace-card-tavily");
     expect(
       screen.getByTestId("mcp-marketplace-toggle-tavily"),
-    ).toHaveAttribute("aria-checked", "true");
+    ).toHaveAttribute("aria-checked", "false");
     expect(screen.getByTestId("mcp-installed-list")).toBeInTheDocument();
   });
 
@@ -362,7 +360,7 @@ describe("MCPPage", () => {
     const tile = await screen.findByTestId("mcp-marketplace-card-slack");
     expect(
       screen.getByTestId("mcp-marketplace-toggle-slack"),
-    ).toHaveAttribute("aria-checked", "true");
+    ).toHaveAttribute("aria-checked", "false");
     fireEvent.click(tile);
 
     await screen.findByTestId("mcp-install-modal");

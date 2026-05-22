@@ -10,16 +10,14 @@ import {
 
 interface MarketplaceCardProps {
   entry: MarketplaceEntry;
-  installed: boolean;
   onClick: () => void;
-  onToggle: (selected: boolean) => void;
+  onAdd: () => void;
 }
 
 export function MarketplaceCard({
   entry,
-  installed,
   onClick,
-  onToggle,
+  onAdd,
 }: MarketplaceCardProps) {
   const transportLabel = (() => {
     switch (entry.template.kind) {
@@ -57,10 +55,14 @@ export function MarketplaceCard({
             </div>
             <CirclePlusCheckToggle
               testId={`mcp-marketplace-toggle-${entry.id}`}
-              isSelected={installed}
-              onToggle={onToggle}
+              isSelected={false}
+              onToggle={(selected) => {
+                if (selected) {
+                  onAdd();
+                }
+              }}
               enableLabelKey={I18nKey.MCP$TOGGLE_ADD_SERVER}
-              disableLabelKey={I18nKey.MCP$TOGGLE_REMOVE_SERVER}
+              disableLabelKey={I18nKey.MCP$TOGGLE_ADD_SERVER}
             />
           </header>
           <p className="line-clamp-3 text-xs leading-relaxed text-content-2">
