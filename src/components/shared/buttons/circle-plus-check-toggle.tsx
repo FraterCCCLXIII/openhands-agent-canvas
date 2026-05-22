@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import PlusIcon from "#/icons/u-plus.svg?react";
 import CheckmarkIcon from "#/icons/checkmark.svg?react";
-import RemoveIcon from "#/icons/x.svg?react";
+import RemoveIcon from "#/icons/x-mark.svg?react";
 import { StyledTooltip } from "#/components/shared/buttons/styled-tooltip";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
@@ -62,16 +62,24 @@ export function CirclePlusCheckToggle({
         onBlur={() => setIsHovered(false)}
         className={cn(
           "inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 p-0 transition-colors",
-          isSelected
-            ? "bg-white text-base hover:bg-white/90 [&_path]:fill-current"
-            : "bg-surface-raised text-white hover:bg-[var(--oh-interactive-hover)]",
+          isSelected &&
+            (showRemoveIcon
+              ? "bg-[rgba(248,113,113,0.14)] text-[#ef4444] hover:bg-[rgba(248,113,113,0.24)]"
+              : "bg-white text-base hover:bg-white/90 [&_path]:fill-current"),
+          !isSelected &&
+            "bg-surface-raised text-white hover:bg-[var(--oh-interactive-hover)]",
           isDisabled && "cursor-not-allowed opacity-50",
           className,
         )}
       >
         {isSelected ? (
           showRemoveIcon ? (
-            <RemoveIcon aria-hidden className="size-3" />
+            <RemoveIcon
+              aria-hidden
+              width={14}
+              height={14}
+              className="stroke-[2.5]"
+            />
           ) : (
             <CheckmarkIcon aria-hidden width={14} height={14} />
           )
