@@ -3,7 +3,11 @@ export const extensionModuleCardSurfaceClassName =
   "rounded-xl border border-[var(--oh-border)] bg-base-secondary";
 
 export const extensionModuleCardInteractiveClassName =
-  "cursor-pointer transition-colors hover:border-white/40 hover:bg-base-tertiary/30 focus-visible:outline-none focus-visible:border-white/40";
+  "cursor-pointer transition-[color,background-color,border-color,box-shadow] hover:border-white/40 hover:bg-surface-raised hover:ring-1 hover:ring-white/20 focus-visible:outline-none focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/20";
+
+/** Saved automation list cards keep rounded-2xl while sharing extension module chrome. */
+export const automationCardSurfaceClassName =
+  "rounded-2xl border border-[var(--oh-border)] bg-base-secondary";
 
 /** Shared pill chrome for Skills, automation cards, and related modals. */
 export const extensionModuleCardPillClassName =
