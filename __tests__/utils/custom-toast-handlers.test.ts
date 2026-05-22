@@ -93,6 +93,10 @@ describe("custom-toast-handlers", () => {
             borderRadius: "var(--oh-radius)",
             maxWidth: "400px",
             wordBreak: "break-word",
+            alignItems: "flex-start",
+            fontSize: "0.875rem",
+            lineHeight: "1.25rem",
+            color: "var(--oh-muted)",
           }),
         }),
       );
@@ -117,6 +121,10 @@ describe("custom-toast-handlers", () => {
             borderRadius: "var(--oh-radius)",
             maxWidth: "400px",
             wordBreak: "break-word",
+            alignItems: "flex-start",
+            fontSize: "0.875rem",
+            lineHeight: "1.25rem",
+            color: "var(--oh-muted)",
           }),
         }),
       );

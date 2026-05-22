@@ -22,12 +22,20 @@ export const TOAST_OPTIONS: ToastOptions = {
   style: TOAST_STYLE,
 };
 
+const ERROR_TOAST_STYLE: CSSProperties = {
+  ...TOAST_STYLE,
+  alignItems: "flex-start",
+  fontSize: "0.875rem",
+  lineHeight: "1.25rem",
+  color: "var(--oh-muted)",
+};
+
 const ERROR_TOAST_ICON = (
   <CircleX
     aria-hidden
     size={16}
     strokeWidth={2}
-    className="shrink-0"
+    className="mt-0.5 shrink-0"
     style={{ color: OH_STATUS_ERROR_COLOR }}
   />
 );
@@ -39,6 +47,7 @@ export const ERROR_TOAST_OPTIONS: ToastOptions = {
     primary: OH_STATUS_ERROR_COLOR,
     secondary: "var(--oh-color-base)",
   },
+  style: ERROR_TOAST_STYLE,
 };
 
 export const displayErrorToast = (error: string | null | undefined) => {
