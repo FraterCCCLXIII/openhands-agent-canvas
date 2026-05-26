@@ -18,6 +18,7 @@ interface CreateConversationVariables {
   agentType?: "default" | "plan";
   plugins?: PluginSpec[];
   workingDir?: string;
+  worktree?: boolean;
 }
 
 interface CreateConversationResponse {
@@ -44,6 +45,7 @@ export const useCreateConversation = () => {
         workingDir,
         parentConversationId,
         agentType,
+        worktree,
       } = variables;
 
       const conversation =
@@ -61,6 +63,8 @@ export const useCreateConversation = () => {
           workingDir,
           parentConversationId,
           agentType,
+          undefined,
+          worktree,
         );
 
       // OpenHands cloud pattern: when the start task isn't immediately

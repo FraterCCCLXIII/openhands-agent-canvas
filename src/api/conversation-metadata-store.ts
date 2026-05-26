@@ -15,6 +15,8 @@ export interface ConversationMetadata {
    * git baseline to compare against.
    */
   selected_workspace?: string | null;
+  /** Whether a git worktree was requested when this conversation was created. */
+  worktree_enabled?: boolean;
 }
 
 type StoredMetadata = Record<string, ConversationMetadata>;

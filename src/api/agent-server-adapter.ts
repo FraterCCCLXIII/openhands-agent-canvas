@@ -687,7 +687,7 @@ type StartConversationPayload = Record<string, unknown> & {
   max_iterations: number;
   stuck_detection: true;
   autotitle: true;
-  worktree: true;
+  worktree: boolean;
   secrets_encrypted?: true;
   conversation_id?: string;
   secrets?: Record<string, LookupSecret>;
@@ -702,6 +702,7 @@ export interface StartConversationOptions {
   plugins?: PluginSpec[];
   conversationId?: string;
   workingDir?: string;
+  worktree?: boolean;
   encryptedAgentSettings?: Record<string, SettingsValue>;
   encryptedConversationSettings?: Record<string, SettingsValue>;
   secretsEncrypted?: boolean;
@@ -746,7 +747,7 @@ export function buildStartConversationRequest(
         : 500,
     stuck_detection: true,
     autotitle: true,
-    worktree: true,
+    worktree: options.worktree ?? false,
   };
 
   if (acpServerTag) {
@@ -829,6 +830,7 @@ export async function buildStartConversationRequestWithEncryptedSettings(options
   plugins?: PluginSpec[];
   conversationId?: string;
   workingDir?: string;
+  worktree?: boolean;
 }): Promise<Record<string, unknown>> {
   const { SecretsService } = await import("./secrets-service");
 
