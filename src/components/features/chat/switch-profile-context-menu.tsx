@@ -17,7 +17,7 @@ const rowBaseClassName = cn(
   "w-full flex flex-col gap-0.5 p-2 rounded",
   "text-start hover:bg-[var(--oh-interactive-hover)] cursor-pointer text-nowrap",
 );
-const profileRowClassName = cn(rowBaseClassName, "h-auto");
+const profileRowClassName = cn(rowBaseClassName, "h-auto items-stretch");
 const linkRowClassName = cn(
   "w-full flex items-center gap-2 p-2 rounded",
   "text-start hover:bg-[var(--oh-interactive-hover)] cursor-pointer text-nowrap",
