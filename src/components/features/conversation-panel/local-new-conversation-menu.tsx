@@ -14,6 +14,7 @@ import { useLocalWorkspaces } from "#/hooks/query/use-local-workspaces";
 import { useResolvedWorkspaces } from "#/hooks/query/use-resolved-workspaces";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import { dropdownMenuRowClassName } from "#/utils/dropdown-classes";
 import { getWorkspacesUnsupportedMessage } from "#/utils/workspaces-compatibility";
 import RepoIcon from "#/icons/repo.svg?react";
 
@@ -126,11 +127,7 @@ export function LocalNewConversationMenu({
     );
   };
 
-  const itemClass = cn(
-    "flex w-full cursor-pointer items-center gap-2 rounded px-2 py-2 text-left text-sm text-white",
-    "font-normal transition-colors hover:bg-[var(--oh-interactive-hover)]",
-    "disabled:cursor-not-allowed disabled:opacity-60",
-  );
+  const itemClass = dropdownMenuRowClassName;
 
   const keepPopoverOpenOnMouseDown = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

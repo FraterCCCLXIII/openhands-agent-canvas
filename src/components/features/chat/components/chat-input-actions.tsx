@@ -34,7 +34,11 @@ import { ContextMenu } from "#/ui/context-menu";
 import { Divider } from "#/ui/divider";
 import { useClickOutsideElement } from "#/hooks/use-click-outside-element";
 import { cn } from "#/utils/utils";
-import { formControlTransitionClassName } from "#/utils/form-control-classes";
+import { chatInputIconButtonClassName } from "#/utils/form-control-classes";
+import {
+  dropdownInstantColorClassName,
+  dropdownMenuRowIconClassName,
+} from "#/utils/dropdown-classes";
 
 interface ChatInputActionsProps {
   disabled: boolean;
@@ -390,16 +394,13 @@ export function ChatInputActions({
                   onClick={closeOverflowMenus}
                   className={cn(
                     "group flex h-[30px] items-center gap-2 rounded p-2 leading-5 text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]",
-                    formControlTransitionClassName,
+                    dropdownInstantColorClassName,
                   )}
                 >
                   <SettingsGearIcon
                     width={16}
                     height={16}
-                    className={cn(
-                      "shrink-0 text-[var(--oh-muted)] group-hover:text-[var(--oh-foreground)]",
-                      formControlTransitionClassName,
-                    )}
+                    className={cn("shrink-0", dropdownMenuRowIconClassName)}
                     aria-hidden
                   />
                   <span>{destinationLabel}</span>
@@ -443,11 +444,7 @@ export function ChatInputActions({
               <button
                 ref={overflowTriggerRef}
                 type="button"
-                className={cn(
-                  "flex size-6 items-center justify-center rounded-full text-[var(--oh-muted)]",
-                  formControlTransitionClassName,
-                  "hover:bg-white/10 hover:text-white cursor-pointer",
-                )}
+                className={cn(chatInputIconButtonClassName, "size-6")}
                 aria-label="More input actions"
                 aria-expanded={isOverflowOpen}
                 aria-haspopup="menu"

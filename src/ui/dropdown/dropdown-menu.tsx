@@ -2,6 +2,7 @@ import React from "react";
 import { Divider } from "#/ui/divider";
 import { cn } from "#/utils/utils";
 import { DropdownOption } from "./types";
+import { dropdownInstantColorClassName } from "#/utils/dropdown-classes";
 
 interface DropdownMenuProps {
   isOpen: boolean;
@@ -58,6 +59,7 @@ export function DropdownMenu({
                   "px-2 py-2 cursor-pointer text-sm rounded",
                   "text-white focus:outline-none font-normal",
                   "flex items-center gap-2",
+                  dropdownInstantColorClassName,
                   selectedItem?.value === option.value
                     ? "bg-[var(--oh-interactive-selected)] text-white"
                     : "hover:bg-[var(--oh-interactive-hover)]",

@@ -1,6 +1,6 @@
 import { ContextMenuListItem } from "#/components/features/context-menu/context-menu-list-item";
-import { formControlTransitionClassName } from "#/utils/form-control-classes";
 import { cn } from "#/utils/utils";
+import { dropdownMenuRowIconClassName } from "#/utils/dropdown-classes";
 
 interface ServerStatusContextMenuIconTextProps {
   icon: React.ReactNode;
@@ -21,8 +21,8 @@ export function ServerStatusContextMenuIconText({
         <span className="min-w-0 truncate">{text}</span>
         <span
           className={cn(
-            "flex shrink-0 items-center text-[var(--oh-muted)] group-hover:text-[var(--oh-foreground)] group-focus-visible:text-[var(--oh-foreground)] [&_svg]:text-current",
-            formControlTransitionClassName,
+            "flex shrink-0 items-center [&_svg]:text-current",
+            dropdownMenuRowIconClassName,
           )}
           aria-hidden
         >

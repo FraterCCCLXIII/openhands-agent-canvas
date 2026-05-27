@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import KebabVerticalIcon from "#/icons/kebab-vertical.svg?react";
 import { ContextMenuListItem } from "#/components/features/context-menu/context-menu-list-item";
 import { I18nKey } from "#/i18n/declaration";
+import { cn } from "#/utils/utils";
 import { ContextMenu } from "#/ui/context-menu";
+import { dropdownMenuRowIconClassName } from "#/utils/dropdown-classes";
 import { automationIconActionButtonClassName } from "./automation-action-button-classes";
 
 export interface KebabMenuItem {
@@ -23,7 +25,10 @@ function KebabMenuItemContent({ icon, label }: KebabMenuItemContentProps) {
   return (
     <span className="flex min-w-0 w-full items-center gap-2">
       <span
-        className="flex shrink-0 items-center text-[var(--oh-muted)] transition-colors group-hover:text-[var(--oh-foreground)] group-focus-visible:text-[var(--oh-foreground)] [&_svg]:size-4 [&_svg]:text-current"
+        className={cn(
+          "flex shrink-0 items-center [&_svg]:size-4 [&_svg]:text-current",
+          dropdownMenuRowIconClassName,
+        )}
         aria-hidden
       >
         {icon}

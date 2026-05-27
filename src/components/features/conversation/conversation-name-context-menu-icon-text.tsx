@@ -1,5 +1,5 @@
 import { cn } from "#/utils/utils";
-import { formControlTransitionClassName } from "#/utils/form-control-classes";
+import { dropdownMenuRowIconClassName } from "#/utils/dropdown-classes";
 
 interface ConversationNameContextMenuIconTextProps {
   icon: React.ReactNode;
@@ -16,8 +16,8 @@ export function ConversationNameContextMenuIconText({
     <div className={cn("flex min-w-0 w-full items-center gap-2", className)}>
       <span
         className={cn(
-          "flex shrink-0 items-center text-[var(--oh-muted)] group-hover:text-[var(--oh-foreground)] group-focus-visible:text-[var(--oh-foreground)] [&_svg]:text-current",
-          formControlTransitionClassName,
+          "flex shrink-0 items-center [&_svg]:text-current",
+          dropdownMenuRowIconClassName,
         )}
         aria-hidden
       >

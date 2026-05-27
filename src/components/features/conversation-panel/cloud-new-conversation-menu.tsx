@@ -11,6 +11,10 @@ import { useDebounce } from "#/hooks/use-debounce";
 import { useHomeStore } from "#/stores/home-store";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import {
+  dropdownMenuRowClassName,
+  dropdownInstantColorClassName,
+} from "#/utils/dropdown-classes";
 import { GitRepository } from "#/types/git";
 import { Provider } from "#/types/settings";
 import RepoIcon from "#/icons/repo.svg?react";
@@ -179,11 +183,7 @@ export function CloudNewConversationMenu({
     setQuery("");
   };
 
-  const itemClass = cn(
-    "flex w-full cursor-pointer items-center gap-2 rounded px-2 py-2 text-left text-sm text-white",
-    "font-normal transition-colors hover:bg-[var(--oh-interactive-hover)]",
-    "disabled:cursor-not-allowed disabled:opacity-60",
-  );
+  const itemClass = dropdownMenuRowClassName;
 
   React.useEffect(() => {
     if (!open) return;
@@ -259,8 +259,8 @@ export function CloudNewConversationMenu({
                     data-testid={`cloud-provider-tab-${provider}`}
                     onClick={() => handleProviderChange(provider)}
                     className={cn(
-                      "flex items-center gap-1 rounded px-2 py-1 text-xs",
-                      "border transition-colors",
+                      "flex items-center gap-1 rounded border px-2 py-1 text-xs",
+                      dropdownInstantColorClassName,
                       isActive
                         ? "border-[var(--oh-border-subtle)] bg-[var(--oh-interactive-hover)] text-white"
                         : "border-transparent text-[var(--oh-text-secondary)] hover:text-white",

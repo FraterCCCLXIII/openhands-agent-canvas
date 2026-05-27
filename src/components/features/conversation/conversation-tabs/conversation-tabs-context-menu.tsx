@@ -21,6 +21,7 @@ import { useTaskList } from "#/hooks/use-task-list";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useSelectConversationTab } from "#/hooks/use-select-conversation-tab";
 import { cn } from "#/utils/utils";
+import { dropdownInstantColorClassName } from "#/utils/dropdown-classes";
 
 interface ConversationTabsContextMenuProps {
   isOpen: boolean;
@@ -127,8 +128,8 @@ export function ConversationTabsContextMenu({
                 type="button"
                 data-testid={`conversation-tabs-menu-open-${tab}`}
                 className={cn(
-                  "flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-l p-2 text-start",
-                  "text-white transition-colors",
+                  "flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-l p-2 text-start text-white",
+                  dropdownInstantColorClassName,
                 )}
                 onClick={() => handleOpenTab(tab)}
               >
@@ -139,8 +140,8 @@ export function ConversationTabsContextMenu({
                 type="button"
                 data-testid={`conversation-tabs-menu-pin-${tab}`}
                 className={cn(
-                  "flex shrink-0 cursor-pointer items-center justify-center rounded-r px-2",
-                  "text-white transition-colors hover:bg-white/10",
+                  "flex shrink-0 cursor-pointer items-center justify-center rounded-r px-2 text-white hover:bg-white/10",
+                  dropdownInstantColorClassName,
                 )}
                 aria-pressed={pinned}
                 aria-label={pinned ? "Unpin tab from bar" : "Pin tab to bar"}
