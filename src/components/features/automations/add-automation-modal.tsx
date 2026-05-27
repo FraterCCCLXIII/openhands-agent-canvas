@@ -33,7 +33,7 @@ export function AddAutomationModal({
         <header className="flex-shrink-0 px-6 pb-4 pt-6">
           <h2
             id="add-automation-modal-title"
-            className="pr-6 text-lg font-semibold"
+            className="pr-6 text-lg font-semibold text-white"
           >
             {t(I18nKey.AUTOMATIONS$EMPTY_HOW_TO_CREATE_TITLE)}
           </h2>
