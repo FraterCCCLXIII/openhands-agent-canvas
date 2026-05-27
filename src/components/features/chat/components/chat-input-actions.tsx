@@ -37,7 +37,8 @@ import { cn } from "#/utils/utils";
 import { chatInputIconButtonClassName } from "#/utils/form-control-classes";
 import {
   dropdownInstantColorClassName,
-  dropdownMenuRowIconClassName,
+  dropdownMenuRowGapClassName,
+  dropdownMenuRowIconWrapperClassName,
 } from "#/utils/dropdown-classes";
 
 interface ChatInputActionsProps {
@@ -393,16 +394,17 @@ export function ChatInputActions({
                   to={destinationPath}
                   onClick={closeOverflowMenus}
                   className={cn(
-                    "group flex h-[30px] items-center gap-2 rounded p-2 leading-5 text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]",
+                    "group flex h-[30px] items-center rounded p-2 leading-5 text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]",
+                    dropdownMenuRowGapClassName,
                     dropdownInstantColorClassName,
                   )}
                 >
-                  <SettingsGearIcon
-                    width={16}
-                    height={16}
-                    className={cn("shrink-0", dropdownMenuRowIconClassName)}
+                  <span
+                    className={dropdownMenuRowIconWrapperClassName}
                     aria-hidden
-                  />
+                  >
+                    <SettingsGearIcon width={16} height={16} />
+                  </span>
                   <span>{destinationLabel}</span>
                 </NavigationLink>
               </li>

@@ -12,6 +12,10 @@ import SettingsIcon from "#/icons/settings.svg?react";
 import CheckIcon from "#/icons/checkmark.svg?react";
 import { cn } from "#/utils/utils";
 import type { ProfileInfo } from "#/api/profiles-service/profiles-service.api";
+import {
+  dropdownMenuRowGapClassName,
+  dropdownMenuRowIconWrapperClassName,
+} from "#/utils/dropdown-classes";
 
 const rowBaseClassName = cn(
   "w-full flex flex-col gap-0.5 p-2 rounded",
@@ -19,7 +23,8 @@ const rowBaseClassName = cn(
 );
 const profileRowClassName = cn(rowBaseClassName, "h-auto items-stretch");
 const linkRowClassName = cn(
-  "w-full flex items-center gap-2 p-2 rounded",
+  "group w-full flex items-center p-2 rounded",
+  dropdownMenuRowGapClassName,
   "text-start hover:bg-[var(--oh-interactive-hover)] cursor-pointer text-nowrap",
 );
 
@@ -83,15 +88,15 @@ export function SwitchProfileContextMenu({
             )}
           >
             <span
-              className="flex items-center gap-2 min-w-0"
+              className={cn(
+                "flex items-center min-w-0",
+                dropdownMenuRowGapClassName,
+              )}
               title={profile.model ?? undefined}
             >
-              <CircuitIcon
-                width={16}
-                height={16}
-                className="shrink-0"
-                aria-hidden
-              />
+              <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
+                <CircuitIcon width={16} height={16} />
+              </span>
               <span className="flex-1 truncate text-sm leading-5">
                 {profile.name}
               </span>
@@ -119,7 +124,9 @@ export function SwitchProfileContextMenu({
         data-testid="switch-profile-open-settings"
         className={linkRowClassName}
       >
-        <SettingsIcon width={16} height={16} className="shrink-0" />
+        <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
+          <SettingsIcon width={16} height={16} />
+        </span>
         <span className="text-sm leading-5">
           {t(I18nKey.MODEL$OPEN_SETTINGS)}
         </span>

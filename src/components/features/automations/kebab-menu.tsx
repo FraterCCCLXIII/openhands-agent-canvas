@@ -6,7 +6,7 @@ import { ContextMenuListItem } from "#/components/features/context-menu/context-
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 import { ContextMenu } from "#/ui/context-menu";
-import { dropdownMenuRowIconClassName } from "#/utils/dropdown-classes";
+import { dropdownMenuRowIconWrapperClassName } from "#/utils/dropdown-classes";
 import { automationIconActionButtonClassName } from "./automation-action-button-classes";
 
 export interface KebabMenuItem {
@@ -25,10 +25,7 @@ function KebabMenuItemContent({ icon, label }: KebabMenuItemContentProps) {
   return (
     <span className="flex min-w-0 w-full items-center gap-2">
       <span
-        className={cn(
-          "flex shrink-0 items-center [&_svg]:size-4 [&_svg]:text-current",
-          dropdownMenuRowIconClassName,
-        )}
+        className={cn("[&_svg]:size-4", dropdownMenuRowIconWrapperClassName)}
         aria-hidden
       >
         {icon}

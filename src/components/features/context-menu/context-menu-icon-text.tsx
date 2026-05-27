@@ -1,5 +1,8 @@
 import { cn } from "#/utils/utils";
-import { dropdownMenuRowIconClassName } from "#/utils/dropdown-classes";
+import {
+  dropdownMenuRowGapClassName,
+  dropdownMenuRowIconWrapperClassName,
+} from "#/utils/dropdown-classes";
 
 interface ContextMenuIconTextProps {
   icon: React.ComponentType<{ className?: string }>;
@@ -15,9 +18,19 @@ export function ContextMenuIconText({
   iconClassName,
 }: ContextMenuIconTextProps) {
   return (
-    <div className={cn("flex min-w-0 items-center gap-2", className)}>
+    <div
+      className={cn(
+        "flex min-w-0 items-center",
+        dropdownMenuRowGapClassName,
+        className,
+      )}
+    >
       <Icon
-        className={cn("h-4 w-4", dropdownMenuRowIconClassName, iconClassName)}
+        className={cn(
+          "h-4 w-4",
+          dropdownMenuRowIconWrapperClassName,
+          iconClassName,
+        )}
       />
       <span className="min-w-0 flex-1 leading-5">{text}</span>
     </div>

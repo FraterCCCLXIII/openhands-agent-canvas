@@ -15,6 +15,7 @@ import {
   dropdownMenuRowClassName,
   dropdownInstantColorClassName,
   dropdownMenuListClassName,
+  dropdownMenuRowIconWrapperClassName,
 } from "#/utils/dropdown-classes";
 import { GitRepository } from "#/types/git";
 import { Provider } from "#/types/settings";
@@ -63,7 +64,9 @@ function RepoListItem({
         onClick={() => onSelect(repo)}
         className={itemClass}
       >
-        <RepoIcon width={14} height={14} className="shrink-0" />
+        <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
+          <RepoIcon width={14} height={14} />
+        </span>
         <span className="truncate">{repo.full_name}</span>
       </button>
     </li>

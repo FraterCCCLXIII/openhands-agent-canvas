@@ -17,6 +17,7 @@ import { cn } from "#/utils/utils";
 import {
   dropdownMenuRowClassName,
   dropdownMenuListClassName,
+  dropdownMenuRowIconWrapperClassName,
 } from "#/utils/dropdown-classes";
 import { getWorkspacesUnsupportedMessage } from "#/utils/workspaces-compatibility";
 import RepoIcon from "#/icons/repo.svg?react";
@@ -236,7 +237,12 @@ export function LocalNewConversationMenu({
                   onClick={() => launch(w.path)}
                   className={itemClass}
                 >
-                  <RepoIcon width={14} height={14} className="shrink-0" />
+                  <span
+                    className={dropdownMenuRowIconWrapperClassName}
+                    aria-hidden
+                  >
+                    <RepoIcon width={14} height={14} />
+                  </span>
                   <span className="truncate">{w.name}</span>
                 </button>
               </li>

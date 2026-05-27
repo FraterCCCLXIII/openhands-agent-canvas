@@ -7,6 +7,9 @@ export const dropdownInstantColorClassName = "transition-none";
 /** 2px vertical gap between rows in a dropdown/context menu list. */
 export const dropdownMenuListGapClassName = "gap-0.5";
 
+/** Standard horizontal gap between a row icon and its label. */
+export const dropdownMenuRowGapClassName = "gap-2";
+
 /** Flex column shell for a dropdown menu item list. */
 export const dropdownMenuListClassName = cn(
   "flex flex-col",
@@ -24,14 +27,16 @@ export const dropdownTriggerShellClassName = cn(
 
 /** Standard white-label menu row. */
 export const dropdownMenuRowClassName = cn(
-  "flex w-full cursor-pointer items-center gap-2 rounded px-2 py-2 text-left text-sm font-normal text-white",
+  "group flex w-full cursor-pointer items-center rounded px-2 py-2 text-left text-sm font-normal text-white",
+  dropdownMenuRowGapClassName,
   "hover:bg-[var(--oh-interactive-hover)] disabled:cursor-not-allowed disabled:opacity-60",
   dropdownInstantColorClassName,
 );
 
 /** Menu row using foreground token (context menus). */
 export const dropdownMenuRowForegroundClassName = cn(
-  "group flex w-full cursor-pointer items-center gap-2 rounded px-2 py-2 text-start text-sm font-normal",
+  "group flex w-full cursor-pointer items-center rounded px-2 py-2 text-start text-sm font-normal",
+  dropdownMenuRowGapClassName,
   "text-[var(--oh-foreground)] hover:bg-[var(--oh-interactive-hover)]",
   "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
   dropdownInstantColorClassName,
@@ -39,8 +44,14 @@ export const dropdownMenuRowForegroundClassName = cn(
 
 /** Icon inside a menu row — muted until row hover/focus. */
 export const dropdownMenuRowIconClassName = cn(
-  "shrink-0 text-[var(--oh-muted)] group-hover:text-[var(--oh-foreground)] group-focus-visible:text-[var(--oh-foreground)]",
+  "shrink-0 text-[var(--oh-muted)] group-hover:text-white group-focus-visible:text-white",
   dropdownInstantColorClassName,
+);
+
+/** Wrapper for SVG/React icon nodes inside a menu row. */
+export const dropdownMenuRowIconWrapperClassName = cn(
+  "flex size-4 shrink-0 items-center justify-center [&_svg]:text-current",
+  dropdownMenuRowIconClassName,
 );
 
 /** Enum/filter dropdown trigger chip. */
@@ -53,7 +64,8 @@ export const dropdownFilterTriggerClassName = cn(
 
 /** Footer action row inside a dropdown panel. */
 export const dropdownFooterActionClassName = cn(
-  "flex w-full items-center rounded-md px-2 py-2 text-sm font-normal text-white",
+  "group flex w-full items-center rounded-md px-2 py-2 text-sm font-normal text-white",
+  dropdownMenuRowGapClassName,
   "hover:bg-[var(--oh-interactive-hover)]",
   dropdownInstantColorClassName,
 );

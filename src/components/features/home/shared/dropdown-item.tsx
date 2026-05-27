@@ -1,6 +1,10 @@
 import React from "react";
 import { cn } from "#/utils/utils";
-import { dropdownInstantColorClassName } from "#/utils/dropdown-classes";
+import {
+  dropdownInstantColorClassName,
+  dropdownMenuRowGapClassName,
+  dropdownMenuRowIconWrapperClassName,
+} from "#/utils/dropdown-classes";
 
 interface DropdownItemProps<T> {
   item: T;
@@ -30,8 +34,8 @@ export function DropdownItem<T>({
     item,
     className: cn(
       isProviderDropdown
-        ? "px-2 py-0 cursor-pointer text-xs rounded-md mx-0 my-0 h-6 flex items-center"
-        : "px-2 py-2 cursor-pointer text-sm rounded-md mx-0 my-0.5",
+        ? "group px-2 py-0 cursor-pointer text-xs rounded-md mx-0 my-0 h-6 flex items-center"
+        : "group px-2 py-2 cursor-pointer text-sm rounded-md mx-0 my-0.5",
       "text-white focus:outline-none font-normal",
       dropdownInstantColorClassName,
       {
@@ -44,8 +48,12 @@ export function DropdownItem<T>({
 
   return (
     <li key={getItemKey(item)} {...itemProps}>
-      <div className="flex items-center gap-2">
-        {renderIcon?.(item)}
+      <div className={cn("flex items-center", dropdownMenuRowGapClassName)}>
+        {renderIcon ? (
+          <span className={dropdownMenuRowIconWrapperClassName}>
+            {renderIcon(item)}
+          </span>
+        ) : null}
         <span className="font-normal">{getDisplayText(item)}</span>
       </div>
     </li>
