@@ -184,6 +184,7 @@ export function ChangeAgentButton() {
       </button>
       {contextMenuOpen && (
         <ChangeAgentContextMenu
+          activeMode={conversationMode}
           onClose={() => setContextMenuOpen(false)}
           onCodeClick={handleCodeClick}
           onPlanClick={handlePlanClick}
