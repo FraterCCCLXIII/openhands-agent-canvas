@@ -62,6 +62,16 @@ export const dropdownFilterTriggerClassName = cn(
   dropdownInstantColorClassName,
 );
 
+/**
+ * Scroll cap for the switch-profile menu: four two-line rows
+ * (p-2 + leading-5 title + gap-0.5 + leading-4 subtitle) plus list gaps.
+ */
+export const switchProfileMenuListScrollClassName = cn(
+  dropdownMenuListClassName,
+  "overflow-y-auto custom-scrollbar-always",
+  "max-h-[13.875rem]",
+);
+
 /** Footer action row inside a dropdown panel. */
 export const dropdownFooterActionClassName = cn(
   "group flex w-full items-center rounded-md px-2 py-2 text-sm font-normal text-white",
