@@ -20,8 +20,6 @@ interface ConversationGroupFolderListProps {
   groupIds: readonly string[];
   groupFolderOrder: readonly string[];
   setGroupFolderOrder: (order: readonly string[]) => void;
-  selectedGroupFolderId: string | null;
-  onSelectGroupFolder: (groupId: string) => void;
   collapsedGroupIds: ReadonlySet<string>;
   expandedGroupPreviewIds: ReadonlySet<string>;
   onToggleGroupCollapsed: (groupId: string) => void;
@@ -37,8 +35,6 @@ export function ConversationGroupFolderList({
   groupIds,
   groupFolderOrder,
   setGroupFolderOrder,
-  selectedGroupFolderId,
-  onSelectGroupFolder,
   collapsedGroupIds,
   expandedGroupPreviewIds,
   onToggleGroupCollapsed,
@@ -85,7 +81,6 @@ export function ConversationGroupFolderList({
           group={group}
           expanded={!collapsedGroupIds.has(group.id)}
           previewExpanded={expandedGroupPreviewIds.has(group.id)}
-          selected={selectedGroupFolderId === group.id}
           isDragging={draggedGroupId === group.id}
           isDropTarget={
             dropTargetGroupId === group.id && draggedGroupId !== group.id
@@ -93,7 +88,6 @@ export function ConversationGroupFolderList({
           isCreatingConversationFlow={isCreatingConversationFlow}
           activeConversationId={activeConversationId}
           onToggleExpanded={() => onToggleGroupCollapsed(group.id)}
-          onSelect={() => onSelectGroupFolder(group.id)}
           onDragStart={() => setDraggedGroupId(group.id)}
           onDragEnd={() => {
             setDraggedGroupId(null);

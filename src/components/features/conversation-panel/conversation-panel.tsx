@@ -155,9 +155,6 @@ export function ConversationPanel({
   const [expandedGroupPreviewIds, setExpandedGroupPreviewIds] = React.useState<
     ReadonlySet<string>
   >(() => new Set());
-  const [selectedGroupFolderId, setSelectedGroupFolderId] = React.useState<
-    string | null
-  >(null);
   const [expandedPinnedPreview, setExpandedPinnedPreview] =
     React.useState(false);
 
@@ -198,7 +195,6 @@ export function ConversationPanel({
     if (organizeMode !== "grouped") {
       setCollapsedGroupIds(new Set());
       setExpandedGroupPreviewIds(new Set());
-      setSelectedGroupFolderId(null);
     }
   }, [organizeMode]);
 
@@ -328,15 +324,6 @@ export function ConversationPanel({
     () => conversationGroups?.map((group) => group.id) ?? [],
     [conversationGroups],
   );
-
-  React.useEffect(() => {
-    if (
-      selectedGroupFolderId &&
-      !conversationGroupIds.includes(selectedGroupFolderId)
-    ) {
-      setSelectedGroupFolderId(null);
-    }
-  }, [conversationGroupIds, selectedGroupFolderId]);
 
   const compactVisibleConversations = React.useMemo(
     () =>
@@ -725,12 +712,6 @@ export function ConversationPanel({
             groupIds={conversationGroupIds}
             groupFolderOrder={groupFolderOrder}
             setGroupFolderOrder={setGroupFolderOrder}
-            selectedGroupFolderId={selectedGroupFolderId}
-            onSelectGroupFolder={(groupId) =>
-              setSelectedGroupFolderId((current) =>
-                current === groupId ? null : groupId,
-              )
-            }
             collapsedGroupIds={collapsedGroupIds}
             expandedGroupPreviewIds={expandedGroupPreviewIds}
             onToggleGroupCollapsed={toggleGroupCollapsed}

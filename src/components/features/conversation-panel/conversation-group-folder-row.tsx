@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import { ChevronRight, Folder, GripVertical, Plus } from "lucide-react";
+import { Folder, Plus } from "lucide-react";
 import type { DragEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { AppConversation } from "#/api/conversation-service/agent-server-conversation-service.types";
@@ -19,13 +18,11 @@ interface ConversationGroupFolderRowProps {
   group: ConversationGroup;
   expanded: boolean;
   previewExpanded: boolean;
-  selected: boolean;
   isDragging: boolean;
   isDropTarget: boolean;
   isCreatingConversationFlow: boolean;
   activeConversationId?: string | null;
   onToggleExpanded: () => void;
-  onSelect: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
   onDragOver: (event: DragEvent<HTMLElement>) => void;
@@ -40,13 +37,11 @@ export function ConversationGroupFolderRow({
   group,
   expanded,
   previewExpanded,
-  selected,
   isDragging,
   isDropTarget,
   isCreatingConversationFlow,
   activeConversationId,
   onToggleExpanded,
-  onSelect,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -66,9 +61,7 @@ export function ConversationGroupFolderRow({
     });
 
   return (
-    <motion.section
-      layout
-      transition={{ type: "spring", stiffness: 520, damping: 42 }}
+    <section
       aria-labelledby={headingId}
       data-testid={`thread-folder-${groupTestIdSuffix}`}
       onDragOver={onDragOver}
@@ -81,20 +74,27 @@ export function ConversationGroupFolderRow({
     >
       <div
         className={cn(
-          "flex h-8 w-full min-w-0 items-center gap-0.5 rounded-md pl-1 pr-1 text-sm font-normal",
-          "text-[var(--oh-muted)] transition-colors",
-          selected
-            ? "bg-[var(--oh-interactive-selected)] text-white"
-            : "hover:bg-[var(--oh-surface-raised)] hover:text-white",
+          "flex h-8 w-full min-w-0 items-center gap-0.5 rounded-md pl-2 pr-1 text-sm font-normal",
+          "text-[var(--oh-muted)] transition-colors hover:bg-[var(--oh-surface-raised)] hover:text-white",
         )}
       >
         <button
           type="button"
           draggable
+          id={headingId}
+          aria-expanded={expanded}
+          aria-controls={`thread-folder-content-${groupTestIdSuffix}`}
           data-testid={`thread-folder-drag-${groupTestIdSuffix}`}
-          aria-label={t(I18nKey.CONVERSATION_PANEL$DRAG_FOLDER, {
-            label: group.label,
-          })}
+          aria-label={
+            expanded
+              ? t(I18nKey.CONVERSATION_PANEL$COLLAPSE_FOLDER, {
+                  label: group.label,
+                })
+              : t(I18nKey.CONVERSATION_PANEL$EXPAND_FOLDER, {
+                  label: group.label,
+                })
+          }
+          onClick={onToggleExpanded}
           onDragStart={(event) => {
             event.stopPropagation();
             const { dataTransfer } = event;
@@ -109,56 +109,8 @@ export function ConversationGroupFolderRow({
             onDragEnd();
           }}
           className={cn(
-            "inline-flex h-6 w-6 shrink-0 cursor-grab items-center justify-center rounded-md active:cursor-grabbing",
-            "text-inherit transition-colors",
-            "hover:bg-white/10 hover:text-white",
-            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
-          )}
-        >
-          <GripVertical className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        </button>
-        <button
-          type="button"
-          data-testid={`thread-folder-expand-${groupTestIdSuffix}`}
-          aria-expanded={expanded}
-          aria-controls={`thread-folder-content-${groupTestIdSuffix}`}
-          aria-label={
-            expanded
-              ? t(I18nKey.CONVERSATION_PANEL$COLLAPSE_FOLDER, {
-                  label: group.label,
-                })
-              : t(I18nKey.CONVERSATION_PANEL$EXPAND_FOLDER, {
-                  label: group.label,
-                })
-          }
-          onClick={onToggleExpanded}
-          className={cn(
-            "inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md",
-            "text-inherit transition-colors",
-            "hover:bg-white/10 hover:text-white",
-            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
-          )}
-        >
-          <ChevronRight
-            className={cn(
-              "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
-              expanded && "rotate-90",
-            )}
-            aria-hidden
-          />
-        </button>
-        <button
-          type="button"
-          id={headingId}
-          aria-pressed={selected}
-          data-testid={`thread-folder-select-${groupTestIdSuffix}`}
-          aria-label={t(I18nKey.CONVERSATION_PANEL$SELECT_FOLDER, {
-            label: group.label,
-          })}
-          onClick={onSelect}
-          className={cn(
-            "flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md py-1 text-left text-inherit outline-none",
-            "transition-colors focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
+            "flex min-h-8 min-w-0 flex-1 cursor-grab items-center gap-2 rounded-md py-1 text-left text-inherit outline-none active:cursor-grabbing",
+            "focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
           )}
         >
           <Folder className="h-4 w-4 shrink-0" aria-hidden />
@@ -188,11 +140,9 @@ export function ConversationGroupFolderRow({
         </button>
       </div>
       {expanded ? (
-        <motion.div
-          layout
+        <div
           id={`thread-folder-content-${groupTestIdSuffix}`}
           className="mt-0.5 space-y-0.5"
-          initial={false}
         >
           {visibleConversations.map(renderConversationCard)}
           {isPreviewTruncated ? (
@@ -201,7 +151,7 @@ export function ConversationGroupFolderRow({
                 type="button"
                 data-testid={`thread-folder-view-more-${groupTestIdSuffix}`}
                 onClick={onTogglePreviewExpanded}
-                className="ml-[26px] cursor-pointer text-xs text-[var(--oh-text-dim)] hover:text-white"
+                className="cursor-pointer text-xs text-[var(--oh-text-dim)] hover:text-white"
               >
                 {isShowingAll
                   ? t(I18nKey.CONVERSATION_PANEL$LESS)
@@ -209,8 +159,8 @@ export function ConversationGroupFolderRow({
               </button>
             </div>
           ) : null}
-        </motion.div>
+        </div>
       ) : null}
-    </motion.section>
+    </section>
   );
 }
