@@ -60,6 +60,38 @@ describe("AppSettingsScreen", () => {
     expect(screen.getByTestId("git-user-email-input")).toHaveValue(
       "octocat@example.com",
     );
+    expect(
+      screen.getByTestId("enable-automation-recommendations-switch"),
+    ).toBeInTheDocument();
+  });
+
+  it("saves automation recommendations preference in OSS mode", async () => {
+    const saveSettingsSpy = vi
+      .spyOn(SettingsService, "saveSettings")
+      .mockResolvedValue(true);
+
+    vi.spyOn(SettingsService, "getSettings").mockResolvedValue(
+      buildSettings({
+        enable_automation_recommendations: true,
+      }),
+    );
+
+    renderAppSettingsScreen();
+
+    const user = userEvent.setup();
+
+    await user.click(
+      await screen.findByTestId("enable-automation-recommendations-switch"),
+    );
+    await user.click(screen.getByTestId("submit-button"));
+
+    await waitFor(() => {
+      expect(saveSettingsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enable_automation_recommendations: false,
+        }),
+      );
+    });
   });
 
   it("saves updated git author details in OSS mode", async () => {

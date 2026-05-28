@@ -32,11 +32,15 @@ interface WorkspaceSelectionFormProps {
    * also flips from "Launch" to "Confirm" so the action matches the new flow.
    */
   onConfirm?: (workspace: LocalWorkspace) => void;
+  hideLaunchButton?: boolean;
+  onSelectionChange?: (workspace: LocalWorkspace | null) => void;
 }
 
 export function WorkspaceSelectionForm({
   isLoadingSettings = false,
   onConfirm,
+  hideLaunchButton = false,
+  onSelectionChange,
 }: WorkspaceSelectionFormProps) {
   const { t } = useTranslation("openhands");
   const { navigate } = useNavigation();
@@ -86,6 +90,11 @@ export function WorkspaceSelectionForm({
     isLoadingSettings ||
     (isLoadingWorkspaces && workspaces.length === 0);
 
+  const handleWorkspaceChange = (workspace: LocalWorkspace | null) => {
+    setSelectedWorkspace(workspace);
+    onSelectionChange?.(workspace);
+  };
+
   const handleLaunch = () => {
     if (!selectedWorkspace) return;
     if (onConfirm) {
@@ -102,16 +111,16 @@ export function WorkspaceSelectionForm({
 
   return (
     <div className="flex flex-col">
-      {/* Skip the in-form "Workspaces" header in dialog mode — the dialog
-          already shows an "Open Workspace" title, so this would be redundant. */}
-      {!onConfirm && (
+      {/* Skip the in-form header in dialog/automation mode — the dialog
+          already shows its own title and description. */}
+      {!onConfirm && !hideLaunchButton ? (
         <div className="flex items-center gap-[10px] pb-4">
           <FolderIcon width={24} height={24} />
           <span className="leading-5 font-bold text-base text-white">
             {t(I18nKey.HOME$WORKSPACES_TAB)}
           </span>
         </div>
-      )}
+      ) : null}
 
       <div className="flex flex-col gap-[10px] pb-4">
         <WorkspaceDropdown
@@ -127,7 +136,7 @@ export function WorkspaceSelectionForm({
           disabled={isDropdownDisabled}
           disabledTooltip={workspacesUnsupportedMessage}
           showManage={workspaces.length > 0 || workspaceParents.length > 0}
-          onChange={setSelectedWorkspace}
+          onChange={handleWorkspaceChange}
           onAddClick={() => setIsBrowserOpen(true)}
           onManageClick={() => setIsManageOpen(true)}
           className="max-w-auto"
@@ -143,26 +152,28 @@ export function WorkspaceSelectionForm({
         )}
       </div>
 
-      <BrandButton
-        testId="workspace-launch-button"
-        variant="primary"
-        type="button"
-        isDisabled={
-          !selectedWorkspace ||
-          (!onConfirm && isCreatingConversation) ||
-          isLoadingSettings
-        }
-        onClick={handleLaunch}
-        className={
-          onConfirm ? "w-full" : "w-auto absolute bottom-5 left-5 right-5"
-        }
-      >
-        {onConfirm
-          ? t(I18nKey.BUTTON$CONFIRM)
-          : !isCreatingConversation
-            ? "Launch"
-            : t(I18nKey.HOME$LOADING)}
-      </BrandButton>
+      {!hideLaunchButton ? (
+        <BrandButton
+          testId="workspace-launch-button"
+          variant="primary"
+          type="button"
+          isDisabled={
+            !selectedWorkspace ||
+            (!onConfirm && isCreatingConversation) ||
+            isLoadingSettings
+          }
+          onClick={handleLaunch}
+          className={
+            onConfirm ? "w-full" : "w-auto absolute bottom-5 left-5 right-5"
+          }
+        >
+          {onConfirm
+            ? t(I18nKey.BUTTON$CONFIRM)
+            : !isCreatingConversation
+              ? "Launch"
+              : t(I18nKey.HOME$LOADING)}
+        </BrandButton>
+      ) : null}
 
       <FolderBrowserModal
         isOpen={isBrowserOpen}

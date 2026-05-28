@@ -36,12 +36,22 @@ interface RepositorySelectionFormProps {
     branch: Branch;
     provider: Provider | null;
   }) => void;
+  hideLaunchButton?: boolean;
+  onSelectionChange?: (
+    selection: {
+      repository: GitRepository;
+      branch: Branch;
+      provider: Provider | null;
+    } | null,
+  ) => void;
 }
 
 export function RepositorySelectionForm({
   onRepoSelection,
   isLoadingSettings = false,
   onConfirm,
+  hideLaunchButton = false,
+  onSelectionChange,
 }: RepositorySelectionFormProps) {
   const { navigate } = useNavigation();
 
@@ -92,6 +102,29 @@ export function RepositorySelectionForm({
   // into the new conversation screen after the conversation is created.
   const isCreatingConversation =
     isPending || isSuccess || isCreatingConversationElsewhere;
+
+  React.useEffect(() => {
+    if (
+      !selectedRepository ||
+      !selectedBranch ||
+      (providers.length > 1 && !selectedProvider)
+    ) {
+      onSelectionChange?.(null);
+      return;
+    }
+
+    onSelectionChange?.({
+      repository: selectedRepository,
+      branch: selectedBranch,
+      provider: selectedProvider,
+    });
+  }, [
+    onSelectionChange,
+    providers.length,
+    selectedBranch,
+    selectedProvider,
+    selectedRepository,
+  ]);
 
   // Branch selection is now handled by GitBranchDropdown component
 
@@ -175,9 +208,9 @@ export function RepositorySelectionForm({
 
   return (
     <div className="flex flex-col">
-      {/* Skip the in-form "Open Repository" header in dialog mode — the dialog
-          already shows the same title, so this would be redundant. */}
-      {!onConfirm && (
+      {/* Skip the in-form header in dialog/automation mode — the dialog
+          already shows its own title and description. */}
+      {!onConfirm && !hideLaunchButton ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[10px] pb-4">
             <RepoForkedIcon width={24} height={24} />
@@ -186,7 +219,7 @@ export function RepositorySelectionForm({
             </span>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="flex flex-col gap-[10px] pb-4">
         <div className="flex items-center justify-between">
@@ -199,55 +232,57 @@ export function RepositorySelectionForm({
         {renderBranchSelector()}
       </div>
 
-      <BrandButton
-        testId="repo-launch-button"
-        variant="primary"
-        type="button"
-        isDisabled={
-          !selectedRepository ||
-          !selectedBranch ||
-          (!onConfirm && isCreatingConversation) ||
-          (providers.length > 1 && !selectedProvider) ||
-          isLoadingSettings
-        }
-        onClick={() => {
-          if (!selectedRepository || !selectedBranch) return;
-
-          // Persist the repository to recent repositories on every confirm so
-          // the home launcher and the inline path stay in sync.
-          addRecentRepository(selectedRepository);
-
-          if (onConfirm) {
-            onConfirm({
-              repository: selectedRepository,
-              branch: selectedBranch,
-              provider: selectedProvider,
-            });
-            return;
+      {!hideLaunchButton ? (
+        <BrandButton
+          testId="repo-launch-button"
+          variant="primary"
+          type="button"
+          isDisabled={
+            !selectedRepository ||
+            !selectedBranch ||
+            (!onConfirm && isCreatingConversation) ||
+            (providers.length > 1 && !selectedProvider) ||
+            isLoadingSettings
           }
+          onClick={() => {
+            if (!selectedRepository || !selectedBranch) return;
 
-          createConversation(
-            {
-              repository: {
-                name: selectedRepository.full_name || "",
-                gitProvider: selectedRepository.git_provider || "github",
-                branch: selectedBranch.name || "main",
+            // Persist the repository to recent repositories on every confirm so
+            // the home launcher and the inline path stay in sync.
+            addRecentRepository(selectedRepository);
+
+            if (onConfirm) {
+              onConfirm({
+                repository: selectedRepository,
+                branch: selectedBranch,
+                provider: selectedProvider,
+              });
+              return;
+            }
+
+            createConversation(
+              {
+                repository: {
+                  name: selectedRepository.full_name || "",
+                  gitProvider: selectedRepository.git_provider || "github",
+                  branch: selectedBranch.name || "main",
+                },
               },
-            },
-            {
-              onSuccess: (data) =>
-                navigate(`/conversations/${data.conversation_id}`),
-            },
-          );
-        }}
-        className="w-full"
-      >
-        {onConfirm
-          ? t(I18nKey.BUTTON$CONFIRM)
-          : !isCreatingConversation
-            ? "Launch"
-            : t("HOME$LOADING")}
-      </BrandButton>
+              {
+                onSuccess: (data) =>
+                  navigate(`/conversations/${data.conversation_id}`),
+              },
+            );
+          }}
+          className="w-full"
+        >
+          {onConfirm
+            ? t(I18nKey.BUTTON$CONFIRM)
+            : !isCreatingConversation
+              ? "Launch"
+              : t("HOME$LOADING")}
+        </BrandButton>
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,10 @@
 export const extensionModuleCardSurfaceClassName =
   "rounded-xl bg-base-secondary";
 
+/** Elevated card surface for tiles on `bg-base-secondary` panels (e.g. modals). */
+export const extensionModuleCardElevatedSurfaceClassName =
+  "rounded-xl bg-surface-raised";
+
 /** See `.extension-module-card-interactive` in `src/tailwind.css`. */
 export const EXTENSION_MODULE_CARD_INTERACTIVE_CLASS =
   "extension-module-card-interactive";

@@ -173,12 +173,13 @@ describe("SettingsService", () => {
   });
 
   it("persists app-level preferences to localStorage when saving on a local backend", async () => {
-    // Arrange: no diffs, only the 5 app-level preference fields.
+    // Arrange: no diffs, only the app-level preference fields.
     const appPrefs = {
       language: "fr",
       git_user_name: "Alice",
       git_user_email: "alice@example.com",
       enable_sound_notifications: true,
+      enable_automation_recommendations: false,
       user_consents_to_analytics: true,
     };
 
@@ -197,6 +198,7 @@ describe("SettingsService", () => {
       git_user_name: "Alice",
       git_user_email: "alice@example.com",
       enable_sound_notifications: true,
+      enable_automation_recommendations: false,
       user_consents_to_analytics: true,
     };
     window.localStorage.setItem(
@@ -213,6 +215,8 @@ describe("SettingsService", () => {
       git_user_name: settings.git_user_name,
       git_user_email: settings.git_user_email,
       enable_sound_notifications: settings.enable_sound_notifications,
+      enable_automation_recommendations:
+        settings.enable_automation_recommendations,
       user_consents_to_analytics: settings.user_consents_to_analytics,
     }).toEqual(appPrefs);
   });

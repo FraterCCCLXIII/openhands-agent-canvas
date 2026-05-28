@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SettingsService from "#/api/settings-service/settings-service.api";
 import McpService from "#/api/mcp-service/mcp-service.api";
@@ -14,9 +14,11 @@ import type { Backend } from "#/api/backend-registry/types";
 import {
   RecommendedAutomationsLauncher,
   buildAutomationPrompt,
+  type RecommendedAutomationSourceSelection,
 } from "#/components/features/automations/recommended-automations-launcher";
 import {
   RecommendedAutomationsSection,
+  HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT,
   getAutomationsByPopularity,
 } from "#/components/features/automations/recommended-automations-section";
 import {
@@ -66,12 +68,25 @@ const cloudBackend: Backend = {
   kind: "cloud",
 };
 
-function renderLauncher({ withBackendProvider = false } = {}) {
+function renderLauncher({
+  withBackendProvider = false,
+  variant = "default",
+  sourceSelection,
+}: {
+  withBackendProvider?: boolean;
+  variant?: "default" | "home";
+  sourceSelection?: RecommendedAutomationSourceSelection;
+} = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-  const launcher = <RecommendedAutomationsLauncher />;
+  const launcher = (
+    <RecommendedAutomationsLauncher
+      variant={variant}
+      sourceSelection={sourceSelection}
+    />
+  );
 
   return render(
     <QueryClientProvider client={queryClient}>
@@ -315,10 +330,106 @@ describe("recommended automations", () => {
       screen.queryByTestId("recommended-automation-plus-github-pr-reviewer"),
     ).not.toBeInTheDocument();
 
+    expect(
+      screen.getByTestId("recommended-automation-card-github-pr-reviewer")
+        .className,
+    ).toContain("bg-surface-raised");
+
     const pillRow = screen.getByTestId(
       "recommended-automation-pills-github-pr-reviewer",
     );
     expect(pillRow).not.toHaveTextContent("RECOMMENDED_AUTOMATIONS$MINUTES:");
+  });
+
+  it("limits the home preview to four cards with a view-more control", () => {
+    const onViewMore = vi.fn();
+
+    render(
+      <RecommendedAutomationsSection
+        backendKind="local"
+        installedServers={[]}
+        onSelect={vi.fn()}
+        variant="home"
+        limit={HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT}
+        onViewMore={onViewMore}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("recommended-automations-home-strip"),
+    ).toHaveClass("w-full");
+    expect(
+      screen.getByTestId("recommended-automation-card-github-pr-reviewer"),
+    ).toHaveClass("flex-1");
+    expect(
+      screen.getByTestId("recommended-automations-home-label"),
+    ).toHaveTextContent("RECOMMENDED_AUTOMATIONS$SECTION_LABEL");
+    expect(screen.getAllByTestId(/^recommended-automation-card-/)).toHaveLength(
+      HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT,
+    );
+    expect(
+      screen.queryByTestId("recommended-automation-pills-github-pr-reviewer"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("recommended-automations-view-more"));
+    expect(onViewMore).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides recommended automations when the app setting is disabled", () => {
+    mockUseSettings.mockReturnValue({
+      data: {
+        ...settingsWithGithubMcp(),
+        enable_automation_recommendations: false,
+      },
+    });
+
+    renderLauncher({ variant: "home" });
+
+    expect(
+      screen.queryByTestId("recommended-automations-section"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens a modal with the full recommended automation list from home", () => {
+    renderLauncher({ variant: "home" });
+
+    expect(screen.getAllByTestId(/^recommended-automation-card-/)).toHaveLength(
+      HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT,
+    );
+    expect(
+      screen.queryByTestId("recommended-automations-modal"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("recommended-automations-view-more"));
+
+    const modal = screen.getByTestId("recommended-automations-modal");
+    expect(modal).toBeInTheDocument();
+    expect(
+      within(modal).getAllByTestId(/^recommended-automation-card-/),
+    ).toHaveLength(7);
+  });
+
+  it("filters recommended automations in the view-more modal", () => {
+    renderLauncher({ variant: "home" });
+
+    fireEvent.click(screen.getByTestId("recommended-automations-view-more"));
+
+    const modal = screen.getByTestId("recommended-automations-modal");
+    fireEvent.change(
+      screen.getByRole("textbox", {
+        name: "AUTOMATIONS$SEARCH_PLACEHOLDER",
+      }),
+      { target: { value: "standup" } },
+    );
+
+    expect(
+      within(modal).getByTestId(
+        "recommended-automation-card-slack-standup-digest",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(modal).queryByTestId("recommended-automation-card-github-pr-reviewer"),
+    ).not.toBeInTheDocument();
   });
 
   it("selects a recommendation directly from its card", () => {
@@ -378,6 +489,159 @@ describe("recommended automations", () => {
     expect(draft).toContain("$OPENHANDS_AUTOMATION_API_KEY");
     expect(draft).not.toContain("app.all-hands.dev");
     expect(draft).not.toContain("$OPENHANDS_API_KEY");
+  });
+
+  it("requires workspace or repository selection before launching from home", () => {
+    mockUseSettings.mockReturnValue({
+      data: settingsWithGithubMcp(),
+    });
+    const onRequireSelection = vi.fn();
+    const automation = AUTOMATION_CATALOG.find(
+      (item) => item.id === "github-pr-reviewer",
+    )!;
+
+    renderLauncher({
+      variant: "home",
+      sourceSelection: {
+        hasSelection: false,
+        launchWithoutSource: false,
+        pendingAutomation: null,
+        onRequireSelection,
+        onPendingAutomationHandled: vi.fn(),
+        getConversationVariables: () => ({}),
+      },
+    });
+
+    fireEvent.click(
+      screen.getByTestId("recommended-automation-card-github-pr-reviewer"),
+    );
+
+    expect(onRequireSelection).toHaveBeenCalledWith(automation);
+    expect(mockCreateConversationMutate).not.toHaveBeenCalled();
+  });
+
+  it("launches with selected workspace after source selection completes", async () => {
+    mockUseSettings.mockReturnValue({
+      data: settingsWithGithubMcp(),
+    });
+    const onPendingAutomationHandled = vi.fn();
+    const getConversationVariables = vi.fn(() => ({
+      workingDir: "/workspace/project/app",
+    }));
+    const automation = AUTOMATION_CATALOG.find(
+      (item) => item.id === "github-pr-reviewer",
+    )!;
+
+    const { rerender } = renderLauncher({
+      variant: "home",
+      sourceSelection: {
+        hasSelection: false,
+        launchWithoutSource: false,
+        pendingAutomation: null,
+        onRequireSelection: vi.fn(),
+        onPendingAutomationHandled,
+        getConversationVariables,
+      },
+    });
+
+    fireEvent.click(
+      screen.getByTestId("recommended-automation-card-github-pr-reviewer"),
+    );
+    expect(mockCreateConversationMutate).not.toHaveBeenCalled();
+
+    rerender(
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: {
+              queries: { retry: false },
+              mutations: { retry: false },
+            },
+          })
+        }
+      >
+        <RecommendedAutomationsLauncher
+          variant="home"
+          sourceSelection={{
+            hasSelection: true,
+            launchWithoutSource: false,
+            pendingAutomation: automation,
+            onRequireSelection: vi.fn(),
+            onPendingAutomationHandled,
+            getConversationVariables,
+          }}
+        />
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() =>
+      expect(mockCreateConversationMutate).toHaveBeenCalledWith(
+        { workingDir: "/workspace/project/app" },
+        expect.any(Object),
+      ),
+    );
+    expect(onPendingAutomationHandled).toHaveBeenCalledTimes(1);
+  });
+
+  it("launches without workspace when source selection is skipped", async () => {
+    mockUseSettings.mockReturnValue({
+      data: settingsWithGithubMcp(),
+    });
+    const onPendingAutomationHandled = vi.fn();
+    const getConversationVariables = vi.fn(() => ({}));
+    const automation = AUTOMATION_CATALOG.find(
+      (item) => item.id === "github-pr-reviewer",
+    )!;
+
+    const { rerender } = renderLauncher({
+      variant: "home",
+      sourceSelection: {
+        hasSelection: false,
+        launchWithoutSource: false,
+        pendingAutomation: null,
+        onRequireSelection: vi.fn(),
+        onPendingAutomationHandled,
+        getConversationVariables,
+      },
+    });
+
+    fireEvent.click(
+      screen.getByTestId("recommended-automation-card-github-pr-reviewer"),
+    );
+    expect(mockCreateConversationMutate).not.toHaveBeenCalled();
+
+    rerender(
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: {
+              queries: { retry: false },
+              mutations: { retry: false },
+            },
+          })
+        }
+      >
+        <RecommendedAutomationsLauncher
+          variant="home"
+          sourceSelection={{
+            hasSelection: false,
+            launchWithoutSource: true,
+            pendingAutomation: automation,
+            onRequireSelection: vi.fn(),
+            onPendingAutomationHandled,
+            getConversationVariables,
+          }}
+        />
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() =>
+      expect(mockCreateConversationMutate).toHaveBeenCalledWith(
+        {},
+        expect.any(Object),
+      ),
+    );
+    expect(onPendingAutomationHandled).toHaveBeenCalledTimes(1);
   });
 
   it("ignores repeated card clicks while a recommendation launch is in flight", () => {

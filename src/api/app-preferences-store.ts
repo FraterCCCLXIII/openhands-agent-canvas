@@ -20,6 +20,7 @@ export const APP_PREFERENCE_FIELDS = [
   "language",
   "user_consents_to_analytics",
   "enable_sound_notifications",
+  "enable_automation_recommendations",
   "git_user_name",
   "git_user_email",
 ] as const;
@@ -45,6 +46,7 @@ const coerceValue = (
     case "git_user_email":
       return typeof value === "string" ? value : undefined;
     case "enable_sound_notifications":
+    case "enable_automation_recommendations":
       return typeof value === "boolean" ? value : undefined;
     case "user_consents_to_analytics":
       if (value === null) return null;

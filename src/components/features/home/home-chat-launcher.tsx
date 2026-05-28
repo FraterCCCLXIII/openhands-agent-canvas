@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { CustomChatInput } from "#/components/features/chat/custom-chat-input";
@@ -23,6 +23,7 @@ import {
   TOAST_OPTIONS,
 } from "#/utils/custom-toast-handlers";
 import { getWorkspacesUnsupportedMessage } from "#/utils/workspaces-compatibility";
+import type { RecommendedAutomation } from "@openhands/extensions/automations";
 import { RecommendedAutomationsLauncher } from "#/components/features/automations/recommended-automations-launcher";
 import { HomeHeaderTitle } from "./home-header/home-header-title";
 import { OpenLauncherButton } from "./open-launcher-button";
@@ -43,6 +44,10 @@ export function HomeChatLauncher() {
     useState<GitRepository | null>(null);
   const [pendingBranch, setPendingBranch] = useState<Branch | null>(null);
   const [pendingProvider, setPendingProvider] = useState<Provider | null>(null);
+  const [automationPendingSource, setAutomationPendingSource] =
+    useState<RecommendedAutomation | null>(null);
+  const [automationLaunchWithoutSource, setAutomationLaunchWithoutSource] =
+    useState(false);
 
   const { mutate: createConversation, isPending } = useCreateConversation();
   const isCreatingElsewhere = useIsCreatingConversation();
@@ -58,6 +63,61 @@ export function HomeChatLauncher() {
   const hasSelection = isLocal
     ? !!pendingWorkspace
     : !!pendingRepository && !!pendingBranch;
+
+  const getAutomationConversationVariables = useCallback(() => {
+    if (isLocal && pendingWorkspace) {
+      return { workingDir: pendingWorkspace.path };
+    }
+    if (!isLocal && pendingRepository && pendingBranch) {
+      return {
+        repository: {
+          name: pendingRepository.full_name,
+          gitProvider: pendingRepository.git_provider,
+          branch: pendingBranch.name,
+        },
+      };
+    }
+    return {};
+  }, [isLocal, pendingWorkspace, pendingRepository, pendingBranch]);
+
+  const handleDismissSourceDialog = () => {
+    setIsDialogOpen(false);
+    setAutomationPendingSource(null);
+    setAutomationLaunchWithoutSource(false);
+  };
+
+  const handleConfirmAutomationSource = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleStartAutomationWithoutSource = () => {
+    setAutomationLaunchWithoutSource(true);
+    setIsDialogOpen(false);
+  };
+
+  const automationSourceSelection = useMemo(
+    () => ({
+      hasSelection,
+      launchWithoutSource: automationLaunchWithoutSource,
+      pendingAutomation: automationPendingSource,
+      onRequireSelection: (automation: RecommendedAutomation) => {
+        setAutomationPendingSource(automation);
+        setAutomationLaunchWithoutSource(false);
+        setIsDialogOpen(true);
+      },
+      onPendingAutomationHandled: () => {
+        setAutomationPendingSource(null);
+        setAutomationLaunchWithoutSource(false);
+      },
+      getConversationVariables: getAutomationConversationVariables,
+    }),
+    [
+      automationLaunchWithoutSource,
+      automationPendingSource,
+      getAutomationConversationVariables,
+      hasSelection,
+    ],
+  );
 
   const handleSubmit = (message: string) => {
     const trimmed = message.trim();
@@ -192,7 +252,12 @@ export function HomeChatLauncher() {
         <HomeHeaderTitle />
       </div>
 
-      {isLocal ? <RecommendedAutomationsLauncher variant="home" /> : null}
+      {isLocal ? (
+        <RecommendedAutomationsLauncher
+          variant="home"
+          sourceSelection={automationSourceSelection}
+        />
+      ) : null}
 
       <div className="w-full">
         <CustomChatInput
@@ -214,7 +279,11 @@ export function HomeChatLauncher() {
         ) : (
           <OpenLauncherButton
             kind={isLocal ? "local" : "cloud"}
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => {
+              setAutomationPendingSource(null);
+              setAutomationLaunchWithoutSource(false);
+              setIsDialogOpen(true);
+            }}
             disabled={isCreating || Boolean(workspacesUnsupportedMessage)}
             disabledTooltip={workspacesUnsupportedMessage}
           />
@@ -224,23 +293,41 @@ export function HomeChatLauncher() {
       {isLocal ? (
         <OpenWorkspaceDialog
           isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          onClose={handleDismissSourceDialog}
+          automationLaunchFlow={Boolean(automationPendingSource)}
+          onStartWithoutSource={
+            automationPendingSource
+              ? handleStartAutomationWithoutSource
+              : undefined
+          }
           onConfirm={(workspace) => {
             setPendingWorkspace(workspace);
             setPendingRepository(null);
             setPendingBranch(null);
             setPendingProvider(null);
+            if (automationPendingSource) {
+              handleConfirmAutomationSource();
+            }
           }}
         />
       ) : (
         <OpenRepositoryDialog
           isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          onClose={handleDismissSourceDialog}
+          automationLaunchFlow={Boolean(automationPendingSource)}
+          onStartWithoutSource={
+            automationPendingSource
+              ? handleStartAutomationWithoutSource
+              : undefined
+          }
           onConfirm={({ repository, branch, provider }) => {
             setPendingRepository(repository);
             setPendingBranch(branch);
             setPendingProvider(provider ?? repository.git_provider);
             setPendingWorkspace(null);
+            if (automationPendingSource) {
+              handleConfirmAutomationSource();
+            }
           }}
         />
       )}

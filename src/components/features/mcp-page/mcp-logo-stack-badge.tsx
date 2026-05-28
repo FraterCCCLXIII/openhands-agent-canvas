@@ -5,8 +5,10 @@ import {
 } from "#/components/features/mcp-logo-badge";
 import { cn } from "#/utils/utils";
 
-const STACK_CONTAINER_CLASS_NAME =
-  "inline-flex h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-surface-raised shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]";
+const STACK_CONTAINER_CLASS_NAMES = {
+  md: "inline-flex h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-surface-raised shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]",
+  sm: "inline-flex h-8 w-8 shrink-0 overflow-hidden rounded-md border border-white/10 bg-surface-raised shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]",
+} as const;
 
 interface McpLogoStackBadgeProps {
   entries: Array<
@@ -14,6 +16,7 @@ interface McpLogoStackBadgeProps {
   >;
   className?: string;
   testId?: string;
+  size?: keyof typeof STACK_CONTAINER_CLASS_NAMES;
 }
 
 function toLogoEntries(
@@ -26,14 +29,17 @@ export function McpLogoStackBadge({
   entries,
   className,
   testId,
+  size = "md",
 }: McpLogoStackBadgeProps) {
   const visibleEntries = toLogoEntries(entries);
+  const stackContainerClassName = STACK_CONTAINER_CLASS_NAMES[size];
+  const singleBadgeSize = size === "sm" ? "sm" : "md";
 
   if (visibleEntries.length === 0) {
     return (
       <McpLogoBadge
         entry={null}
-        size="md"
+        size={singleBadgeSize}
         className={className}
         testId={testId}
       />
@@ -44,7 +50,7 @@ export function McpLogoStackBadge({
     return (
       <McpLogoBadge
         entry={visibleEntries[0]}
-        size="md"
+        size={singleBadgeSize}
         className={className}
         testId={testId}
       />
@@ -58,7 +64,7 @@ export function McpLogoStackBadge({
         data-testid={testId}
         data-layout="overlap"
         className={cn(
-          STACK_CONTAINER_CLASS_NAME,
+          stackContainerClassName,
           "items-center justify-center",
           className,
         )}
@@ -68,7 +74,7 @@ export function McpLogoStackBadge({
             <McpLogoBadge
               key={entry.id}
               entry={entry}
-              size="sm"
+              size={size === "sm" ? "xs" : "sm"}
               className="ring-2 ring-surface-raised"
             />
           ))}
@@ -90,7 +96,7 @@ export function McpLogoStackBadge({
       data-testid={testId}
       data-layout="quadrants"
       className={cn(
-        STACK_CONTAINER_CLASS_NAME,
+        stackContainerClassName,
         "grid grid-cols-2 grid-rows-2 gap-0.5 p-1",
         className,
       )}

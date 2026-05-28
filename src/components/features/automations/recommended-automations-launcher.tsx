@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useNavigation } from "#/context/navigation-context";
 import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
@@ -21,16 +21,45 @@ import {
   getInstallableTemplate,
   getMarketplaceEntryById,
 } from "#/utils/mcp-marketplace-utils";
+import type { Provider } from "#/types/settings";
 import { InstallServerModal } from "#/components/features/mcp-page/install-server-modal";
+import { RecommendedAutomationsModal } from "./recommended-automations-modal";
 import {
+  HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT,
   RecommendedAutomationsSection,
   type RecommendedAutomationsSectionVariant,
 } from "./recommended-automations-section";
+
+interface RecommendedAutomationConversationVariables {
+  workingDir?: string;
+  repository?: {
+    name: string;
+    gitProvider: Provider;
+    branch?: string;
+  };
+}
+
+export interface RecommendedAutomationSourceSelection {
+  hasSelection: boolean;
+  launchWithoutSource: boolean;
+  pendingAutomation: RecommendedAutomation | null;
+  onRequireSelection: (automation: RecommendedAutomation) => void;
+  onPendingAutomationHandled: () => void;
+  getConversationVariables: () => RecommendedAutomationConversationVariables;
+}
+
+function isSourceSelectionSatisfied(
+  sourceSelection?: RecommendedAutomationSourceSelection,
+): boolean {
+  if (!sourceSelection) return true;
+  return sourceSelection.hasSelection || sourceSelection.launchWithoutSource;
+}
 
 interface RecommendedAutomationsLauncherProps {
   query?: string;
   onLaunched?: () => void;
   variant?: RecommendedAutomationsSectionVariant;
+  sourceSelection?: RecommendedAutomationSourceSelection;
 }
 
 function getRequiredEntries(automation: RecommendedAutomation) {
@@ -85,6 +114,7 @@ export function RecommendedAutomationsLauncher({
   query,
   onLaunched,
   variant = "default",
+  sourceSelection,
 }: RecommendedAutomationsLauncherProps) {
   const activeBackend = useActiveBackend();
   const { navigate } = useNavigation();
@@ -97,8 +127,11 @@ export function RecommendedAutomationsLauncher({
   const [pendingAutomation, setPendingAutomation] =
     useState<RecommendedAutomation | null>(null);
   const [installQueue, setInstallQueue] = useState<MarketplaceEntry[]>([]);
+  const [isAllAutomationsModalOpen, setIsAllAutomationsModalOpen] =
+    useState(false);
   const completedInstallRef = useRef(false);
   const launchInFlightRef = useRef(false);
+  const isHomeVariant = variant === "home";
 
   const installedMcpServers = useMemo(
     () =>
@@ -115,6 +148,12 @@ export function RecommendedAutomationsLauncher({
       ) {
         return;
       }
+
+      if (sourceSelection && !isSourceSelectionSatisfied(sourceSelection)) {
+        sourceSelection.onRequireSelection(automation);
+        return;
+      }
+
       launchInFlightRef.current = true;
 
       const prompt = buildAutomationPrompt(
@@ -124,7 +163,7 @@ export function RecommendedAutomationsLauncher({
       );
 
       createConversation.mutate(
-        {},
+        sourceSelection?.getConversationVariables() ?? {},
         {
           onSuccess: (conversation) => {
             if (
@@ -148,14 +187,44 @@ export function RecommendedAutomationsLauncher({
       );
     },
     [
+      activeBackend.backend.host,
       activeBackend.backend.kind,
       createConversation,
       isCreatingConversation,
       navigate,
       onLaunched,
       setMessageToSend,
+      sourceSelection,
     ],
   );
+
+  useEffect(() => {
+    if (!sourceSelection) return;
+
+    const { pendingAutomation, onPendingAutomationHandled } = sourceSelection;
+
+    if (!pendingAutomation || !isSourceSelectionSatisfied(sourceSelection))
+      return;
+    if (
+      launchInFlightRef.current ||
+      createConversation.isPending ||
+      isCreatingConversation ||
+      installQueue.length > 0
+    ) {
+      return;
+    }
+
+    onPendingAutomationHandled();
+    launchAutomation(pendingAutomation);
+  }, [
+    createConversation.isPending,
+    installQueue.length,
+    isCreatingConversation,
+    launchAutomation,
+    sourceSelection?.hasSelection,
+    sourceSelection?.launchWithoutSource,
+    sourceSelection?.pendingAutomation,
+  ]);
 
   const getMissingEntries = useCallback(
     (automation: RecommendedAutomation) =>
@@ -167,6 +236,8 @@ export function RecommendedAutomationsLauncher({
   );
 
   const handleSelectAutomation = (automation: RecommendedAutomation) => {
+    setIsAllAutomationsModalOpen(false);
+
     if (
       launchInFlightRef.current ||
       createConversation.isPending ||
@@ -214,10 +285,13 @@ export function RecommendedAutomationsLauncher({
   };
 
   const installEntry = installQueue[0] ?? null;
+  const automationRecommendationsEnabled =
+    settings?.enable_automation_recommendations ?? true;
 
   // Recommended automations are a local-backend-only feature; cloud
   // automations are managed elsewhere.
   if (activeBackend.backend.kind === "cloud") return null;
+  if (!automationRecommendationsEnabled) return null;
 
   return (
     <>
@@ -227,7 +301,22 @@ export function RecommendedAutomationsLauncher({
         query={query}
         onSelect={handleSelectAutomation}
         variant={variant}
+        limit={
+          isHomeVariant ? HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT : undefined
+        }
+        onViewMore={
+          isHomeVariant ? () => setIsAllAutomationsModalOpen(true) : undefined
+        }
       />
+
+      {isAllAutomationsModalOpen ? (
+        <RecommendedAutomationsModal
+          backendKind={activeBackend.backend.kind}
+          installedServers={installedMcpServers}
+          onClose={() => setIsAllAutomationsModalOpen(false)}
+          onSelect={handleSelectAutomation}
+        />
+      ) : null}
 
       {installEntry && (
         <InstallServerModal

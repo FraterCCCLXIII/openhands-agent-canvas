@@ -34,6 +34,10 @@ export function AppSettingsScreen() {
     soundNotificationsSwitchHasChanged,
     setSoundNotificationsSwitchHasChanged,
   ] = React.useState(false);
+  const [
+    automationRecommendationsSwitchHasChanged,
+    setAutomationRecommendationsSwitchHasChanged,
+  ] = React.useState(false);
   const [gitUserNameHasChanged, setGitUserNameHasChanged] =
     React.useState(false);
   const [gitUserEmailHasChanged, setGitUserEmailHasChanged] =
@@ -50,6 +54,9 @@ export function AppSettingsScreen() {
       formData.get("enable-analytics-switch")?.toString() === "on";
     const enableSoundNotifications =
       formData.get("enable-sound-notifications-switch")?.toString() === "on";
+    const enableAutomationRecommendations =
+      formData.get("enable-automation-recommendations-switch")?.toString() ===
+      "on";
 
     const gitUserName =
       formData.get("git-user-name-input")?.toString() ||
@@ -63,6 +70,7 @@ export function AppSettingsScreen() {
         language,
         user_consents_to_analytics: enableAnalytics,
         enable_sound_notifications: enableSoundNotifications,
+        enable_automation_recommendations: enableAutomationRecommendations,
         git_user_name: gitUserName,
         git_user_email: gitUserEmail,
       },
@@ -79,6 +87,7 @@ export function AppSettingsScreen() {
           setLanguageInputHasChanged(false);
           setAnalyticsSwitchHasChanged(false);
           setSoundNotificationsSwitchHasChanged(false);
+          setAutomationRecommendationsSwitchHasChanged(false);
           setGitUserNameHasChanged(false);
           setGitUserEmailHasChanged(false);
         },
@@ -110,6 +119,16 @@ export function AppSettingsScreen() {
     );
   };
 
+  const checkIfAutomationRecommendationsSwitchHasChanged = (
+    checked: boolean,
+  ) => {
+    const currentAutomationRecommendations =
+      settings?.enable_automation_recommendations ?? true;
+    setAutomationRecommendationsSwitchHasChanged(
+      checked !== currentAutomationRecommendations,
+    );
+  };
+
   const checkIfGitUserNameHasChanged = (value: string) => {
     const currentValue = settings?.git_user_name;
     setGitUserNameHasChanged(value !== currentValue);
@@ -124,6 +143,7 @@ export function AppSettingsScreen() {
     !languageInputHasChanged &&
     !analyticsSwitchHasChanged &&
     !soundNotificationsSwitchHasChanged &&
+    !automationRecommendationsSwitchHasChanged &&
     !gitUserNameHasChanged &&
     !gitUserEmailHasChanged;
 
@@ -162,6 +182,17 @@ export function AppSettingsScreen() {
             onToggle={checkIfSoundNotificationsSwitchHasChanged}
           >
             {t(I18nKey.SETTINGS$SOUND_NOTIFICATIONS)}
+          </SettingsSwitch>
+
+          <SettingsSwitch
+            testId="enable-automation-recommendations-switch"
+            name="enable-automation-recommendations-switch"
+            defaultIsToggled={
+              settings.enable_automation_recommendations ?? true
+            }
+            onToggle={checkIfAutomationRecommendationsSwitchHasChanged}
+          >
+            {t(I18nKey.SETTINGS$ENABLE_AUTOMATION_RECOMMENDATIONS)}
           </SettingsSwitch>
 
           <div className="border-t border-[var(--oh-border)] pt-6 mt-2">

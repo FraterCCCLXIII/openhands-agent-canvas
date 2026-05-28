@@ -26,6 +26,7 @@ import {
 import { cn } from "#/utils/utils";
 import {
   extensionModuleCardInteractiveClassName,
+  extensionModuleCardElevatedSurfaceClassName,
   extensionModuleCardGridClassName,
   extensionModuleCardGridContainerClassName,
   extensionModuleCardPillClassName,
@@ -36,12 +37,16 @@ import { StatusBadge } from "./status-badge";
 
 export type RecommendedAutomationsSectionVariant = "default" | "home";
 
+export const HOME_RECOMMENDED_AUTOMATIONS_PREVIEW_LIMIT = 4;
+
 interface RecommendedAutomationsSectionProps {
   backendKind: "local" | "cloud";
   installedServers: MCPServerConfig[];
   query?: string;
   onSelect: (automation: RecommendedAutomation) => void;
   variant?: RecommendedAutomationsSectionVariant;
+  limit?: number;
+  onViewMore?: () => void;
 }
 
 export function getAutomationsByPopularity(
@@ -160,11 +165,16 @@ export function RecommendedAutomationsSection({
   query = "",
   onSelect,
   variant = "default",
+  limit,
+  onViewMore,
 }: RecommendedAutomationsSectionProps) {
   const { t } = useTranslation("openhands");
   const isHomeVariant = variant === "home";
   const showPlusBadge = !isHomeVariant;
   const showSetupDuration = !isHomeVariant;
+  const cardSurfaceClassName = isHomeVariant
+    ? extensionModuleCardElevatedSurfaceClassName
+    : extensionModuleCardSurfaceClassName;
 
   const visibleAutomations = RECOMMENDED_AUTOMATIONS.filter((automation) => {
     const requiredEntries = getRequiredEntries(automation);
@@ -175,6 +185,103 @@ export function RecommendedAutomationsSection({
   });
 
   if (visibleAutomations.length === 0) return null;
+
+  const displayedAutomations =
+    limit != null ? visibleAutomations.slice(0, limit) : visibleAutomations;
+  const hasMore =
+    limit != null && onViewMore != null && visibleAutomations.length > limit;
+  const isHomeStrip = isHomeVariant && limit != null;
+
+  const renderAutomationCard = (automation: RecommendedAutomation) => {
+    const requiredEntries = getRequiredEntries(automation);
+    const missingCount = requiredEntries.filter((entry) => {
+      const template = getInstallableTemplate(entry);
+      return !template || !findInstalledMatch(template, installedServers);
+    }).length;
+
+    if (isHomeStrip) {
+      return (
+        <button
+          key={automation.id}
+          type="button"
+          data-testid={`recommended-automation-card-${automation.id}`}
+          onClick={() => onSelect(automation)}
+          className={cn(
+            "flex min-w-0 flex-1 flex-col items-start gap-2 p-3 text-left",
+            cardSurfaceClassName,
+            extensionModuleCardInteractiveClassName,
+          )}
+        >
+          <McpLogoStackBadge
+            entries={requiredEntries}
+            size="sm"
+            testId={`recommended-automation-icon-${automation.id}`}
+          />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-white">
+              {automation.name}
+            </h3>
+            <p className="truncate text-[11px] text-tertiary-alt">
+              {automation.category}
+            </p>
+          </div>
+        </button>
+      );
+    }
+
+    return (
+      <button
+        key={automation.id}
+        type="button"
+        data-testid={`recommended-automation-card-${automation.id}`}
+        onClick={() => onSelect(automation)}
+        className={cn(
+          "flex min-w-0 overflow-hidden p-4 text-left",
+          cardSurfaceClassName,
+          extensionModuleCardInteractiveClassName,
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <McpLogoStackBadge
+            entries={requiredEntries}
+            testId={`recommended-automation-icon-${automation.id}`}
+          />
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <header className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-white">
+                  {automation.name}
+                </h3>
+                <p className="mt-0.5 truncate text-xs text-tertiary-alt">
+                  {automation.category}
+                </p>
+              </div>
+              {showPlusBadge ? (
+                <CirclePlusBadge
+                  testId={`recommended-automation-plus-${automation.id}`}
+                />
+              ) : null}
+            </header>
+            <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
+              {automation.description}
+            </p>
+
+            <SkillCardPillRow
+              pills={buildRecommendedAutomationPills(
+                automation,
+                requiredEntries,
+                installedServers,
+                missingCount,
+                t,
+                showSetupDuration,
+              )}
+              testId={`recommended-automation-pills-${automation.id}`}
+            />
+          </div>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <section data-testid="recommended-automations-section">
@@ -192,75 +299,50 @@ export function RecommendedAutomationsSection({
         </>
       ) : null}
 
+      {isHomeStrip ? (
+        <div className="mb-2 flex w-full items-center justify-between gap-3">
+          <h2
+            data-testid="recommended-automations-home-label"
+            className="text-left text-xs font-normal text-tertiary-alt"
+          >
+            {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_LABEL)}
+          </h2>
+          {hasMore ? (
+            <button
+              type="button"
+              data-testid="recommended-automations-view-more"
+              onClick={onViewMore}
+              className="shrink-0 cursor-pointer text-xs text-tertiary-alt transition-colors hover:text-white"
+            >
+              {t(I18nKey.COMMON$VIEW_MORE)}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div
         className={cn(
-          !isHomeVariant && "mt-3",
-          extensionModuleCardGridContainerClassName,
+          isHomeStrip
+            ? "w-full min-w-0"
+            : cn(
+                !isHomeVariant && "mt-3",
+                extensionModuleCardGridContainerClassName,
+              ),
         )}
       >
-        <div className={extensionModuleCardGridClassName}>
-          {visibleAutomations.map((automation) => {
-            const requiredEntries = getRequiredEntries(automation);
-            const missingCount = requiredEntries.filter((entry) => {
-              const template = getInstallableTemplate(entry);
-              return (
-                !template || !findInstalledMatch(template, installedServers)
-              );
-            }).length;
-
-            return (
-              <button
-                key={automation.id}
-                type="button"
-                data-testid={`recommended-automation-card-${automation.id}`}
-                onClick={() => onSelect(automation)}
-                className={cn(
-                  "flex min-w-0 overflow-hidden p-4 text-left",
-                  extensionModuleCardSurfaceClassName,
-                  extensionModuleCardInteractiveClassName,
-                )}
-              >
-                <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <McpLogoStackBadge
-                    entries={requiredEntries}
-                    testId={`recommended-automation-icon-${automation.id}`}
-                  />
-                  <div className="flex min-w-0 flex-1 flex-col gap-3">
-                    <header className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold text-white">
-                          {automation.name}
-                        </h3>
-                        <p className="mt-0.5 truncate text-xs text-tertiary-alt">
-                          {automation.category}
-                        </p>
-                      </div>
-                      {showPlusBadge ? (
-                        <CirclePlusBadge
-                          testId={`recommended-automation-plus-${automation.id}`}
-                        />
-                      ) : null}
-                    </header>
-                    <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
-                      {automation.description}
-                    </p>
-
-                    <SkillCardPillRow
-                      pills={buildRecommendedAutomationPills(
-                        automation,
-                        requiredEntries,
-                        installedServers,
-                        missingCount,
-                        t,
-                        showSetupDuration,
-                      )}
-                      testId={`recommended-automation-pills-${automation.id}`}
-                    />
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+        <div
+          data-testid={
+            isHomeStrip ? "recommended-automations-home-strip" : undefined
+          }
+          className={
+            isHomeStrip
+              ? "flex w-full min-w-0 gap-2"
+              : extensionModuleCardGridClassName
+          }
+        >
+          {displayedAutomations.map((automation) =>
+            renderAutomationCard(automation),
+          )}
         </div>
       </div>
     </section>
