@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type {
-  ConversationSortField,
-  OrganizeMode,
-  ThreadScope,
+import {
+  type ConversationSortField,
+  type OrganizeMode,
+  type ThreadScope,
 } from "#/components/features/conversation-panel/conversation-panel-list-helpers";
 
 /**
@@ -26,6 +26,7 @@ interface ConversationPanelPreferencesState {
   organizeMode: OrganizeMode;
   conversationSort: ConversationSortField;
   threadScope: ThreadScope;
+  groupFolderOrder: string[];
 }
 
 interface ConversationPanelPreferencesActions {
@@ -38,6 +39,7 @@ interface ConversationPanelPreferencesActions {
   setOrganizeMode: (value: OrganizeMode) => void;
   setConversationSort: (value: ConversationSortField) => void;
   setThreadScope: (value: ThreadScope) => void;
+  setGroupFolderOrder: (order: readonly string[]) => void;
 }
 
 type ConversationPanelPreferencesStore = ConversationPanelPreferencesState &
@@ -50,6 +52,7 @@ const initialState: ConversationPanelPreferencesState = {
   organizeMode: "chronological",
   conversationSort: "updated",
   threadScope: "all",
+  groupFolderOrder: [],
 };
 
 export const useConversationPanelPreferencesStore =
@@ -82,6 +85,8 @@ export const useConversationPanelPreferencesStore =
         setConversationSort: (value) =>
           set(() => ({ conversationSort: value })),
         setThreadScope: (value) => set(() => ({ threadScope: value })),
+        setGroupFolderOrder: (order) =>
+          set(() => ({ groupFolderOrder: [...order] })),
       }),
       {
         name: "conversation-panel-preferences",
@@ -94,6 +99,7 @@ export const useConversationPanelPreferencesStore =
           organizeMode: state.organizeMode,
           conversationSort: state.conversationSort,
           threadScope: state.threadScope,
+          groupFolderOrder: state.groupFolderOrder,
         }),
       },
     ),

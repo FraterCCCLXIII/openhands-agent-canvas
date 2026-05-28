@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Folder, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { useNavigation } from "#/context/navigation-context";
 import { useActiveBackend } from "#/contexts/active-backend-context";
@@ -31,12 +30,16 @@ import { useConversationPanelPreferencesStore } from "#/stores/conversation-pane
 import { cn } from "#/utils/utils";
 import { ConversationPanelFilterMenu } from "./conversation-panel-filter-menu";
 import { ConversationPanelNewThreadPicker } from "./conversation-panel-new-thread-picker";
+import { ConversationGroupFolderList } from "./conversation-group-folder-list";
+import { ConversationPanelPinnedSection } from "./conversation-panel-pinned-section";
 import {
+  applyGroupFolderOrder,
   groupConversations,
-  getGroupConversationPreview,
+  resolvePinnedConversations,
   sortConversationsByField,
   type ConversationGroupLaunch,
 } from "./conversation-panel-list-helpers";
+import { usePinnedConversationsStore } from "#/stores/pinned-conversations-store";
 
 interface ConversationPanelProps {
   onClose?: () => void;
@@ -49,6 +52,8 @@ interface ConversationPanelProps {
 }
 
 const noop = () => {};
+
+const EMPTY_PINNED_CONVERSATION_IDS: readonly string[] = [];
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
@@ -133,6 +138,12 @@ export function ConversationPanel({
   const setThreadScope = useConversationPanelPreferencesStore(
     (state) => state.setThreadScope,
   );
+  const groupFolderOrder = useConversationPanelPreferencesStore(
+    (state) => state.groupFolderOrder,
+  );
+  const setGroupFolderOrder = useConversationPanelPreferencesStore(
+    (state) => state.setGroupFolderOrder,
+  );
   const [filterMenuOpen, setFilterMenuOpen] = React.useState(false);
   const [isListScrolled, setIsListScrolled] = React.useState(false);
   const filterMenuRef = useClickOutsideElement<HTMLDivElement>(() => {
@@ -144,6 +155,20 @@ export function ConversationPanel({
   const [expandedGroupPreviewIds, setExpandedGroupPreviewIds] = React.useState<
     ReadonlySet<string>
   >(() => new Set());
+  const [selectedGroupFolderId, setSelectedGroupFolderId] = React.useState<
+    string | null
+  >(null);
+  const [expandedPinnedPreview, setExpandedPinnedPreview] =
+    React.useState(false);
+
+  const pinnedIds = usePinnedConversationsStore(
+    (state) =>
+      state.pinsByBackendId[activeBackend.id] ?? EMPTY_PINNED_CONVERSATION_IDS,
+  );
+  const togglePin = usePinnedConversationsStore((state) => state.togglePin);
+  const pruneMissingPinnedConversations = usePinnedConversationsStore(
+    (state) => state.pruneMissingConversations,
+  );
 
   const toggleGroupCollapsed = React.useCallback((groupId: string) => {
     setCollapsedGroupIds((prev) => {
@@ -173,6 +198,7 @@ export function ConversationPanel({
     if (organizeMode !== "grouped") {
       setCollapsedGroupIds(new Set());
       setExpandedGroupPreviewIds(new Set());
+      setSelectedGroupFolderId(null);
     }
   }, [organizeMode]);
 
@@ -203,6 +229,32 @@ export function ConversationPanel({
     () => data?.pages.flatMap((page) => page.items) ?? [],
     [data],
   );
+
+  const pinnedConversations = React.useMemo(
+    () => resolvePinnedConversations(pinnedIds, conversations),
+    [conversations, pinnedIds],
+  );
+
+  React.useEffect(() => {
+    if (!isFetched) {
+      return;
+    }
+    pruneMissingPinnedConversations(
+      activeBackend.id,
+      conversations.map((conversation) => conversation.id),
+    );
+  }, [
+    activeBackend.id,
+    conversations,
+    isFetched,
+    pruneMissingPinnedConversations,
+  ]);
+
+  React.useEffect(() => {
+    if (pinnedIds.length === 0) {
+      setExpandedPinnedPreview(false);
+    }
+  }, [pinnedIds.length]);
 
   const scopedConversations = React.useMemo(() => {
     if (threadScope === "relevant") {
@@ -265,6 +317,27 @@ export function ConversationPanel({
     showOlderConversations,
   ]);
 
+  const orderedConversationGroups = React.useMemo(() => {
+    if (!conversationGroups) {
+      return null;
+    }
+    return applyGroupFolderOrder(conversationGroups, groupFolderOrder);
+  }, [conversationGroups, groupFolderOrder]);
+
+  const conversationGroupIds = React.useMemo(
+    () => conversationGroups?.map((group) => group.id) ?? [],
+    [conversationGroups],
+  );
+
+  React.useEffect(() => {
+    if (
+      selectedGroupFolderId &&
+      !conversationGroupIds.includes(selectedGroupFolderId)
+    ) {
+      setSelectedGroupFolderId(null);
+    }
+  }, [conversationGroupIds, selectedGroupFolderId]);
+
   const compactVisibleConversations = React.useMemo(
     () =>
       sortConversationsByField(
@@ -279,11 +352,14 @@ export function ConversationPanel({
   const visibleFlatCount = sortedVisibleConversations.length;
 
   const visibleGroupedCount = React.useMemo(() => {
-    if (!conversationGroups) {
+    if (!orderedConversationGroups) {
       return 0;
     }
-    return conversationGroups.reduce((n, g) => n + g.conversations.length, 0);
-  }, [conversationGroups]);
+    return orderedConversationGroups.reduce(
+      (n, g) => n + g.conversations.length,
+      0,
+    );
+  }, [orderedConversationGroups]);
 
   const listIsEffectivelyEmpty =
     organizeMode === "grouped" && !compact
@@ -407,7 +483,11 @@ export function ConversationPanel({
   };
 
   const renderConversationCard = React.useCallback(
-    (conversation: (typeof conversations)[number]) => {
+    (
+      conversation: (typeof conversations)[number],
+      options?: { inPinnedSection?: boolean },
+    ) => {
+      const isPinned = pinnedIds.includes(conversation.id);
       if (compact) {
         return (
           <CompactConversationRow
@@ -442,7 +522,14 @@ export function ConversationPanel({
           key={conversation.id}
           to={`/conversations/${conversation.id}`}
           onClick={onClose}
-          className="block"
+          className={cn(
+            "block rounded-md transition-colors",
+            openContextMenuId !== conversation.id &&
+              "hover:bg-[var(--oh-surface)]",
+            (conversation.id === currentConversationId ||
+              openContextMenuId === conversation.id) &&
+              "bg-[var(--oh-surface)]",
+          )}
         >
           <ConversationCard
             onDelete={() =>
@@ -477,11 +564,15 @@ export function ConversationPanel({
             showLlmProfiles={showLlmProfiles}
             agentKind={conversation.agent_kind}
             acpServer={conversation.acp_server}
+            isPinned={isPinned}
+            onTogglePin={() => togglePin(activeBackend.id, conversation.id)}
+            alwaysShowPinIcon={isPinned && !options?.inPinnedSection}
           />
         </NavigationLink>
       );
     },
     [
+      activeBackend.id,
       compact,
       currentConversationId,
       handleConversationTitleChange,
@@ -489,8 +580,10 @@ export function ConversationPanel({
       handleStopConversation,
       onClose,
       openContextMenuId,
+      pinnedIds,
       showRepoBranchMetadata,
       showLlmProfiles,
+      togglePin,
     ],
   );
 
@@ -510,6 +603,8 @@ export function ConversationPanel({
     !startTasks?.length;
 
   const showConversationHeader = !compact;
+  const showPinnedSection =
+    !compact && !showInitialSkeleton && pinnedConversations.length > 0;
 
   return (
     <div
@@ -586,6 +681,20 @@ export function ConversationPanel({
           </div>
         )}
 
+        {showPinnedSection ? (
+          <ConversationPanelPinnedSection
+            pinnedConversations={pinnedConversations}
+            isPreviewExpanded={expandedPinnedPreview}
+            onTogglePreviewExpanded={() =>
+              setExpandedPinnedPreview((current) => !current)
+            }
+            activeConversationId={currentConversationId}
+            renderConversationCard={(conversation) =>
+              renderConversationCard(conversation, { inPinnedSection: true })
+            }
+          />
+        ) : null}
+
         {/* Render in-progress start tasks first (skipped in compact mode —
             their rich card layout doesn't fit in the icon rail). */}
         {!compact &&
@@ -601,108 +710,47 @@ export function ConversationPanel({
           ))}
 
         {!showInitialSkeleton && compact
-          ? compactVisibleConversations.map(renderConversationCard)
+          ? compactVisibleConversations.map((conversation) =>
+              renderConversationCard(conversation),
+            )
           : null}
 
         {!showInitialSkeleton &&
         !compact &&
         organizeMode === "grouped" &&
-        conversationGroups &&
-        conversationGroups.length > 0 ? (
-          <nav
-            aria-label={t(I18nKey.SIDEBAR$CONVERSATIONS)}
-            className="space-y-1 md:space-y-0.5 pb-1"
-          >
-            {conversationGroups.map((group) => {
-              const headingId = `thread-folder-${group.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-              const groupTestIdSuffix = group.id.replace(
-                /[^a-zA-Z0-9_-]/g,
-                "-",
-              );
-              const expanded = !collapsedGroupIds.has(group.id);
-              const previewExpanded = expandedGroupPreviewIds.has(group.id);
-              const { visibleConversations, isPreviewTruncated, isShowingAll } =
-                getGroupConversationPreview(group.conversations, {
-                  expanded: previewExpanded,
-                  activeConversationId: currentConversationId,
-                });
-              return (
-                <section key={group.id} aria-labelledby={headingId}>
-                  <div
-                    className={cn(
-                      "flex h-8 w-full min-w-0 items-center gap-0.5 rounded-md pl-2 pr-1 text-sm font-normal",
-                      "text-[var(--oh-muted)] transition-colors",
-                      "hover:bg-[var(--oh-surface-raised)] hover:text-white",
-                    )}
-                  >
-                    <button
-                      type="button"
-                      id={headingId}
-                      aria-expanded={expanded}
-                      onClick={() => toggleGroupCollapsed(group.id)}
-                      className="flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md py-1 text-left text-inherit outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]"
-                    >
-                      <Folder className="h-4 w-4 shrink-0" aria-hidden />
-                      <span className="truncate">{group.label}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md",
-                        "text-inherit transition-colors",
-                        "hover:bg-white/10 hover:text-white",
-                        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--oh-border)]",
-                        "disabled:cursor-not-allowed disabled:opacity-50",
-                      )}
-                      disabled={isCreatingConversationFlow}
-                      aria-label={t(
-                        I18nKey.CONVERSATION_PANEL$ADD_CONVERSATION_TO_GROUP,
-                        { label: group.label },
-                      )}
-                      data-testid={`add-conversation-to-group-${group.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        launchFromGroup(group.launch);
-                      }}
-                    >
-                      <Plus
-                        className="h-3.5 w-3.5 shrink-0"
-                        aria-hidden
-                        strokeWidth={2}
-                      />
-                    </button>
-                  </div>
-                  {expanded ? (
-                    <div className="mt-0.5 space-y-0.5">
-                      {visibleConversations.map(renderConversationCard)}
-                      {isPreviewTruncated ? (
-                        <div className="pl-2">
-                          <button
-                            type="button"
-                            data-testid={`thread-folder-view-more-${groupTestIdSuffix}`}
-                            onClick={() => toggleGroupPreviewExpanded(group.id)}
-                            className="ml-[26px] cursor-pointer text-xs text-[var(--oh-text-dim)] hover:text-white"
-                          >
-                            {isShowingAll
-                              ? t(I18nKey.CONVERSATION_PANEL$LESS)
-                              : t(I18nKey.CONVERSATION_PANEL$MORE)}
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </section>
-              );
-            })}
-          </nav>
+        orderedConversationGroups &&
+        orderedConversationGroups.length > 0 ? (
+          <ConversationGroupFolderList
+            groups={orderedConversationGroups}
+            groupIds={conversationGroupIds}
+            groupFolderOrder={groupFolderOrder}
+            setGroupFolderOrder={setGroupFolderOrder}
+            selectedGroupFolderId={selectedGroupFolderId}
+            onSelectGroupFolder={(groupId) =>
+              setSelectedGroupFolderId((current) =>
+                current === groupId ? null : groupId,
+              )
+            }
+            collapsedGroupIds={collapsedGroupIds}
+            expandedGroupPreviewIds={expandedGroupPreviewIds}
+            onToggleGroupCollapsed={toggleGroupCollapsed}
+            onToggleGroupPreviewExpanded={toggleGroupPreviewExpanded}
+            isCreatingConversationFlow={isCreatingConversationFlow}
+            activeConversationId={currentConversationId}
+            onLaunchFromGroup={launchFromGroup}
+            renderConversationCard={(conversation) =>
+              renderConversationCard(conversation)
+            }
+          />
         ) : null}
 
         {!showInitialSkeleton &&
         !compact &&
         organizeMode === "chronological" ? (
           <div className="space-y-0.5">
-            {sortedVisibleConversations.map(renderConversationCard)}
+            {sortedVisibleConversations.map((conversation) =>
+              renderConversationCard(conversation),
+            )}
           </div>
         ) : null}
 
