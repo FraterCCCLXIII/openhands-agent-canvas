@@ -23,6 +23,7 @@ import {
   TOAST_OPTIONS,
 } from "#/utils/custom-toast-handlers";
 import { getWorkspacesUnsupportedMessage } from "#/utils/workspaces-compatibility";
+import { RecommendedAutomationsLauncher } from "#/components/features/automations/recommended-automations-launcher";
 import { HomeHeaderTitle } from "./home-header/home-header-title";
 import { OpenLauncherButton } from "./open-launcher-button";
 import { OpenWorkspaceDialog } from "./open-workspace-dialog";
@@ -190,6 +191,8 @@ export function HomeChatLauncher() {
       <div className="flex w-full justify-center">
         <HomeHeaderTitle />
       </div>
+
+      {isLocal ? <RecommendedAutomationsLauncher variant="home" /> : null}
 
       <div className="w-full">
         <CustomChatInput

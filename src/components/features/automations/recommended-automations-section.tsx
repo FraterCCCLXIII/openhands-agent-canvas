@@ -34,11 +34,14 @@ import {
 import ClockIcon from "#/icons/clock.svg?react";
 import { StatusBadge } from "./status-badge";
 
+export type RecommendedAutomationsSectionVariant = "default" | "home";
+
 interface RecommendedAutomationsSectionProps {
   backendKind: "local" | "cloud";
   installedServers: MCPServerConfig[];
   query?: string;
   onSelect: (automation: RecommendedAutomation) => void;
+  variant?: RecommendedAutomationsSectionVariant;
 }
 
 export function getAutomationsByPopularity(
@@ -97,6 +100,7 @@ function buildRecommendedAutomationPills(
   installedServers: MCPServerConfig[],
   missingCount: number,
   translate: TFunction,
+  includeSetupDuration: boolean,
 ): SkillCardPill[] {
   const pills: SkillCardPill[] = requiredEntries.map((entry) => {
     const template = getInstallableTemplate(entry);
@@ -120,17 +124,19 @@ function buildRecommendedAutomationPills(
     };
   });
 
-  pills.push({
-    id: "setup-minutes",
-    node: (
-      <span className={cn(extensionModuleCardPillClassName, "gap-1")}>
-        <ClockIcon className="size-3 shrink-0" />
-        {translate(I18nKey.RECOMMENDED_AUTOMATIONS$MINUTES, {
-          count: automation.estimatedSetupMinutes,
-        })}
-      </span>
-    ),
-  });
+  if (includeSetupDuration) {
+    pills.push({
+      id: "setup-minutes",
+      node: (
+        <span className={cn(extensionModuleCardPillClassName, "gap-1")}>
+          <ClockIcon className="size-3 shrink-0" />
+          {translate(I18nKey.RECOMMENDED_AUTOMATIONS$MINUTES, {
+            count: automation.estimatedSetupMinutes,
+          })}
+        </span>
+      ),
+    });
+  }
 
   if (missingCount > 0) {
     pills.push({
@@ -153,8 +159,12 @@ export function RecommendedAutomationsSection({
   installedServers,
   query = "",
   onSelect,
+  variant = "default",
 }: RecommendedAutomationsSectionProps) {
   const { t } = useTranslation("openhands");
+  const isHomeVariant = variant === "home";
+  const showPlusBadge = !isHomeVariant;
+  const showSetupDuration = !isHomeVariant;
 
   const visibleAutomations = RECOMMENDED_AUTOMATIONS.filter((automation) => {
     const requiredEntries = getRequiredEntries(automation);
@@ -168,17 +178,26 @@ export function RecommendedAutomationsSection({
 
   return (
     <section data-testid="recommended-automations-section">
-      <div className="flex items-center">
-        <h2 className="text-base font-semibold text-foreground">
-          {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
-        </h2>
-        <StatusBadge count={visibleAutomations.length} />
-      </div>
-      <p className="mt-1 text-sm text-muted">
-        {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
-      </p>
+      {!isHomeVariant ? (
+        <>
+          <div className="flex items-center">
+            <h2 className="text-base font-semibold text-foreground">
+              {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
+            </h2>
+            <StatusBadge count={visibleAutomations.length} />
+          </div>
+          <p className="mt-1 text-sm text-muted">
+            {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
+          </p>
+        </>
+      ) : null}
 
-      <div className={cn("mt-3", extensionModuleCardGridContainerClassName)}>
+      <div
+        className={cn(
+          !isHomeVariant && "mt-3",
+          extensionModuleCardGridContainerClassName,
+        )}
+      >
         <div className={extensionModuleCardGridClassName}>
           {visibleAutomations.map((automation) => {
             const requiredEntries = getRequiredEntries(automation);
@@ -216,9 +235,11 @@ export function RecommendedAutomationsSection({
                           {automation.category}
                         </p>
                       </div>
-                      <CirclePlusBadge
-                        testId={`recommended-automation-plus-${automation.id}`}
-                      />
+                      {showPlusBadge ? (
+                        <CirclePlusBadge
+                          testId={`recommended-automation-plus-${automation.id}`}
+                        />
+                      ) : null}
                     </header>
                     <p className="line-clamp-2 text-xs leading-relaxed text-tertiary-light">
                       {automation.description}
@@ -231,6 +252,7 @@ export function RecommendedAutomationsSection({
                         installedServers,
                         missingCount,
                         t,
+                        showSetupDuration,
                       )}
                       testId={`recommended-automation-pills-${automation.id}`}
                     />

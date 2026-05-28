@@ -298,6 +298,29 @@ describe("recommended automations", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("hides section header, plus badge, and setup duration in home variant", () => {
+    render(
+      <RecommendedAutomationsSection
+        backendKind="local"
+        installedServers={[]}
+        onSelect={vi.fn()}
+        variant="home"
+      />,
+    );
+
+    expect(
+      screen.queryByText("RECOMMENDED_AUTOMATIONS$SECTION_TITLE"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("recommended-automation-plus-github-pr-reviewer"),
+    ).not.toBeInTheDocument();
+
+    const pillRow = screen.getByTestId(
+      "recommended-automation-pills-github-pr-reviewer",
+    );
+    expect(pillRow).not.toHaveTextContent("RECOMMENDED_AUTOMATIONS$MINUTES:");
+  });
+
   it("selects a recommendation directly from its card", () => {
     const automation = AUTOMATION_CATALOG.find(
       (item) => item.id === "github-pr-reviewer",

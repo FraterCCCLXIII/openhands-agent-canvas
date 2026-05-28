@@ -22,11 +22,15 @@ import {
   getMarketplaceEntryById,
 } from "#/utils/mcp-marketplace-utils";
 import { InstallServerModal } from "#/components/features/mcp-page/install-server-modal";
-import { RecommendedAutomationsSection } from "./recommended-automations-section";
+import {
+  RecommendedAutomationsSection,
+  type RecommendedAutomationsSectionVariant,
+} from "./recommended-automations-section";
 
 interface RecommendedAutomationsLauncherProps {
   query?: string;
   onLaunched?: () => void;
+  variant?: RecommendedAutomationsSectionVariant;
 }
 
 function getRequiredEntries(automation: RecommendedAutomation) {
@@ -80,6 +84,7 @@ export function buildAutomationPrompt(
 export function RecommendedAutomationsLauncher({
   query,
   onLaunched,
+  variant = "default",
 }: RecommendedAutomationsLauncherProps) {
   const activeBackend = useActiveBackend();
   const { navigate } = useNavigation();
@@ -221,6 +226,7 @@ export function RecommendedAutomationsLauncher({
         installedServers={installedMcpServers}
         query={query}
         onSelect={handleSelectAutomation}
+        variant={variant}
       />
 
       {installEntry && (

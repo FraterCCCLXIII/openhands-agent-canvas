@@ -174,6 +174,19 @@ vi.mock("#/components/features/home/home-git-control-bar-preview", () => ({
   ),
 }));
 
+vi.mock("#/components/features/automations/recommended-automations-launcher", () => ({
+  RecommendedAutomationsLauncher: ({
+    variant,
+  }: {
+    variant?: string;
+  }) => (
+    <div
+      data-testid="recommended-automations-launcher-stub"
+      data-variant={variant}
+    />
+  ),
+}));
+
 const renderLauncher = () =>
   render(<HomeChatLauncher />, {
     wrapper: ({ children }) => (
@@ -254,6 +267,30 @@ describe("HomeChatLauncher", () => {
 
   afterEach(() => {
     toast.remove();
+  });
+
+  it("shows recommended automations above the chat input on local backends", () => {
+    renderLauncher();
+
+    const stub = screen.getByTestId("recommended-automations-launcher-stub");
+    expect(stub).toHaveAttribute("data-variant", "home");
+
+    const launcher = screen.getByTestId("home-chat-launcher");
+    const stubIndex = launcher.innerHTML.indexOf(
+      "recommended-automations-launcher-stub",
+    );
+    const chatIndex = launcher.innerHTML.indexOf("stub-chat-submit");
+    expect(stubIndex).toBeGreaterThanOrEqual(0);
+    expect(chatIndex).toBeGreaterThan(stubIndex);
+  });
+
+  it("does not show recommended automations on cloud backends", () => {
+    mockUseActiveBackend.mockReturnValue(cloudBackend);
+    renderLauncher();
+
+    expect(
+      screen.queryByTestId("recommended-automations-launcher-stub"),
+    ).not.toBeInTheDocument();
   });
 
   it("creates a conversation with just the typed query and navigates when no workspace is selected", async () => {
