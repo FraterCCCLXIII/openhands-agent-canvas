@@ -114,7 +114,7 @@ export function WorkbenchCardItem({
         </div>
 
         {card.activity ? (
-          <p className="shine-text mb-3 truncate text-xs font-medium [&_*]:font-sans">
+          <p className="gradient-flow mb-3 truncate text-xs font-medium [&_*]:font-sans">
             {liveEvent ? (
               <Suspense fallback={card.activity}>
                 <LiveActivityLabel event={liveEvent} />
