@@ -11,6 +11,7 @@ import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { useActiveBackend } from "#/contexts/active-backend-context";
+import { useSettings } from "#/hooks/query/use-settings";
 import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
 import {
   displayErrorToast,
@@ -52,6 +53,7 @@ export function WorkbenchBoard({
 }: WorkbenchBoardProps) {
   const { t } = useTranslation("openhands");
   const isCloud = useActiveBackend().backend.kind === "cloud";
+  const { data: settings } = useSettings();
   const createConversation = useCreateConversation();
   const archiveConversation = useWorkbenchArchiveStore(
     (state) => state.archive,
@@ -172,7 +174,11 @@ export function WorkbenchBoard({
           // Stay on the workbench; the placeholder is replaced once the real
           // conversation surfaces in the refetched list (see the prune effect).
           setIsNewTaskOpen(false);
-          displaySuccessToast(t(I18nKey.WORKBENCH$TASK_QUEUED));
+          displaySuccessToast(
+            t(I18nKey.WORKBENCH$TASK_QUEUED, {
+              model: settings?.llm_model ?? "",
+            }),
+          );
           setPendingCards((prev) =>
             prev.map((pending) =>
               pending.tempId === tempId
