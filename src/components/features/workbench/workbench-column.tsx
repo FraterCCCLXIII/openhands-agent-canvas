@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import {
   Archive,
   CheckCircle2,
@@ -7,7 +6,6 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
-import { I18nKey } from "#/i18n/declaration";
 import { WorkbenchCardItem } from "./workbench-card";
 import type {
   WorkbenchCard,
@@ -43,7 +41,6 @@ export function WorkbenchColumnComponent({
   onCardClick,
   onArchiveCard,
 }: WorkbenchColumnProps) {
-  const { t } = useTranslation("openhands");
   const Icon = COLUMN_ICONS[column.icon];
   const statusDotClassName =
     STATUS_DOT_CLASSES[column.id] ?? "bg-[var(--oh-muted)]";
@@ -63,22 +60,16 @@ export function WorkbenchColumnComponent({
         data-testid={`workbench-column-${column.id}`}
         className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-xl bg-base-secondary p-2 pb-6 custom-scrollbar"
       >
-        {column.cards.length === 0 ? (
-          <p className="px-2 py-4 text-center text-xs text-text-dim">
-            {t(I18nKey.WORKBENCH$EMPTY_COLUMN)}
-          </p>
-        ) : (
-          column.cards.map((card) => (
-            <WorkbenchCardItem
-              key={card.id}
-              card={card}
-              statusDotClassName={statusDotClassName}
-              onClick={() => onCardClick(card)}
-              onArchive={onArchiveCard}
-              isArchived={isArchivedColumn}
-            />
-          ))
-        )}
+        {column.cards.map((card) => (
+          <WorkbenchCardItem
+            key={card.id}
+            card={card}
+            statusDotClassName={statusDotClassName}
+            onClick={() => onCardClick(card)}
+            onArchive={onArchiveCard}
+            isArchived={isArchivedColumn}
+          />
+        ))}
       </div>
     </div>
   );
