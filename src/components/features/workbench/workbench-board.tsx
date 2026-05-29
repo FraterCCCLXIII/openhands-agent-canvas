@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useMemo, useState, type UIEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
@@ -57,6 +57,13 @@ export function WorkbenchBoard({
   const [cardToArchive, setCardToArchive] = useState<WorkbenchCard | null>(
     null,
   );
+  // Tracks horizontal scroll so the board's left edge fades (rather than hard
+  // cuts) once columns are scrolled out of view to the left.
+  const [isBoardScrolled, setIsBoardScrolled] = useState(false);
+
+  const handleBoardScroll = (event: UIEvent<HTMLDivElement>) => {
+    setIsBoardScrolled(event.currentTarget.scrollLeft > 8);
+  };
 
   const isFiltered = activeRepo !== ALL_REPOSITORIES;
 
@@ -185,7 +192,20 @@ export function WorkbenchBoard({
           </p>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 items-stretch gap-4 overflow-x-auto px-4 pb-4 custom-scrollbar">
+        <div
+          onScroll={handleBoardScroll}
+          style={
+            isBoardScrolled
+              ? {
+                  maskImage:
+                    "linear-gradient(to right, transparent 0, #000 3rem)",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, transparent 0, #000 3rem)",
+                }
+              : undefined
+          }
+          className="flex min-h-0 flex-1 items-stretch gap-4 overflow-x-auto px-4 pb-4 custom-scrollbar"
+        >
           {visibleColumns.map((column) => (
             <WorkbenchColumnComponent
               key={column.id}
