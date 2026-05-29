@@ -74,22 +74,33 @@ export function WorkbenchBoard({
     setIsBoardScrolled(event.currentTarget.scrollLeft > 8);
   };
 
-  // Drop a placeholder once its real conversation appears in the loaded data.
+  const presentIds = useMemo(
+    () =>
+      new Set(columns.flatMap((column) => column.cards.map((card) => card.id))),
+    [columns],
+  );
+
+  // Clean up resolved placeholders from state once their real conversation is
+  // loaded (keeps `pendingCards` from growing). Display correctness is handled
+  // at render time below, so this is just housekeeping.
   useEffect(() => {
-    const presentIds = new Set(
-      columns.flatMap((column) => column.cards.map((card) => card.id)),
-    );
-    setPendingCards((prev) =>
-      prev.filter((pending) =>
-        pending.realId ? !presentIds.has(pending.realId) : true,
-      ),
-    );
-  }, [columns]);
+    setPendingCards((prev) => {
+      const next = prev.filter(
+        (pending) => !(pending.realId && presentIds.has(pending.realId)),
+      );
+      return next.length === prev.length ? prev : next;
+    });
+  }, [presentIds]);
 
   const isFiltered = activeRepo !== ALL_REPOSITORIES;
 
   const visibleColumns = useMemo(() => {
-    const placeholders = pendingCards.map((pending) => pending.card);
+    // Hide any placeholder whose real conversation has already loaded — even if
+    // the conversation arrived before `onSuccess` tagged the placeholder, or if
+    // `columns` hasn't changed since it did.
+    const placeholders = pendingCards
+      .filter((pending) => !(pending.realId && presentIds.has(pending.realId)))
+      .map((pending) => pending.card);
     return columns.map((column) => {
       const baseCards = isFiltered
         ? column.cards.filter((card) => card.repo === activeRepo)
@@ -102,7 +113,7 @@ export function WorkbenchBoard({
         : placeholders;
       return { ...column, cards: [...relevant, ...baseCards] };
     });
-  }, [columns, activeRepo, isFiltered, pendingCards]);
+  }, [columns, activeRepo, isFiltered, pendingCards, presentIds]);
 
   const runningCount = useMemo(
     () =>
