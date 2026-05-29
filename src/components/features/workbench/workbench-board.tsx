@@ -41,6 +41,36 @@ interface WorkbenchBoardProps extends WorkbenchData {
   onToggleRail: () => void;
 }
 
+interface PendingCard {
+  tempId: string;
+  /** Conversation id returned by the create mutation, once it resolves. */
+  realId?: string;
+  /** Conversation ids that already existed when the task was created. */
+  baselineIds: ReadonlySet<string>;
+  /** True once the create mutation has settled successfully. */
+  resolved: boolean;
+  card: WorkbenchCard;
+}
+
+/**
+ * A placeholder should be dropped once its real conversation is loaded. We
+ * can't rely solely on `realId === card.id` because the create response id and
+ * the list id can differ by format/timing, so once the mutation has resolved we
+ * also treat the appearance of *any* brand-new (non-baseline) conversation as
+ * the placeholder's resolution.
+ */
+function isPlaceholderResolved(
+  pending: PendingCard,
+  presentIds: ReadonlySet<string>,
+): boolean {
+  if (!pending.resolved) return false;
+  if (pending.realId && presentIds.has(pending.realId)) return true;
+  for (const id of presentIds) {
+    if (!pending.baselineIds.has(id)) return true;
+  }
+  return false;
+}
+
 export function WorkbenchBoard({
   activeRepo,
   isRailOpen,
@@ -68,9 +98,7 @@ export function WorkbenchBoard({
   const [isBoardScrolled, setIsBoardScrolled] = useState(false);
   // Optimistic placeholder cards shown in the In Progress column the instant a
   // task is created, until the real conversation surfaces in the refetch.
-  const [pendingCards, setPendingCards] = useState<
-    { tempId: string; realId?: string; card: WorkbenchCard }[]
-  >([]);
+  const [pendingCards, setPendingCards] = useState<PendingCard[]>([]);
 
   const handleBoardScroll = (event: UIEvent<HTMLDivElement>) => {
     setIsBoardScrolled(event.currentTarget.scrollLeft > 8);
@@ -88,7 +116,7 @@ export function WorkbenchBoard({
   useEffect(() => {
     setPendingCards((prev) => {
       const next = prev.filter(
-        (pending) => !(pending.realId && presentIds.has(pending.realId)),
+        (pending) => !isPlaceholderResolved(pending, presentIds),
       );
       return next.length === prev.length ? prev : next;
     });
@@ -101,7 +129,7 @@ export function WorkbenchBoard({
     // the conversation arrived before `onSuccess` tagged the placeholder, or if
     // `columns` hasn't changed since it did.
     const placeholders = pendingCards
-      .filter((pending) => !(pending.realId && presentIds.has(pending.realId)))
+      .filter((pending) => !isPlaceholderResolved(pending, presentIds))
       .map((pending) => pending.card);
     return columns.map((column) => {
       const baseCards = isFiltered
@@ -144,10 +172,13 @@ export function WorkbenchBoard({
     // board before the conversation list refetches.
     const tempId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const nowIso = new Date().toISOString();
+    const baselineIds = new Set(presentIds);
     setPendingCards((prev) => [
       ...prev,
       {
         tempId,
+        baselineIds,
+        resolved: false,
         card: {
           id: tempId,
           title: payload.prompt,
@@ -182,7 +213,11 @@ export function WorkbenchBoard({
           setPendingCards((prev) =>
             prev.map((pending) =>
               pending.tempId === tempId
-                ? { ...pending, realId: result.conversation_id }
+                ? {
+                    ...pending,
+                    realId: result.conversation_id,
+                    resolved: true,
+                  }
                 : pending,
             ),
           );
