@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Archive, Clock } from "lucide-react";
+import { Archive } from "lucide-react";
 import AutomationsIcon from "#/icons/automations.svg?react";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
@@ -73,10 +73,7 @@ export function WorkbenchCardItem({
             ) : null}
             <span className="truncate">{card.model || card.repo}</span>
           </span>
-          <span className="flex shrink-0 items-center gap-1.5">
-            <Clock width={12} height={12} aria-hidden />
-            {formatTimeAgo(t, card.updatedAt)}
-          </span>
+          <span className="shrink-0">{formatTimeAgo(t, card.updatedAt)}</span>
         </div>
       </div>
 
