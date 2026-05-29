@@ -1,4 +1,5 @@
 import React from "react";
+import { Tooltip } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import { useNavigation } from "#/context/navigation-context";
@@ -23,6 +24,7 @@ import { isExecutionActive } from "#/utils/status";
 import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
 import { useIsCreatingConversation } from "#/hooks/use-is-creating-conversation";
 import { ConversationCard } from "./conversation-card/conversation-card";
+import { ConversationCardPreview } from "./conversation-card/conversation-card-preview";
 import { StartTaskCard } from "./start-task-card/start-task-card";
 import { ConversationCardSkeleton } from "./conversation-card/conversation-card-skeleton";
 import { CompactConversationRow } from "./compact-conversation-row";
@@ -119,6 +121,12 @@ export function ConversationPanel({
   );
   const toggleShowLlmProfiles = useConversationPanelPreferencesStore(
     (state) => state.toggleShowLlmProfiles,
+  );
+  const showHoverMetadata = useConversationPanelPreferencesStore(
+    (state) => state.showHoverMetadata,
+  );
+  const toggleShowHoverMetadata = useConversationPanelPreferencesStore(
+    (state) => state.toggleShowHoverMetadata,
   );
   const organizeMode = useConversationPanelPreferencesStore(
     (state) => state.organizeMode,
@@ -505,57 +513,86 @@ export function ConversationPanel({
         );
       }
       return (
-        <NavigationLink
+        <Tooltip
           key={conversation.id}
-          to={`/conversations/${conversation.id}`}
-          onClick={onClose}
-          className={cn(
-            "block rounded-md transition-colors",
-            openContextMenuId !== conversation.id &&
-              "hover:bg-[var(--oh-surface)]",
-            (conversation.id === currentConversationId ||
-              openContextMenuId === conversation.id) &&
-              "bg-[var(--oh-surface)]",
-          )}
+          placement="right-start"
+          delay={1000}
+          closeDelay={100}
+          isDisabled={
+            !showHoverMetadata || openContextMenuId === conversation.id
+          }
+          disableAnimation={import.meta.env.MODE === "test"}
+          className="rounded-xl border border-[var(--oh-border)] bg-base-secondary p-0 text-white shadow-xl"
+          content={
+            <ConversationCardPreview
+              title={conversation.title ?? ""}
+              executionStatus={conversation.execution_status}
+              sandboxStatus={conversation.sandbox_status}
+              selectedRepository={{
+                selected_repository: conversation.selected_repository,
+                selected_branch: conversation.selected_branch,
+                git_provider: conversation.git_provider as Provider,
+              }}
+              workspaceWorkingDir={
+                conversation.selected_workspace ??
+                conversation.workspace?.working_dir
+              }
+              llmModel={conversation.llm_model}
+              createdAt={conversation.created_at}
+            />
+          }
         >
-          <ConversationCard
-            onDelete={() =>
-              handleDeleteProject(conversation.id, conversation.title ?? "")
-            }
-            onStop={() => handleStopConversation(conversation.id)}
-            onChangeTitle={(title) =>
-              handleConversationTitleChange(conversation.id, title)
-            }
-            title={conversation.title ?? ""}
-            selectedRepository={{
-              selected_repository: conversation.selected_repository,
-              selected_branch: conversation.selected_branch,
-              git_provider: conversation.git_provider as Provider,
-            }}
-            lastUpdatedAt={conversation.updated_at}
-            createdAt={conversation.created_at}
-            executionStatus={conversation.execution_status}
-            sandboxStatus={conversation.sandbox_status}
-            conversationId={conversation.id}
-            contextMenuOpen={openContextMenuId === conversation.id}
-            onContextMenuToggle={(isOpen) =>
-              setOpenContextMenuId(isOpen ? conversation.id : null)
-            }
-            isActive={conversation.id === currentConversationId}
-            workspaceWorkingDir={
-              conversation.selected_workspace ??
-              conversation.workspace?.working_dir
-            }
-            showRepositoryMetadata={showRepoBranchMetadata}
-            llmModel={conversation.llm_model}
-            showLlmProfiles={showLlmProfiles}
-            agentKind={conversation.agent_kind}
-            acpServer={conversation.acp_server}
-            isPinned={isPinned}
-            onTogglePin={() => togglePin(activeBackend.id, conversation.id)}
-            alwaysShowPinIcon={isPinned && !options?.inPinnedSection}
-          />
-        </NavigationLink>
+          <NavigationLink
+            to={`/conversations/${conversation.id}`}
+            onClick={onClose}
+            className={cn(
+              "block rounded-md transition-colors",
+              openContextMenuId !== conversation.id &&
+                "hover:bg-[var(--oh-surface)]",
+              (conversation.id === currentConversationId ||
+                openContextMenuId === conversation.id) &&
+                "bg-[var(--oh-surface)]",
+            )}
+          >
+            <ConversationCard
+              onDelete={() =>
+                handleDeleteProject(conversation.id, conversation.title ?? "")
+              }
+              onStop={() => handleStopConversation(conversation.id)}
+              onChangeTitle={(title) =>
+                handleConversationTitleChange(conversation.id, title)
+              }
+              title={conversation.title ?? ""}
+              selectedRepository={{
+                selected_repository: conversation.selected_repository,
+                selected_branch: conversation.selected_branch,
+                git_provider: conversation.git_provider as Provider,
+              }}
+              lastUpdatedAt={conversation.updated_at}
+              createdAt={conversation.created_at}
+              executionStatus={conversation.execution_status}
+              sandboxStatus={conversation.sandbox_status}
+              conversationId={conversation.id}
+              contextMenuOpen={openContextMenuId === conversation.id}
+              onContextMenuToggle={(isOpen) =>
+                setOpenContextMenuId(isOpen ? conversation.id : null)
+              }
+              isActive={conversation.id === currentConversationId}
+              workspaceWorkingDir={
+                conversation.selected_workspace ??
+                conversation.workspace?.working_dir
+              }
+              showRepositoryMetadata={showRepoBranchMetadata}
+              llmModel={conversation.llm_model}
+              showLlmProfiles={showLlmProfiles}
+              agentKind={conversation.agent_kind}
+              acpServer={conversation.acp_server}
+              isPinned={isPinned}
+              onTogglePin={() => togglePin(activeBackend.id, conversation.id)}
+              alwaysShowPinIcon={isPinned && !options?.inPinnedSection}
+            />
+          </NavigationLink>
+        </Tooltip>
       );
     },
     [
@@ -570,6 +607,7 @@ export function ConversationPanel({
       pinnedIds,
       showRepoBranchMetadata,
       showLlmProfiles,
+      showHoverMetadata,
       togglePin,
     ],
   );
@@ -636,6 +674,8 @@ export function ConversationPanel({
                 toggleShowRepoBranchMetadata={toggleShowRepoBranchMetadata}
                 showLlmProfiles={showLlmProfiles}
                 toggleShowLlmProfiles={toggleShowLlmProfiles}
+                showHoverMetadata={showHoverMetadata}
+                toggleShowHoverMetadata={toggleShowHoverMetadata}
                 totalConversationsCount={conversations.length}
                 onRequestDeleteAll={() => setConfirmDeleteAllVisible(true)}
               />

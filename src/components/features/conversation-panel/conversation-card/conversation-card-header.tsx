@@ -26,6 +26,7 @@ export function ConversationCardHeader({
           <ConversationStatusDot
             executionStatus={executionStatus}
             sandboxStatus={sandboxStatus}
+            showTooltip={false}
           />
         </div>
       )}

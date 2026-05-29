@@ -23,6 +23,7 @@ interface ConversationPanelPreferencesState {
   showOlderConversations: boolean;
   showRepoBranchMetadata: boolean;
   showLlmProfiles: boolean;
+  showHoverMetadata: boolean;
   organizeMode: OrganizeMode;
   conversationSort: ConversationSortField;
   threadScope: ThreadScope;
@@ -36,6 +37,8 @@ interface ConversationPanelPreferencesActions {
   toggleShowRepoBranchMetadata: () => void;
   setShowLlmProfiles: (value: boolean) => void;
   toggleShowLlmProfiles: () => void;
+  setShowHoverMetadata: (value: boolean) => void;
+  toggleShowHoverMetadata: () => void;
   setOrganizeMode: (value: OrganizeMode) => void;
   setConversationSort: (value: ConversationSortField) => void;
   setThreadScope: (value: ThreadScope) => void;
@@ -49,6 +52,7 @@ const initialState: ConversationPanelPreferencesState = {
   showOlderConversations: true,
   showRepoBranchMetadata: false,
   showLlmProfiles: false,
+  showHoverMetadata: true,
   organizeMode: "chronological",
   conversationSort: "updated",
   threadScope: "all",
@@ -81,6 +85,13 @@ export const useConversationPanelPreferencesStore =
             showLlmProfiles: !state.showLlmProfiles,
           })),
 
+        setShowHoverMetadata: (value) =>
+          set(() => ({ showHoverMetadata: value })),
+        toggleShowHoverMetadata: () =>
+          set((state) => ({
+            showHoverMetadata: !state.showHoverMetadata,
+          })),
+
         setOrganizeMode: (value) => set(() => ({ organizeMode: value })),
         setConversationSort: (value) =>
           set(() => ({ conversationSort: value })),
@@ -96,6 +107,7 @@ export const useConversationPanelPreferencesStore =
           showOlderConversations: state.showOlderConversations,
           showRepoBranchMetadata: state.showRepoBranchMetadata,
           showLlmProfiles: state.showLlmProfiles,
+          showHoverMetadata: state.showHoverMetadata,
           organizeMode: state.organizeMode,
           conversationSort: state.conversationSort,
           threadScope: state.threadScope,

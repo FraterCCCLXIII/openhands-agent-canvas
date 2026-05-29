@@ -205,7 +205,20 @@ export function ConversationCard({
           {sandboxStatus === "ERROR" && <ConversationStatusBadges />}
         </div>
 
-        <div className="relative ml-auto pl-2 flex items-center justify-end shrink-0">
+        <div
+          className={cn(
+            "relative ml-auto pl-2 flex items-center justify-end shrink-0",
+            // The hover action overlay (pin + ellipsis) is absolutely
+            // positioned, so reserve its width so the flex-1 title truncates
+            // instead of colliding with the buttons. Pinned cards keep the pin
+            // visible at rest, so reserve the width always for those.
+            showPersistentPinIcon
+              ? "min-w-[3.75rem]"
+              : hasHoverActions &&
+                  "group-hover:min-w-[3.75rem] group-focus-within:min-w-[3.75rem]",
+            contextMenuOpen && "min-w-[3.75rem]",
+          )}
+        >
           {!showPersistentPinIcon && (createdAt ?? lastUpdatedAt) && (
             <p
               className={cn(
