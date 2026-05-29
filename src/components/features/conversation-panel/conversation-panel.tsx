@@ -10,7 +10,6 @@ import { useDeleteConversation } from "#/hooks/mutation/use-delete-conversation"
 import { useUnifiedPauseConversation } from "#/hooks/mutation/use-unified-stop-conversation";
 import { ConfirmDeleteModal } from "./confirm-delete-modal";
 import { ConfirmStopModal } from "./confirm-stop-modal";
-import { LoadingSpinner } from "#/components/shared/loading-spinner";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { ExitConversationModal } from "./exit-conversation-modal";
 import { useClickOutsideElement } from "#/hooks/use-click-outside-element";
@@ -222,6 +221,7 @@ export function ConversationPanel({
     isLoading,
     isFetched,
     hasNextPage,
+    isFetching,
     isFetchingNextPage,
     fetchNextPage,
   } = usePaginatedConversations();
@@ -229,10 +229,22 @@ export function ConversationPanel({
   // Fetch in-progress start tasks
   const { data: startTasks } = useStartTasks();
 
-  const conversations = React.useMemo(
-    () => data?.pages.flatMap((page) => page.items) ?? [],
-    [data],
-  );
+  const conversations = React.useMemo(() => {
+    const all = data?.pages.flatMap((page) => page.items) ?? [];
+    // The 10s background refetch re-fetches every loaded page with the
+    // `UPDATED_AT_DESC` cursor. If a conversation's `updated_at` shifts between
+    // page fetches, a later page can overlap an earlier one and surface the
+    // same conversation twice. Dedupe by id (keeping the first/freshest copy)
+    // so the rendered count reflects real growth and React keys stay unique.
+    const seen = new Set<string>();
+    return all.filter((conversation) => {
+      if (seen.has(conversation.id)) {
+        return false;
+      }
+      seen.add(conversation.id);
+      return true;
+    });
+  }, [data]);
 
   const pinnedConversations = React.useMemo(
     () => resolvePinnedConversations(pinnedIds, conversations),
@@ -360,6 +372,73 @@ export function ConversationPanel({
     organizeMode === "grouped" && !compact
       ? visibleGroupedCount === 0
       : visibleFlatCount === 0;
+
+  // Number of conversations actually rendered in the list right now, in the
+  // current organize mode. "Load more" succeeds only when this number grows.
+  const visibleCount =
+    organizeMode === "grouped" && !compact
+      ? visibleGroupedCount
+      : visibleFlatCount;
+
+  // KNOWN ISSUE (unresolved as of 2026-05-29): users still report that the
+  // sidebar "Load more" sometimes requires two clicks before new conversations
+  // appear. The mitigation below (dedupe by id in `conversations`, plus the
+  // floor-tracking driver that keeps fetching until the visible count grows)
+  // reduced but did NOT fully eliminate the symptom in manual testing. Likely
+  // remaining suspects to investigate next: the agent-server cursor pagination
+  // returning an overlapping/short page under `UPDATED_AT_DESC` while the 10s
+  // `refetchInterval` reorders pages (see `usePaginatedConversations`), or a
+  // React Query state lag where `hasNextPage`/`isFetching` settle a render
+  // after the click. If you pick this up, reproduce against a backend with
+  // >40 conversations and watch the `/api/conversations/search` cursors.
+  //
+  // Robust "Load more" driver. A single click can fail to surface new rows for
+  // two reasons: (1) `fetchNextPage()` is silently dropped while the 10s
+  // background refetch is in flight, and (2) a fetched page can yield zero
+  // *visible* rows (filtered out by the active scope, or deduped as overlap),
+  // so the list does not appear to grow. We capture the visible count at click
+  // time and keep fetching pages — once the query is idle — until the visible
+  // count actually increases or there are no more pages.
+  const [loadMoreFloor, setLoadMoreFloor] = React.useState<number | null>(null);
+  const visibleCountRef = React.useRef(visibleCount);
+  visibleCountRef.current = visibleCount;
+
+  const requestLoadMore = React.useCallback(() => {
+    if (hasNextPage) {
+      setLoadMoreFloor(visibleCountRef.current);
+    }
+  }, [hasNextPage]);
+
+  React.useEffect(() => {
+    if (loadMoreFloor === null) {
+      return;
+    }
+    // Goal met: the visible list grew past where it was when the user clicked.
+    if (visibleCount > loadMoreFloor) {
+      setLoadMoreFloor(null);
+      return;
+    }
+    // Nothing more to fetch — stop waiting even if the list did not grow.
+    if (!hasNextPage) {
+      setLoadMoreFloor(null);
+      return;
+    }
+    // Wait for any in-flight fetch (including the background refetch) to settle
+    // before requesting the next page, otherwise the request is dropped.
+    if (isFetching || isFetchingNextPage) {
+      return;
+    }
+    fetchNextPage();
+  }, [
+    loadMoreFloor,
+    visibleCount,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
+
+  const isLoadingMore = loadMoreFloor !== null || isFetchingNextPage;
 
   const { mutate: deleteConversation, mutateAsync: deleteConversationAsync } =
     useDeleteConversation();
@@ -780,22 +859,23 @@ export function ConversationPanel({
             *and* the older list is currently visible (or there are no older
             conversations to begin with) — otherwise the next page would be
             populated mostly with conversations the user has chosen to hide. */}
-        {showLoadMore && (
-          <div className="flex justify-center py-4">
-            {isFetchingNextPage ? (
-              <LoadingSpinner size="small" />
-            ) : (
+        {showLoadMore &&
+          (isLoadingMore ? (
+            <div className="py-1">
+              <ConversationCardSkeleton compact={compact} />
+            </div>
+          ) : (
+            <div className="flex justify-center py-4">
               <button
                 type="button"
                 data-testid="load-more-conversations"
-                onClick={() => fetchNextPage()}
+                onClick={requestLoadMore}
                 className="text-xs text-[var(--oh-muted)] hover:text-white"
               >
                 {t(I18nKey.CONVERSATION$LOAD_MORE)}
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          ))}
       </div>
 
       {confirmDeleteModalVisible && (
