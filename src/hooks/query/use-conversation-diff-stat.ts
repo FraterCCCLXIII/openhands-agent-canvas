@@ -23,6 +23,36 @@ interface UseConversationDiffStatParams {
 // estimate, so a single huge file can't lock up the main thread.
 const MAX_LCS_LINES = 4000;
 
+// There is no numstat endpoint, so each changed file costs one diff request.
+// Cap how many files we fetch (the badge is a summary, not an exact ledger) and
+// how many requests run at once, so a conversation with thousands of changed
+// files can't fire thousands of parallel requests and stall.
+const MAX_DIFF_FILES = 60;
+const DIFF_CONCURRENCY = 6;
+
+/** Run `task` over `items` with a bounded number of concurrent executions. */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      for (;;) {
+        const index = cursor;
+        cursor += 1;
+        if (index >= items.length) return;
+        results[index] = await task(items[index]);
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results;
+}
+
 /** Length of the longest common subsequence of two line arrays. */
 function lcsLength(a: string[], b: string[]): number {
   if (a.length === 0 || b.length === 0) return 0;
@@ -110,10 +140,16 @@ export function useConversationDiffStat({
         return { additions: 0, deletions: 0, filesChanged: 0 };
       }
 
-      const perFile = await Promise.all(
-        changes.map(async (change) => {
-          // Deleted files no longer exist on disk; the diff endpoint 400s.
-          if (change.status === "D") return { additions: 0, deletions: 0 };
+      // Deleted files no longer exist on disk (the diff endpoint 400s), and we
+      // only diff up to MAX_DIFF_FILES so huge changesets stay responsive.
+      const diffable = changes
+        .filter((change) => change.status !== "D")
+        .slice(0, MAX_DIFF_FILES);
+
+      const perFile = await mapWithConcurrency(
+        diffable,
+        DIFF_CONCURRENCY,
+        async (change) => {
           try {
             const diff = (await AgentServerGitService.getGitChangeDiff(
               conversationUrl,
@@ -124,7 +160,7 @@ export function useConversationDiffStat({
           } catch {
             return { additions: 0, deletions: 0 };
           }
-        }),
+        },
       );
 
       return perFile.reduce<ConversationDiffStat>(
