@@ -49,9 +49,6 @@ export function WorkbenchBoard({
   repositoryProviders,
   isLoading,
   isError,
-  hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
 }: WorkbenchBoardProps) {
   const { t } = useTranslation("openhands");
   const isCloud = useActiveBackend().backend.kind === "cloud";
@@ -279,19 +276,6 @@ export function WorkbenchBoard({
               onArchiveCard={setCardToArchive}
             />
           ))}
-          {hasNextPage ? (
-            <div className="flex shrink-0 items-start pt-1">
-              <button
-                type="button"
-                data-testid="workbench-load-more"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="rounded-lg border border-[var(--oh-border)] px-4 py-2 text-sm text-white transition-colors hover:bg-surface-raised disabled:opacity-50"
-              >
-                {t(I18nKey.WORKBENCH$LOAD_MORE)}
-              </button>
-            </div>
-          ) : null}
         </div>
       )}
 

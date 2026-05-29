@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { Provider } from "#/types/settings";
 import { usePaginatedConversations } from "#/hooks/query/use-paginated-conversations";
@@ -21,9 +21,6 @@ export interface WorkbenchData {
   repositoryProviders: Map<string, Provider>;
   isLoading: boolean;
   isError: boolean;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
 }
 
 /**
@@ -41,6 +38,14 @@ export function useWorkbenchData(): WorkbenchData {
     isFetchingNextPage,
     fetchNextPage,
   } = usePaginatedConversations(PAGE_SIZE);
+
+  // Eagerly pull every page so the board shows all conversations without a
+  // manual "load more" control.
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const archivedIds = useWorkbenchArchiveStore((state) => state.archivedIds);
 
@@ -67,8 +72,5 @@ export function useWorkbenchData(): WorkbenchData {
     repositoryProviders,
     isLoading,
     isError,
-    hasNextPage: Boolean(hasNextPage),
-    isFetchingNextPage,
-    fetchNextPage: () => fetchNextPage(),
   };
 }
