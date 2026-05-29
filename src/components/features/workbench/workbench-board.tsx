@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { BrandButton } from "#/components/features/settings/brand-button";
-import { useNavigation } from "#/context/navigation-context";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useCreateConversation } from "#/hooks/mutation/use-create-conversation";
 import {
@@ -48,7 +47,6 @@ export function WorkbenchBoard({
   fetchNextPage,
 }: WorkbenchBoardProps) {
   const { t } = useTranslation("openhands");
-  const { navigate } = useNavigation();
   const isCloud = useActiveBackend().backend.kind === "cloud";
   const createConversation = useCreateConversation();
   const archiveConversation = useWorkbenchArchiveStore(
@@ -100,10 +98,11 @@ export function WorkbenchBoard({
           : undefined,
       },
       {
-        onSuccess: (result) => {
+        onSuccess: () => {
+          // Stay on the workbench; the new task surfaces in the board once the
+          // conversation list query refetches (invalidated by the mutation).
           setIsNewTaskOpen(false);
           displaySuccessToast(t(I18nKey.WORKBENCH$TASK_QUEUED));
-          navigate(`/conversations/${result.conversation_id}`);
         },
         onError: () => {
           displayErrorToast(t(I18nKey.WORKBENCH$TASK_CREATE_ERROR));
