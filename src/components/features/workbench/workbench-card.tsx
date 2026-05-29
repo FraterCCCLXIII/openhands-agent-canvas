@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { Archive } from "lucide-react";
 import AutomationsIcon from "#/icons/automations.svg?react";
@@ -5,12 +6,21 @@ import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 import { useInView } from "#/hooks/use-in-view";
 import { useConversationDiffStat } from "#/hooks/query/use-conversation-diff-stat";
+import { useConversationLiveActivity } from "./use-conversation-live-activity";
 import { formatTimeAgo } from "./format-time-ago";
 import { DiffStat } from "./diff-stat";
 import type { WorkbenchCard } from "./types";
 
-// Prefetch the diff stat slightly before the card scrolls into view.
-const IN_VIEW_OPTIONS: IntersectionObserverInit = { rootMargin: "200px" };
+// Render the live-action title only once a running card is in view; lazy so the
+// chat event-content helpers stay out of the workbench route's eager bundle.
+const LiveActivityLabel = lazy(() => import("./live-activity-label"));
+
+// Track visibility continuously (not once) so the per-card live websocket
+// connects on enter and disconnects on leave; cards prefetch slightly early.
+const IN_VIEW_OPTIONS: IntersectionObserverInit & { once?: boolean } = {
+  rootMargin: "200px",
+  once: false,
+};
 
 interface WorkbenchCardProps {
   card: WorkbenchCard;
@@ -41,6 +51,13 @@ export function WorkbenchCardItem({
     selectedRepository: null,
     workingDir: card.workingDir,
     enabled: inView && !card.isPlaceholder,
+  });
+  const liveEvent = useConversationLiveActivity({
+    conversationId: card.id,
+    conversationUrl: card.conversationUrl,
+    sessionApiKey: card.sessionApiKey,
+    updatedAt: card.updatedAt,
+    enabled: inView && Boolean(card.activity) && !card.isPlaceholder,
   });
 
   if (card.isPlaceholder) {
@@ -98,7 +115,13 @@ export function WorkbenchCardItem({
 
         {card.activity ? (
           <p className="shine-text mb-3 truncate text-xs font-medium">
-            {card.activity}
+            {liveEvent ? (
+              <Suspense fallback={card.activity}>
+                <LiveActivityLabel event={liveEvent} />
+              </Suspense>
+            ) : (
+              card.activity
+            )}
           </p>
         ) : null}
 
