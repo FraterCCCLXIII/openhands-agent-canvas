@@ -51,7 +51,7 @@ export function WorkbenchColumnComponent({
       <div className="mb-3 flex items-center gap-2 px-2">
         <Icon width={16} height={16} className="shrink-0 text-tertiary-light" />
         <h2 className="text-sm font-medium text-white">{column.title}</h2>
-        <span className="rounded bg-surface-raised px-2 py-0.5 font-mono text-xs text-tertiary-light">
+        <span className="rounded bg-surface-raised px-2 py-0.5 text-xs text-tertiary-light">
           {column.cards.length}
         </span>
       </div>
