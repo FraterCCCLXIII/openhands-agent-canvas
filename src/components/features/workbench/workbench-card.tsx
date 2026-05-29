@@ -53,7 +53,7 @@ export function WorkbenchCardItem({
     conversationId: card.id,
     conversationUrl: card.conversationUrl,
     sessionApiKey: card.sessionApiKey,
-    selectedRepository: null,
+    selectedRepository: card.selectedRepository ?? null,
     workingDir: card.workingDir,
     enabled: !card.isPlaceholder,
   });

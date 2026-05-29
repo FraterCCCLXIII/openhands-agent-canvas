@@ -36,6 +36,13 @@ export interface WorkbenchCard {
   sessionApiKey?: string | null;
   workingDir?: string | null;
   /**
+   * The conversation's selected repository (e.g. `owner/repo`), if any. Needed
+   * alongside `workingDir` so the diff stat resolves the same git path the
+   * conversation page uses — when `workingDir` is absent the path is derived
+   * from the repo name.
+   */
+  selectedRepository?: string | null;
+  /**
    * Optimistic placeholder shown immediately after a task is created, before
    * the real conversation surfaces in the refetched list. Rendered as a
    * skeleton and not interactive.
