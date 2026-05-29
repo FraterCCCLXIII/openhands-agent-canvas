@@ -198,9 +198,9 @@ export function WorkbenchBoard({
             isBoardScrolled
               ? {
                   maskImage:
-                    "linear-gradient(to right, transparent 0, #000 3rem)",
+                    "linear-gradient(to right, transparent 0, #000 1.25rem)",
                   WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0, #000 3rem)",
+                    "linear-gradient(to right, transparent 0, #000 1.25rem)",
                 }
               : undefined
           }
