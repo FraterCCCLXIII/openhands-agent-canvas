@@ -44,13 +44,18 @@ export function WorkbenchCardItem({
   const showArchive = Boolean(onArchive) && !isArchived;
 
   const { ref, inView } = useInView<HTMLDivElement>(IN_VIEW_OPTIONS);
+  // Diff stats fetch for every real card (not gated on viewport): most
+  // conversations report zero changes in a single request, and changed ones
+  // are bounded (capped files + limited concurrency) inside the hook. Gating on
+  // `inView` left cards blank when the IntersectionObserver didn't fire for
+  // their position, so the badge never appeared.
   const { data: diffStat } = useConversationDiffStat({
     conversationId: card.id,
     conversationUrl: card.conversationUrl,
     sessionApiKey: card.sessionApiKey,
     selectedRepository: null,
     workingDir: card.workingDir,
-    enabled: inView && !card.isPlaceholder,
+    enabled: !card.isPlaceholder,
   });
   const liveEvent = useConversationLiveActivity({
     conversationId: card.id,
