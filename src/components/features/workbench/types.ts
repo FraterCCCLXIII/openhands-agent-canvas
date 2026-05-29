@@ -29,6 +29,13 @@ export interface WorkbenchCard {
   createdAt: string;
   updatedAt: string;
   /**
+   * Runtime coordinates used for on-demand git/diff fetches (e.g. the card's
+   * diff stat). Absent for placeholder cards.
+   */
+  conversationUrl?: string | null;
+  sessionApiKey?: string | null;
+  workingDir?: string | null;
+  /**
    * Optimistic placeholder shown immediately after a task is created, before
    * the real conversation surfaces in the refetched list. Rendered as a
    * skeleton and not interactive.

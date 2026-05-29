@@ -11,6 +11,7 @@ import { WebSocketProviderWrapper } from "#/contexts/websocket-provider-wrapper"
 import { EventHandler } from "#/wrapper/event-handler";
 import { ChatInterface } from "#/components/features/chat/chat-interface";
 import { useActiveConversation } from "#/hooks/query/use-active-conversation";
+import { useConversationDiffStat } from "#/hooks/query/use-conversation-diff-stat";
 import { useCommandStore } from "#/stores/command-store";
 import { useConversationStore } from "#/stores/conversation-store";
 import { useConversationStateStore } from "#/stores/conversation-state-store";
@@ -20,6 +21,7 @@ import { AgentState } from "#/types/agent-state";
 import { ExecutionStatus } from "#/types/agent-server/core/base/common";
 import { executionStatusToColumnId } from "./conversation-mapper";
 import { formatTimeAgo } from "./format-time-ago";
+import { DiffStat } from "./diff-stat";
 import type { WorkbenchCard } from "./types";
 
 const TRANSITION_MS = 250;
@@ -90,6 +92,15 @@ function DrawerBody({ card, onOpenFull, onClose }: DrawerBodyProps) {
   const model = conversation?.llm_model ?? card.model;
   const updatedAt = conversation?.updated_at ?? card.updatedAt;
 
+  const { data: diffStat } = useConversationDiffStat({
+    conversationId: card.id,
+    conversationUrl: conversation?.conversation_url,
+    sessionApiKey: conversation?.session_api_key,
+    selectedRepository: conversation?.selected_repository,
+    workingDir: conversation?.workspace?.working_dir,
+    enabled: Boolean(conversation),
+  });
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex shrink-0 items-center gap-2 px-4 pb-2 pt-4">
@@ -130,7 +141,15 @@ function DrawerBody({ card, onOpenFull, onClose }: DrawerBodyProps) {
           {branch}
         </span>
         {model ? <span className="truncate">{model}</span> : null}
-        <span className="ml-auto shrink-0">{formatTimeAgo(t, updatedAt)}</span>
+        <span className="ml-auto flex shrink-0 items-center gap-3">
+          {diffStat ? (
+            <DiffStat
+              additions={diffStat.additions}
+              deletions={diffStat.deletions}
+            />
+          ) : null}
+          <span>{formatTimeAgo(t, updatedAt)}</span>
+        </span>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">

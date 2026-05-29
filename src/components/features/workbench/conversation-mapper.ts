@@ -133,6 +133,9 @@ export function conversationToCard(
     baseBranch: "main",
     createdAt: conversation.created_at,
     updatedAt: conversation.updated_at,
+    conversationUrl: conversation.conversation_url,
+    sessionApiKey: conversation.session_api_key,
+    workingDir: conversation.workspace?.working_dir ?? null,
   };
 }
 

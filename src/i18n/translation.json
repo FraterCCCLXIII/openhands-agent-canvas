@@ -12171,6 +12171,23 @@
     "uk": "Працює…",
     "ca": "Treballant…"
   },
+  "WORKBENCH$DIFF_STAT_LABEL": {
+    "en": "{{additions}} additions, {{deletions}} deletions",
+    "ja": "{{additions}} 行追加、{{deletions}} 行削除",
+    "zh-CN": "新增 {{additions}} 行，删除 {{deletions}} 行",
+    "zh-TW": "新增 {{additions}} 行，刪除 {{deletions}} 行",
+    "ko-KR": "{{additions}}줄 추가, {{deletions}}줄 삭제",
+    "no": "{{additions}} tillegg, {{deletions}} slettinger",
+    "it": "{{additions}} aggiunte, {{deletions}} eliminazioni",
+    "pt": "{{additions}} adições, {{deletions}} remoções",
+    "es": "{{additions}} adiciones, {{deletions}} eliminaciones",
+    "ar": "{{additions}} إضافة، {{deletions}} حذف",
+    "fr": "{{additions}} ajouts, {{deletions}} suppressions",
+    "tr": "{{additions}} ekleme, {{deletions}} silme",
+    "de": "{{additions}} Ergänzungen, {{deletions}} Löschungen",
+    "uk": "{{additions}} додано, {{deletions}} видалено",
+    "ca": "{{additions}} addicions, {{deletions}} supressions"
+  },
   "WORKBENCH$DRAWER_MODEL": {
     "en": "Model",
     "ja": "モデル",

@@ -3,8 +3,14 @@ import { Archive } from "lucide-react";
 import AutomationsIcon from "#/icons/automations.svg?react";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import { useInView } from "#/hooks/use-in-view";
+import { useConversationDiffStat } from "#/hooks/query/use-conversation-diff-stat";
 import { formatTimeAgo } from "./format-time-ago";
+import { DiffStat } from "./diff-stat";
 import type { WorkbenchCard } from "./types";
+
+// Prefetch the diff stat slightly before the card scrolls into view.
+const IN_VIEW_OPTIONS: IntersectionObserverInit = { rootMargin: "200px" };
 
 interface WorkbenchCardProps {
   card: WorkbenchCard;
@@ -26,6 +32,16 @@ export function WorkbenchCardItem({
 }: WorkbenchCardProps) {
   const { t } = useTranslation("openhands");
   const showArchive = Boolean(onArchive) && !isArchived;
+
+  const { ref, inView } = useInView<HTMLDivElement>(IN_VIEW_OPTIONS);
+  const { data: diffStat } = useConversationDiffStat({
+    conversationId: card.id,
+    conversationUrl: card.conversationUrl,
+    sessionApiKey: card.sessionApiKey,
+    selectedRepository: null,
+    workingDir: card.workingDir,
+    enabled: inView && !card.isPlaceholder,
+  });
 
   if (card.isPlaceholder) {
     return (
@@ -52,6 +68,7 @@ export function WorkbenchCardItem({
 
   return (
     <div
+      ref={ref}
       className={cn(
         "group relative rounded-xl border border-[var(--oh-border)] bg-base",
         "transition-colors duration-150 hover:border-[var(--oh-muted)]",
@@ -94,9 +111,17 @@ export function WorkbenchCardItem({
             {card.sourceType === "automation" ? (
               <AutomationsIcon width={12} height={12} aria-hidden />
             ) : null}
-            <span className="truncate">{card.model || card.repo}</span>
+            <span className="min-w-0 truncate">{card.model || card.repo}</span>
           </span>
-          <span className="shrink-0">{formatTimeAgo(t, card.updatedAt)}</span>
+          <span className="flex shrink-0 items-center gap-2">
+            {diffStat ? (
+              <DiffStat
+                additions={diffStat.additions}
+                deletions={diffStat.deletions}
+              />
+            ) : null}
+            <span>{formatTimeAgo(t, card.updatedAt)}</span>
+          </span>
         </div>
       </div>
 
