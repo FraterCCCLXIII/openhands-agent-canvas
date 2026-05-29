@@ -12154,6 +12154,23 @@
     "uk": "Розмова без назви",
     "ca": "Conversa sense títol"
   },
+  "WORKBENCH$AGENT_WORKING": {
+    "en": "Working…",
+    "ja": "作業中…",
+    "zh-CN": "处理中…",
+    "zh-TW": "處理中…",
+    "ko-KR": "작업 중…",
+    "no": "Jobber…",
+    "it": "In lavorazione…",
+    "pt": "Trabalhando…",
+    "es": "Trabajando…",
+    "ar": "جارٍ العمل…",
+    "fr": "En cours…",
+    "tr": "Çalışıyor…",
+    "de": "Arbeitet…",
+    "uk": "Працює…",
+    "ca": "Treballant…"
+  },
   "WORKBENCH$DRAWER_MODEL": {
     "en": "Model",
     "ja": "モデル",

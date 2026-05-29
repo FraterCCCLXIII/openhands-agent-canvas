@@ -117,6 +117,8 @@ export function conversationToCard(
       ? "automation"
       : "task";
 
+  const isRunning = conversation.execution_status === ExecutionStatus.RUNNING;
+
   return {
     id: conversation.id,
     number: hasPr ? conversation.pr_number[0] : undefined,
@@ -124,6 +126,9 @@ export function conversationToCard(
     repo: repoFromConversation(conversation),
     sourceType,
     model: conversation.llm_model,
+    // The list payload has no live action text; show a generic working line
+    // for running conversations so the card reads as active.
+    activity: isRunning ? t(I18nKey.WORKBENCH$AGENT_WORKING) : undefined,
     branch: conversation.selected_branch ?? "main",
     baseBranch: "main",
     createdAt: conversation.created_at,

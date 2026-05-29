@@ -28,6 +28,12 @@ export interface WorkbenchCard {
   baseBranch: string;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Optimistic placeholder shown immediately after a task is created, before
+   * the real conversation surfaces in the refetched list. Rendered as a
+   * skeleton and not interactive.
+   */
+  isPlaceholder?: boolean;
 }
 
 export interface WorkbenchColumn {

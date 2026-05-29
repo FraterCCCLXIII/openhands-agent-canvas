@@ -1,4 +1,11 @@
-import { Suspense, lazy, useMemo, useState, type UIEvent } from "react";
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useMemo,
+  useState,
+  type UIEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
@@ -60,20 +67,45 @@ export function WorkbenchBoard({
   // Tracks horizontal scroll so the board's left edge fades (rather than hard
   // cuts) once columns are scrolled out of view to the left.
   const [isBoardScrolled, setIsBoardScrolled] = useState(false);
+  // Optimistic placeholder cards shown in the In Progress column the instant a
+  // task is created, until the real conversation surfaces in the refetch.
+  const [pendingCards, setPendingCards] = useState<
+    { tempId: string; realId?: string; card: WorkbenchCard }[]
+  >([]);
 
   const handleBoardScroll = (event: UIEvent<HTMLDivElement>) => {
     setIsBoardScrolled(event.currentTarget.scrollLeft > 8);
   };
 
+  // Drop a placeholder once its real conversation appears in the loaded data.
+  useEffect(() => {
+    const presentIds = new Set(
+      columns.flatMap((column) => column.cards.map((card) => card.id)),
+    );
+    setPendingCards((prev) =>
+      prev.filter((pending) =>
+        pending.realId ? !presentIds.has(pending.realId) : true,
+      ),
+    );
+  }, [columns]);
+
   const isFiltered = activeRepo !== ALL_REPOSITORIES;
 
   const visibleColumns = useMemo(() => {
-    if (!isFiltered) return columns;
-    return columns.map((column) => ({
-      ...column,
-      cards: column.cards.filter((card) => card.repo === activeRepo),
-    }));
-  }, [columns, activeRepo, isFiltered]);
+    const placeholders = pendingCards.map((pending) => pending.card);
+    return columns.map((column) => {
+      const baseCards = isFiltered
+        ? column.cards.filter((card) => card.repo === activeRepo)
+        : column.cards;
+      if (column.id !== IN_PROGRESS_COLUMN_ID || placeholders.length === 0) {
+        return { ...column, cards: baseCards };
+      }
+      const relevant = isFiltered
+        ? placeholders.filter((card) => card.repo === activeRepo)
+        : placeholders;
+      return { ...column, cards: [...relevant, ...baseCards] };
+    });
+  }, [columns, activeRepo, isFiltered, pendingCards]);
 
   const runningCount = useMemo(
     () =>
@@ -97,6 +129,29 @@ export function WorkbenchBoard({
       payload.repo !== NO_REPOSITORY
         ? repositoryProviders.get(payload.repo)
         : undefined;
+
+    // Show a skeleton placeholder immediately so the new task is visible on the
+    // board before the conversation list refetches.
+    const tempId = `pending-${Date.now()}`;
+    const nowIso = new Date().toISOString();
+    setPendingCards((prev) => [
+      ...prev,
+      {
+        tempId,
+        card: {
+          id: tempId,
+          title: payload.prompt,
+          repo: payload.repo,
+          sourceType: "task",
+          branch: "main",
+          baseBranch: "main",
+          createdAt: nowIso,
+          updatedAt: nowIso,
+          isPlaceholder: true,
+        },
+      },
+    ]);
+
     createConversation.mutate(
       {
         query: payload.prompt,
@@ -105,14 +160,24 @@ export function WorkbenchBoard({
           : undefined,
       },
       {
-        onSuccess: () => {
-          // Stay on the workbench; the new task surfaces in the board once the
-          // conversation list query refetches (invalidated by the mutation).
+        onSuccess: (result) => {
+          // Stay on the workbench; the placeholder is replaced once the real
+          // conversation surfaces in the refetched list (see the prune effect).
           setIsNewTaskOpen(false);
           displaySuccessToast(t(I18nKey.WORKBENCH$TASK_QUEUED));
+          setPendingCards((prev) =>
+            prev.map((pending) =>
+              pending.tempId === tempId
+                ? { ...pending, realId: result.conversation_id }
+                : pending,
+            ),
+          );
         },
         onError: () => {
           displayErrorToast(t(I18nKey.WORKBENCH$TASK_CREATE_ERROR));
+          setPendingCards((prev) =>
+            prev.filter((pending) => pending.tempId !== tempId),
+          );
         },
       },
     );
