@@ -6,6 +6,7 @@ import {
   Plus,
   Server,
   Settings,
+  SquareKanban,
 } from "lucide-react";
 import { OpenHandsLogoButton } from "#/components/shared/buttons/openhands-logo-button";
 import { NavigationLink } from "#/components/shared/navigation-link";
@@ -207,6 +208,14 @@ export function SidebarRailBody({
           disabled={linkDisabled}
           collapsed={collapsed}
           icon={<AutomationsIcon width={ICON_SIZE} height={ICON_SIZE} />}
+        />
+        <SidebarNavLink
+          to="/workbench"
+          label={t(I18nKey.SIDEBAR$WORKBENCH)}
+          testId="sidebar-workbench-link"
+          disabled={linkDisabled}
+          collapsed={collapsed}
+          icon={<SquareKanban width={ICON_SIZE} height={ICON_SIZE} />}
         />
       </nav>
 
