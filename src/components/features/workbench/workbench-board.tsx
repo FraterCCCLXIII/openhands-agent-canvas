@@ -132,7 +132,7 @@ export function WorkbenchBoard({
 
     // Show a skeleton placeholder immediately so the new task is visible on the
     // board before the conversation list refetches.
-    const tempId = `pending-${Date.now()}`;
+    const tempId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const nowIso = new Date().toISOString();
     setPendingCards((prev) => [
       ...prev,
