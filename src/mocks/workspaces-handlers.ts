@@ -4,6 +4,11 @@ import type {
   WorkspaceParentItem,
   WorkspacesListResponse,
 } from "@openhands/typescript-client/clients";
+import { isScreenshotMode } from "./screenshot-mode";
+import {
+  SCREENSHOT_WORKSPACES,
+  SCREENSHOT_WORKSPACE_PARENTS,
+} from "./screenshot-fixtures";
 
 /**
  * MSW handlers for the agent-server's `/api/workspaces` and
@@ -19,8 +24,12 @@ import type {
  * cleanly within a single page load. State resets on every test reload.
  */
 
-let workspaces: WorkspaceItem[] = [];
-let workspaceParents: WorkspaceParentItem[] = [];
+let workspaces: WorkspaceItem[] = isScreenshotMode()
+  ? SCREENSHOT_WORKSPACES.map((w) => ({ ...w }))
+  : [];
+let workspaceParents: WorkspaceParentItem[] = isScreenshotMode()
+  ? SCREENSHOT_WORKSPACE_PARENTS.map((p) => ({ ...p }))
+  : [];
 
 function snapshot(): WorkspacesListResponse {
   return {
@@ -30,8 +39,12 @@ function snapshot(): WorkspacesListResponse {
 }
 
 export function resetMockWorkspaces(): void {
-  workspaces = [];
-  workspaceParents = [];
+  workspaces = isScreenshotMode()
+    ? SCREENSHOT_WORKSPACES.map((w) => ({ ...w }))
+    : [];
+  workspaceParents = isScreenshotMode()
+    ? SCREENSHOT_WORKSPACE_PARENTS.map((p) => ({ ...p }))
+    : [];
 }
 
 export const WORKSPACES_HANDLERS = [

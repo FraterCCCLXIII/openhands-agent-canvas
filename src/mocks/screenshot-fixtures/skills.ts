@@ -1,0 +1,66 @@
+import type { SkillInfo } from "#/types/settings";
+
+export const SCREENSHOT_SKILLS: SkillInfo[] = [
+  {
+    name: "code-review",
+    type: "agentskills",
+    source: "github:OpenHands/extensions/skills/codereview",
+    description:
+      "Structured code review focused on correctness, security, and maintainability.",
+    triggers: ["/review"],
+    version: "1.2.0",
+    license: "MIT",
+    allowed_tools: ["terminal", "file_editor"],
+  },
+  {
+    name: "docker",
+    type: "agentskills",
+    source: "github:OpenHands/extensions/skills/docker",
+    description:
+      "Run and manage containers, including local Docker daemon setup.",
+    triggers: ["/docker"],
+    version: "0.9.1",
+    license: "Apache-2.0",
+    allowed_tools: ["terminal"],
+  },
+  {
+    name: "prd",
+    type: "knowledge",
+    source: "github:OpenHands/extensions/skills/prd",
+    description: "Draft a product requirements document for a new feature.",
+    triggers: ["/prd"],
+    version: "1.0.0",
+    license: null,
+    allowed_tools: null,
+  },
+  {
+    name: "repo-rules",
+    type: "repo",
+    source: null,
+    description: "Repository-specific coding standards and review checklist.",
+    triggers: [],
+    version: undefined,
+    license: null,
+    allowed_tools: ["file_editor", "terminal"],
+  },
+  {
+    name: "release-notes",
+    type: "agentskills",
+    source: "github:OpenHands/extensions/skills/releasenotes",
+    description: "Generate release notes from merged pull requests.",
+    triggers: ["/releasenotes"],
+    version: "1.1.0",
+    license: "MIT",
+    allowed_tools: ["terminal", "file_editor"],
+  },
+  {
+    name: "test-runner",
+    type: "agentskills",
+    source: "github:OpenHands/extensions/skills/testrunner",
+    description: "Run the project test suite and summarize failures.",
+    triggers: ["/test"],
+    version: "1.0.3",
+    license: "MIT",
+    allowed_tools: ["terminal"],
+  },
+];

@@ -1,16 +1,31 @@
 import { http, HttpResponse } from "msw";
+import { isScreenshotMode } from "./screenshot-mode";
+import { SCREENSHOT_SECRETS } from "./screenshot-fixtures";
+
+const defaultSecrets: Array<[string, { value: string; description?: string }]> =
+  isScreenshotMode()
+    ? SCREENSHOT_SECRETS.map((secret) => [
+        secret.name,
+        { value: secret.value, description: secret.description },
+      ])
+    : [
+        [
+          "OpenAI_API_Key",
+          { value: "test-123", description: "OpenAI API Key" },
+        ],
+        [
+          "Google_Maps_API_Key",
+          { value: "test-123", description: "Google Maps API Key" },
+        ],
+      ];
 
 /**
  * In-memory secrets storage for mock agent-server API.
  * Uses name as the key (agent-server uses name-based lookups, not IDs).
  */
-const secrets = new Map<string, { value: string; description?: string }>([
-  ["OpenAI_API_Key", { value: "test-123", description: "OpenAI API Key" }],
-  [
-    "Google_Maps_API_Key",
-    { value: "test-123", description: "Google Maps API Key" },
-  ],
-]);
+const secrets = new Map<string, { value: string; description?: string }>(
+  defaultSecrets,
+);
 
 /**
  * Mock handlers for the agent-server secrets API.

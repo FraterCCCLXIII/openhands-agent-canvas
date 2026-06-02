@@ -1,6 +1,8 @@
 import { delay, http, HttpResponse } from "msw";
 import { GitRepository, Branch, PaginatedBranchesResponse } from "#/types/git";
 import { Provider } from "#/types/settings";
+import { isScreenshotMode } from "./screenshot-mode";
+import { SCREENSHOT_GIT_CHANGES } from "./screenshot-fixtures";
 
 // Generate a list of mock repositories with realistic data
 const generateMockRepositories = (
@@ -60,11 +62,14 @@ const MOCK_BRANCHES = generateMockBranches(25);
 // Uses AgentServerGitChangeStatus values ("UPDATED", "ADDED", "DELETED") as
 // returned by the real /api/git/changes endpoint; AgentServerGitService maps
 // them via mapAnyGitStatusToClientStatus before handing them to the UI.
-export let MOCK_GIT_CHANGES: Array<{ path: string; status: string }> = [
-  { path: "src/components/hello.tsx", status: "UPDATED" },
-  { path: "src/utils/new-helper.ts", status: "ADDED" },
-  { path: "src/old-module.py", status: "DELETED" },
-];
+export let MOCK_GIT_CHANGES: Array<{ path: string; status: string }> =
+  isScreenshotMode()
+    ? SCREENSHOT_GIT_CHANGES.map((change) => ({ ...change }))
+    : [
+        { path: "src/components/hello.tsx", status: "UPDATED" },
+        { path: "src/utils/new-helper.ts", status: "ADDED" },
+        { path: "src/old-module.py", status: "DELETED" },
+      ];
 
 export const setMockGitChanges = (changes: typeof MOCK_GIT_CHANGES): void => {
   MOCK_GIT_CHANGES = changes;

@@ -6,9 +6,17 @@ import {
   type OpenHandsEvent,
 } from "#/types/agent-server/core";
 import { GetMicroagentsResponse } from "#/api/open-hands.types";
+import { isScreenshotMode } from "./screenshot-mode";
+import {
+  SCREENSHOT_CONVERSATIONS,
+  SCREENSHOT_CONVERSATION_EVENTS,
+  SCREENSHOT_SKILLS,
+} from "./screenshot-fixtures";
 
 /** Map from conversation id → events returned by GET /events/search */
-const CONVERSATION_EVENTS: Record<string, unknown[]> = {};
+const CONVERSATION_EVENTS: Record<string, unknown[]> = isScreenshotMode()
+  ? { ...SCREENSHOT_CONVERSATION_EVENTS }
+  : {};
 
 const now = Date.now();
 const PAGINATION_LOCAL_CONVERSATION_ID = "pagination-local";
@@ -28,62 +36,64 @@ type CloudProxyEnvelope = {
   path?: string;
 };
 
-const conversations: MockConversation[] = [
-  {
-    id: "1",
-    title: "My New Project",
-    created_at: new Date(now).toISOString(),
-    updated_at: new Date(now).toISOString(),
-    execution_status: "waiting_for_confirmation",
-  },
-  {
-    id: "2",
-    title: "Repo Testing",
-    created_at: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    execution_status: "idle",
-    selected_repository: "octocat/hello-world",
-    git_provider: "github",
-  },
-  {
-    id: "3",
-    title: "Another Project",
-    created_at: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    execution_status: "idle",
-    selected_repository: "octocat/earth",
-    selected_branch: "main",
-  },
-  // Conversation whose sandbox has been removed (MISSING). The conversation
-  // history is still readable but the sandbox cannot be resumed — the chat
-  // input is replaced with a read-only archived banner.
-  {
-    id: "4",
-    title: "Archived Project",
-    created_at: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    execution_status: "idle",
-    sandbox_status: "MISSING",
-  },
-  // Conversation whose sandbox encountered an unrecoverable error. Same
-  // read-only treatment but with the "Sandbox error" variant of the banner.
-  {
-    id: "5",
-    title: "Errored Project",
-    created_at: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    execution_status: "idle",
-    sandbox_status: "ERROR",
-  },
-  {
-    id: PAGINATION_LOCAL_CONVERSATION_ID,
-    title: "Local pagination fixture",
-    created_at: new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    execution_status: "idle",
-    workspace: { working_dir: "/workspace/project" },
-  },
-];
+const conversations: MockConversation[] = isScreenshotMode()
+  ? [...SCREENSHOT_CONVERSATIONS]
+  : [
+      {
+        id: "1",
+        title: "My New Project",
+        created_at: new Date(now).toISOString(),
+        updated_at: new Date(now).toISOString(),
+        execution_status: "waiting_for_confirmation",
+      },
+      {
+        id: "2",
+        title: "Repo Testing",
+        created_at: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        execution_status: "idle",
+        selected_repository: "octocat/hello-world",
+        git_provider: "github",
+      },
+      {
+        id: "3",
+        title: "Another Project",
+        created_at: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        execution_status: "idle",
+        selected_repository: "octocat/earth",
+        selected_branch: "main",
+      },
+      // Conversation whose sandbox has been removed (MISSING). The conversation
+      // history is still readable but the sandbox cannot be resumed — the chat
+      // input is replaced with a read-only archived banner.
+      {
+        id: "4",
+        title: "Archived Project",
+        created_at: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        execution_status: "idle",
+        sandbox_status: "MISSING",
+      },
+      // Conversation whose sandbox encountered an unrecoverable error. Same
+      // read-only treatment but with the "Sandbox error" variant of the banner.
+      {
+        id: "5",
+        title: "Errored Project",
+        created_at: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        execution_status: "idle",
+        sandbox_status: "ERROR",
+      },
+      {
+        id: PAGINATION_LOCAL_CONVERSATION_ID,
+        title: "Local pagination fixture",
+        created_at: new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString(),
+        execution_status: "idle",
+        workspace: { working_dir: "/workspace/project" },
+      },
+    ];
 
 const CONVERSATIONS = new Map<string, MockConversation>(
   conversations.map((conversation) => [conversation.id, conversation]),
@@ -290,8 +300,13 @@ export const CONVERSATION_HANDLERS = [
     return HttpResponse.json(null, { status: 404 });
   }),
 
-  http.get("*/api/conversations/:conversationId/events/count", async () =>
-    HttpResponse.json(0),
+  http.get(
+    "*/api/conversations/:conversationId/events/count",
+    async ({ params }) => {
+      const conversationId = params.conversationId as string;
+      const items = CONVERSATION_EVENTS[conversationId] ?? [];
+      return HttpResponse.json(items.length);
+    },
   ),
 
   http.get(
@@ -408,7 +423,11 @@ export const CONVERSATION_HANDLERS = [
 
   http.get("*/api/vscode/url", async () => HttpResponse.json({ url: null })),
 
-  http.post("*/api/skills", async () => HttpResponse.json({ skills: [] })),
+  http.post("*/api/skills", async () =>
+    HttpResponse.json({
+      skills: isScreenshotMode() ? SCREENSHOT_SKILLS : [],
+    }),
+  ),
 
   http.post(
     "/api/v1/conversations/:conversationId/pending-messages",

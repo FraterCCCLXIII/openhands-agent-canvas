@@ -3,6 +3,12 @@ import { WebClientConfig } from "#/api/option-service/option.types";
 import type { SaveProfileRequest } from "#/api/profiles-service/profiles-service.api";
 import { DEFAULT_SETTINGS } from "#/services/settings";
 import { Settings, SettingsValue } from "#/types/settings";
+import { isScreenshotMode } from "./screenshot-mode";
+import {
+  SCREENSHOT_ACTIVE_LLM_PROFILE,
+  SCREENSHOT_LLM_PROFILES,
+  SCREENSHOT_MCP_CONFIG,
+} from "./screenshot-fixtures";
 
 /** Simple recursive merge — objects merge, scalars overwrite. */
 function deepMerge(
@@ -302,6 +308,7 @@ const MOCK_CONVERSATION_SETTINGS_SCHEMA: NonNullable<
 export const MOCK_DEFAULT_USER_SETTINGS: Settings = {
   ...DEFAULT_SETTINGS,
   provider_tokens_set: {},
+  ...(isScreenshotMode() ? { user_consents_to_analytics: true } : {}),
   agent_settings_schema: MOCK_AGENT_SETTINGS_SCHEMA,
   agent_settings: {
     ...DEFAULT_AGENT_SETTINGS,
@@ -318,7 +325,10 @@ export const MOCK_DEFAULT_USER_SETTINGS: Settings = {
       enable_default_condenser: true,
       condenser_max_size: null,
     },
-    enable_sub_agents: false,
+    enable_sub_agents: isScreenshotMode(),
+    ...(isScreenshotMode()
+      ? { mcp_config: structuredClone(SCREENSHOT_MCP_CONFIG) }
+      : {}),
   },
   conversation_settings_schema: MOCK_CONVERSATION_SETTINGS_SCHEMA,
   conversation_settings: {
@@ -345,6 +355,17 @@ const MOCK_LLM_PROFILES: {
   profiles: new Map(),
   activeProfile: null,
 };
+
+if (isScreenshotMode()) {
+  for (const profile of SCREENSHOT_LLM_PROFILES) {
+    MOCK_LLM_PROFILES.profiles.set(profile.name, {
+      name: profile.name,
+      config: structuredClone(profile.config),
+      api_key_set: profile.api_key_set,
+    });
+  }
+  MOCK_LLM_PROFILES.activeProfile = SCREENSHOT_ACTIVE_LLM_PROFILE;
+}
 
 const getProfileNameParam = (value: unknown): string =>
   decodeURIComponent(
@@ -424,10 +445,31 @@ const saveMockProfile = (name: string, request: SaveProfileRequest) => {
   return profile;
 };
 
+if (isScreenshotMode()) {
+  const active = MOCK_LLM_PROFILES.profiles.get(SCREENSHOT_ACTIVE_LLM_PROFILE);
+  if (active) {
+    applyProfileToMockSettings(active);
+  }
+}
+
 export const resetTestHandlersMockSettings = () => {
   MOCK_USER_PREFERENCES.settings = structuredClone(MOCK_DEFAULT_USER_SETTINGS);
   MOCK_LLM_PROFILES.profiles.clear();
   MOCK_LLM_PROFILES.activeProfile = null;
+  if (isScreenshotMode()) {
+    for (const profile of SCREENSHOT_LLM_PROFILES) {
+      MOCK_LLM_PROFILES.profiles.set(profile.name, {
+        name: profile.name,
+        config: structuredClone(profile.config),
+        api_key_set: profile.api_key_set,
+      });
+    }
+    MOCK_LLM_PROFILES.activeProfile = SCREENSHOT_ACTIVE_LLM_PROFILE;
+    const active = MOCK_LLM_PROFILES.profiles.get(
+      SCREENSHOT_ACTIVE_LLM_PROFILE,
+    );
+    if (active) applyProfileToMockSettings(active);
+  }
 };
 
 // Mock model data used by provider/model endpoints
