@@ -22,7 +22,9 @@ import { getStateDir } from "./paths";
 import { detectPrereqs, getMode, setMode } from "./runtime";
 import { Supervisor } from "./supervisor";
 import { createTray } from "./tray";
+import { loadingPageHtml } from "./screens";
 import { IPC, type RuntimeMode, type StackStatus } from "./types";
+import { APP_BACKGROUND, toDataUrl } from "./ui-theme";
 import { createWizardWindow } from "./wizard";
 
 // @spec DI-090 — GPU mitigation. The Electron GPU process emits "Invalid
@@ -46,44 +48,7 @@ function getWindow(): BrowserWindow | null {
 }
 
 function loadingPage(status: StackStatus): string {
-  const isError = status.state === "error";
-  const title = isError ? "Couldn’t start the stack" : "Starting Agent Canvas";
-  const detail =
-    status.message ??
-    (isError
-      ? "See the logs for details."
-      : "Preparing the agent stack. This can take a minute…");
-  const spinner = isError ? "" : '<div class="spinner"></div>';
-  const retry = isError
-    ? '<button onclick="agentCanvasDesktop&&agentCanvasDesktop.stack.restart()">Retry</button>' +
-      '<button class="ghost" onclick="agentCanvasDesktop&&agentCanvasDesktop.logs.open()">Open logs</button>'
-    : "";
-  const html = `<!doctype html><html><head><meta charset="utf-8" />
-<title>Agent Canvas</title>
-<style>
-  :root { color-scheme: dark; }
-  body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
-    font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:#0b0b0d; color:#e8e8ea; }
-  .card { text-align:center; max-width:460px; padding:32px; }
-  .spinner { width:28px; height:28px; margin:0 auto 18px; border:3px solid #2a2a31;
-    border-top-color:#7c8cff; border-radius:50%; animation:spin 0.9s linear infinite; }
-  h1 { font-size:18px; font-weight:600; margin:0 0 8px; }
-  p { font-size:13px; color:#9b9ba6; margin:0 0 18px; line-height:1.5; word-break:break-word; }
-  button { font:inherit; font-size:13px; padding:8px 16px; margin:0 6px; border-radius:8px;
-    border:1px solid #2a2a31; background:#7c8cff; color:#0b0b0d; cursor:pointer; }
-  button.ghost { background:transparent; color:#cfcfe0; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-</style></head>
-<body><div class="card">${spinner}
-<h1>${escapeHtml(title)}</h1><p>${escapeHtml(detail)}</p>${retry}</div></body></html>`;
-  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return toDataUrl(loadingPageHtml(status));
 }
 
 function currentOrigin(): string | null {
@@ -109,7 +74,7 @@ function createWindow(): void {
     minWidth: 940,
     minHeight: 600,
     title: "Agent Canvas",
-    backgroundColor: "#0b0b0d",
+    backgroundColor: APP_BACKGROUND,
     show: true,
     webPreferences: {
       preload: join(__dirname, "preload.js"),
