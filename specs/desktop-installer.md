@@ -212,6 +212,48 @@ post-v1.
   (`OH_CANVAS_SAFE_STATE_DIR`) so a second concurrent stack can run without
   violating the one-server-per-state-dir invariant. May land post-v1.
 
+### Renderer ↔ main IPC & window security
+
+> The desktop API is *additive*: the renderer is the same web app served from
+> localhost, so the bridge must be feature-detected (`window.agentCanvasDesktop`)
+> and the frontend must keep running unchanged in browser / CLI / Docker.
+
+#### DI-080: Hardened BrowserWindow
+- [ ] Windows shall use `contextIsolation: true`, `nodeIntegration: false`,
+  `sandbox: true`, and `webSecurity: true`. The renderer shall load only the
+  local ingress origin; external navigations/links shall open in the system
+  browser (deny in-app navigation away from localhost).
+
+#### DI-081: Single typed preload bridge
+- [ ] A single `preload` script shall expose `window.agentCanvasDesktop` via
+  `contextBridge` — no raw `ipcRenderer`. Every channel shall be enumerated and
+  validated; unknown channels rejected.
+
+#### DI-082: IPC command surface (renderer → main)
+- [ ] The bridge shall expose exactly: `stack.getStatus()`,
+  `stack.start(mode, opts)`, `stack.stop()`, `stack.restart()`;
+  `runtime.getMode()` / `runtime.setMode(mode)` / `runtime.detectPrereqs()`;
+  `dialog.pickFolder()`; `logs.getPath()` / `logs.open()`; `app.getVersion()` /
+  `app.checkForUpdates()`. New capabilities require a new typed channel, never a
+  generic passthrough.
+
+#### DI-083: IPC event surface (main → renderer)
+- [ ] The bridge shall deliver typed events: `stack.statusChanged`,
+  `service.exited`, `update.available`, `update.downloaded`, and
+  `prereqs.changed`. Listeners shall register through the bridge, not via direct
+  `ipcRenderer.on`.
+
+#### DI-084: Feature-detected, single frontend
+- [ ] Frontend code shall guard every desktop call with
+  `if (window.agentCanvasDesktop)` so the identical build runs in the browser,
+  CLI static server, and Docker without the bridge present. No desktop-only fork
+  of the frontend.
+
+#### DI-085: No privilege escalation over IPC
+- [ ] The bridge shall not expand the renderer's privilege: the session key is
+  already injected into the page by the static-server today, so IPC shall not
+  re-expose additional credentials or arbitrary filesystem/shell access.
+
 ### Runtime selection & management
 
 #### DI-020: Runtime Manager
@@ -303,6 +345,58 @@ post-v1.
   automations fire after a reboot without the user reopening the window. The
   setting shall be surfaced both in the tray menu and in Settings.
 
+### Operations, platform integration & hardening
+
+#### DI-090: Crash recovery with backoff
+- [ ] The supervisor shall auto-restart a crashed child service (agent-server /
+  automation / ingress) with capped exponential backoff (e.g. 3 attempts). On
+  exhaustion it shall surface a tray error + "view logs" rather than silently
+  die, mirroring the Docker entrypoint's crash tolerance.
+
+#### DI-091: Logging to disk
+- [ ] Each service shall log to `~/.openhands/agent-canvas/logs/<service>.log`
+  with size/date rotation. The tray "Open logs" action (DI-050) shall reveal this
+  directory.
+
+#### DI-092: Docker mode operational rules
+- [ ] Docker mode shall `docker run` with `-p <hostPort>:8000` and load the
+  window at `http://localhost:<hostPort>` (the container ships its own
+  ingress/frontend), avoiding `host.docker.internal`. It shall mount
+  `~/.openhands` and the user-selected projects dir(s), detect a stopped daemon
+  via `docker info` and show an actionable card, and pin the tag per DI-071.
+  Podman is best-effort / post-v1.
+
+#### DI-093: Native folder picker for local modes
+- [ ] `direct` / `docker` modes shall use the native `dialog.showOpenDialog`
+  (via `dialog.pickFolder()`) for choosing the working/projects directory,
+  feeding the result into the existing workspace flow. `remote` / `cloud` shall
+  keep using the in-app `FolderBrowserModal` (the filesystem lives on the server).
+
+#### DI-094: v1 support matrix
+- [ ] v1 shall target macOS 12+ (universal2: arm64 + x64), Windows 10/11 x64, and
+  Linux x64 (AppImage, glibc ≥ 2.31). Windows arm64, Linux arm64, and
+  `.deb`/`.rpm` are post-v1. Bundled `uv` binaries shall match each shipped arch.
+
+#### DI-095: Deep-link protocol handler (minimal in v1)
+- [ ] The app shall register an `openhands://` protocol handler that focuses the
+  window and routes to a path. Full external-trigger semantics (Slack/GitHub) are
+  post-v1.
+
+#### DI-096: Desktop telemetry identity
+- [ ] The desktop build shall fire `canvas_install` once per installation (keyed
+  by a persisted install id under `~/.openhands/agent-canvas/`) and tag events
+  with `platform: "desktop"`, reusing `telemetry.ts` and honoring the existing
+  consent surfaces. No new analytics system.
+
+#### DI-097: Disk footprint & cleanup
+- [ ] The OS uninstaller shall leave user data (`~/.openhands`) intact. An in-app
+  "Clean caches" action shall optionally remove `~/.cache/uv` wheels and pulled
+  Docker images. Disk usage shall be disclosed in Settings.
+
+#### DI-098: Respect system/env proxies
+- [ ] The app, `uvx`, and `docker pull` shall honor system / `HTTP(S)_PROXY`
+  settings in v1. Full air-gap support is deferred to DI-033.
+
 ---
 
 ## Phased roadmap
@@ -311,94 +405,88 @@ post-v1.
    return a handle and stop calling `process.exit()`. Benefits CLI users too.
    Lowest risk; unblocks everything else.
 2. **Phase 1 — Minimal Electron shell + coexistence (DI-012, DI-013, DI-030,
-   DI-031, DI-060–DI-063, DI-070, DI-072).** BrowserWindow → existing ingress;
-   supervisor runs `direct` mode with bundled `uv`; single-instance lock,
-   reuse-if-present, dynamic ports, guarded lease recovery; shell-pinned backend
-   version with offline last-good fallback. Unsigned dev builds.
+   DI-031, DI-060–DI-063, DI-070, DI-072, DI-080–DI-085, DI-090, DI-091,
+   DI-093).** BrowserWindow → existing ingress; hardened window + typed IPC
+   bridge; supervisor runs `direct` mode with bundled `uv`; single-instance lock,
+   reuse-if-present, dynamic ports, guarded lease recovery; crash backoff +
+   logging; native folder picker; shell-pinned backend version with offline
+   last-good fallback. Unsigned dev builds.
 3. **Phase 2 — Runtime selection + tray (DI-020–DI-023, DI-040–DI-042,
-   DI-050–DI-052, DI-071, DI-074).** Wizard step + Settings page + Docker mode in
-   the Runtime Manager (shell-derived image tag; remote/cloud detect-and-warn),
-   reusing backend-registry and health UI; menu-bar/tray resident, close-≠-quit
-   lifecycle, and launch-at-login.
-4. **Phase 3 — Distribution (DI-001–DI-005, DI-032, DI-073).** electron-builder
-   targets, signing/notarization, `electron-updater` with idle-only apply, CI
-   release job.
+   DI-050–DI-052, DI-071, DI-074, DI-092).** Wizard step + Settings page + Docker
+   mode in the Runtime Manager (shell-derived image tag; published-port renderer;
+   remote/cloud detect-and-warn), reusing backend-registry and health UI;
+   menu-bar/tray resident, close-≠-quit lifecycle, and launch-at-login.
+4. **Phase 3 — Distribution (DI-001–DI-005, DI-032, DI-073, DI-094, DI-095,
+   DI-096, DI-097, DI-098).** electron-builder targets, signing/notarization,
+   `electron-updater` with idle-only apply, support matrix, deep-link handler,
+   telemetry/cleanup/proxy, CI release job.
 5. **Phase 4 — Optional embedded Python + isolated instance (DI-033, DI-064).**
    Remove first-run network dependency; allow concurrent stacks via separate
    state dir. Defer until demand exists.
 
 ---
 
-## Open questions
+## Decisions log
 
-Grouped by how blocking each one is. Tier 1 should be resolved before writing
-Electron code; Tier 2 shapes Phase 1–2; Tier 3 can be decided during the build.
+All design questions are resolved; each maps to DI spec items above. Anything
+that is *not* an engineering decision (accounts, certs, assets) lives in
+"Pre-build readiness" below.
 
-### Tier 1 — resolve before writing code
+- **v1 scope** → all four runtime modes (Scope decision).
+- **Two-tier update strategy** → DI-070–DI-074.
+- **Coexistence / lease conflict** → DI-060–DI-064.
+- **IPC / window security** → DI-080–DI-085.
+- **Crash recovery + logging** → DI-090, DI-091.
+- **Docker operational details + renderer URL** → DI-092 (publish container port,
+  load `localhost:<hostPort>`; no `host.docker.internal`).
+- **Native folder picker vs `FolderBrowserModal`** → DI-093 (native for local
+  modes, in-app browser for remote/cloud).
+- **Support matrix** → DI-094.
+- **Deep-link protocol** → DI-095 (minimal in v1).
+- **Telemetry identity & consent** → DI-096.
+- **Disk footprint & cleanup** → DI-097.
+- **Corporate proxy** → DI-098 (honor system proxies; air-gap deferred to DI-033).
+- **uv first-run network dependency** → acceptable for v1 with DI-032 progress UX.
+- **State sharing across modes** → DI-023 (direct & docker share
+  `~/.openhands/agent-canvas`; verify on-disk compatibility in Phase 2).
+- **Electron vs Tauri** → Electron for v1 (reuses `main()`); revisit post-v1.
+- **macOS background permissions** → normal app + `Tray` (not `LSUIElement`);
+  launch-at-login via `app.setLoginItemSettings` (DI-052).
 
-- **v1 scope:** RESOLVED — v1 ships all four runtime modes (see "Scope decision"
-  above). Docker mode is in-scope.
-- **Two-tier update strategy:** RESOLVED — lockstep by default with the shell as
-  source of truth for local modes, detect-and-warn for remote/cloud, offline
-  last-good fallback, idle-only apply. See DI-070–DI-074.
-- **Coexistence with an already-running stack + conversation-lease conflict:**
-  RESOLVED — invariant of one agent-server per state dir, upheld by
-  single-instance lock + reuse-if-present + dynamic port fallback + guarded
-  stale-lease recovery. See DI-060–DI-064.
-- **Renderer↔main IPC / security contract:** lock in `contextIsolation: true`,
-  `nodeIntegration: false`, and a typed `preload` bridge. Define the API surface
-  the renderer may call (start/stop stack, pick folder, runtime status, open
-  logs). Hard to change later; primary Electron security footgun.
+---
 
-### Tier 2 — shapes Phase 1–2
+## Pre-build readiness
 
-- **Crash recovery + logging:** does the supervisor auto-restart a crashed
-  agent-server (with backoff)? Where do logs go on disk so the tray "open logs"
-  action works, and how are they rotated? (Docker entrypoint *tolerates* backend
-  crashes via 502; desktop needs an explicit policy.)
-- **Docker mode operational details:** image tag pinned to the shell version via
-  `config/defaults.json` `images.agentCanvas`; "Docker installed but daemon
-  stopped" handling; volume mounts (`~/.openhands`, which project dirs); the
-  macOS/Windows networking quirk (`--network host` is Linux-only; mac/win need
-  `host.docker.internal`, per the mock-llm-docker notes); Podman/rootless.
-- **Native folder picker vs `FolderBrowserModal`:** in direct mode the agent has
-  full FS access; the existing browser talks to the agent-server file API. Decide
-  whether native `dialog.showOpenDialog` owns workspace/working-dir selection.
-- **Support matrix:** macOS min version + Apple Silicon/Intel (universal vs
-  separate); Windows 10/11 x64/arm64; Linux glibc baseline. The bundled `uv`
-  binary must match each arch — gates DI-030.
-- **Code-signing cert ownership/provisioning:** beyond EV-vs-OV — who holds the
-  Apple Developer account and the Windows cert, and how do they reach CI secrets?
-  Longest-lead-time item; start procurement in parallel with Phase 0.
-- **Docker mode renderer:** proxy the container through the Electron-side ingress
-  (uniform) vs. point the window straight at the container's `:8000` (simpler).
-  Leaning toward proxy for a consistent URL/session-key story.
+### Decided — safe to start
+- [x] Architecture, runtime modes, update strategy, coexistence, IPC contract,
+  and operations are all specified (DI-0xx above).
+- [ ] **Repo structure:** add an isolated `desktop/` workspace with its own
+  `package.json`. Electron / electron-builder / electron-updater shall live ONLY
+  there — never in the root `dependencies` / `devDependencies` — so they do not
+  leak into the published `@openhands/agent-canvas` npm library or the Docker
+  build. (Confirm before any code.)
+- [ ] **App identity:** appId `dev.openhands.agent-canvas`, product name
+  "Agent Canvas". (Confirm before any code.)
 
-### Tier 3 — decide during the build
+### Needed before Phase 1 (Electron shell)
+- [ ] Phase 0 (`main()` refactor, DI-010) merged so the supervisor is importable.
+- [ ] Per-arch `uv` binaries acquired and wired as `extraResources` (DI-030).
+- [ ] Placeholder app icon (final branding can come later).
 
-- **Deep-link / custom URL scheme** (e.g. `openhands://…`): register a protocol
-  handler so external triggers (Slack/GitHub, per the product pitch) can
-  focus/drive the desktop app?
-- **Telemetry identity & consent in desktop:** does an Electron install count as
-  a `canvas_install`? Reconcile with the two existing PostHog systems and the
-  consent surfaces (`TelemetryConsentBanner`, `AnalyticsConsentFormModal`).
-- **Disk footprint & uninstall cleanup:** `uv` caches wheels+Python in
-  `~/.cache/uv` and Docker images are GBs. Does uninstall clean them, and how is
-  disk usage disclosed?
-- **Corporate proxy / air-gap:** `uvx` (PyPI), `docker pull`, and
-  `electron-updater` all need proxy config; air-gapped orgs push DI-033 (embedded
-  Python) sooner.
-- **uv first-run network dependency:** acceptable for v1, or do we need DI-033
-  sooner for fully-offline installs?
-- **State sharing across modes (DI-023):** direct mode uses
-  `~/.openhands/agent-canvas`; the Docker image mounts the same path. Confirm the
-  on-disk formats are compatible enough to share history when switching.
-- **Electron vs Tauri:** Electron is chosen for v1 because the main process can
-  import `dev-with-automation.mjs::main()` directly and the codebase is all-JS.
-  Tauri (Rust shell, native sidecar/tray, ~10–20 MB installers vs Electron's
-  ~100 MB+) is the main alternative if binary size or memory becomes a concern;
-  revisit post-v1.
-- **macOS background permissions (DI-050–DI-052):** a resident menu-bar app +
-  launch-at-login interacts with the Login Items & Background permission surface
-  and notarization. Confirm we ship a normal app *with* a menu-bar item (not an
-  `LSUIElement` menu-bar-only app, since there is a real main window).
+### Needed before Phase 3 (signed distribution) — external, long lead time
+- [ ] **Apple Developer Program** membership under the org + a Developer ID
+  Application certificate (for `.dmg` signing + notarization).
+- [ ] **Windows code-signing certificate** (EV recommended for SmartScreen
+  reputation).
+- [ ] Certs + notarization Apple-ID/app-password provisioned into **CI secrets**.
+- [ ] **Final branding assets** (per-platform icons, installer artwork).
+- [ ] CI runners confirmed (GitHub-hosted mac/win/linux are sufficient).
+
+### Not blocking v1 (post-v1)
+- [ ] Embedded Python for full air-gap (DI-033); isolated concurrent instances
+  (DI-064); `.deb`/`.rpm`, Windows/Linux arm64, Podman; full deep-link triggers.
+
+> **Bottom line:** Phases 0–2 have **no external blockers** and can start now,
+> pending only the two repo-structure confirmations above. The sole true
+> prerequisites are procurement items (Apple/Windows certs + branding) required
+> for **Phase 3 signed distribution** — start those in parallel with Phase 0.
