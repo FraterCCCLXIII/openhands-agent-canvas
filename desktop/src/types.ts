@@ -52,6 +52,7 @@ export const IPC = {
   runtimeGetMode: "runtime:getMode",
   runtimeSetMode: "runtime:setMode",
   runtimeDetectPrereqs: "runtime:detectPrereqs",
+  wizardComplete: "wizard:complete",
   dialogPickFolder: "dialog:pickFolder",
   logsGetPath: "logs:getPath",
   logsOpen: "logs:open",
@@ -81,6 +82,10 @@ export interface DesktopBridge {
     getMode(): Promise<RuntimeMode | null>;
     setMode(mode: RuntimeMode): Promise<void>;
     detectPrereqs(): Promise<PrereqStatus>;
+  };
+  wizard: {
+    /** Persist the chosen mode and proceed to launch the stack + main window. */
+    complete(mode: RuntimeMode): Promise<void>;
   };
   dialog: {
     pickFolder(): Promise<string | null>;

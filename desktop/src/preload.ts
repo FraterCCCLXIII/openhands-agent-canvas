@@ -38,6 +38,10 @@ const bridge: DesktopBridge = {
       ipcRenderer.invoke(IPC.runtimeSetMode, mode),
     detectPrereqs: () => ipcRenderer.invoke(IPC.runtimeDetectPrereqs),
   },
+  wizard: {
+    complete: (mode: RuntimeMode) =>
+      ipcRenderer.invoke(IPC.wizardComplete, mode),
+  },
   dialog: {
     pickFolder: () => ipcRenderer.invoke(IPC.dialogPickFolder),
   },

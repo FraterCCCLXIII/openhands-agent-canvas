@@ -7,14 +7,16 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { app, BrowserWindow, shell, type Tray } from "electron";
+import { app, BrowserWindow, ipcMain, shell, type Tray } from "electron";
 
 import { registerIpc } from "./ipc";
 import { log, logsDir } from "./logger";
 import { getStateDir } from "./paths";
+import { detectPrereqs, getMode, setMode } from "./runtime";
 import { Supervisor } from "./supervisor";
 import { createTray } from "./tray";
-import type { StackStatus } from "./types";
+import { IPC, type RuntimeMode, type StackStatus } from "./types";
+import { createWizardWindow } from "./wizard";
 
 // @spec DI-090 — GPU mitigation. The Electron GPU process emits "Invalid
 // mailbox" / "ProduceOverlay" errors on some macOS setups and crashes the
@@ -24,6 +26,8 @@ app.disableHardwareAcceleration();
 
 const supervisor = new Supervisor();
 let mainWindow: BrowserWindow | null = null;
+let wizardWindow: BrowserWindow | null = null;
+let wizardCompleted = false;
 let tray: Tray | null = null;
 let isQuitting = false;
 let cleanupDone = false;
@@ -170,6 +174,38 @@ function onStatusForWindow(status: StackStatus): void {
   }
 }
 
+// @spec DI-040 — always-ask runtime wizard (first run + tray "Switch Runtime").
+function showWizard(): void {
+  if (wizardWindow) {
+    wizardWindow.focus();
+    return;
+  }
+  wizardWindow = createWizardWindow(detectPrereqs());
+  wizardWindow.on("closed", () => {
+    wizardWindow = null;
+    // Closing the first-run wizard without a choice (and no main window yet)
+    // means there's nothing to do — exit rather than linger invisibly.
+    if (!wizardCompleted && !mainWindow) {
+      isQuitting = true;
+      app.quit();
+    }
+  });
+}
+
+async function onWizardComplete(mode: RuntimeMode): Promise<void> {
+  wizardCompleted = true;
+  setMode(mode);
+  log("info", `Runtime selected: ${mode}`);
+  const switching = supervisor.getStatus().state === "running";
+  createWindow();
+  if (wizardWindow) {
+    wizardWindow.close();
+    wizardWindow = null;
+  }
+  if (switching) await supervisor.restart({ mode });
+  else await supervisor.start({ mode });
+}
+
 async function gracefulQuit(): Promise<void> {
   if (cleanupDone) return;
   cleanupDone = true;
@@ -196,10 +232,14 @@ async function init(): Promise<void> {
   });
 
   registerIpc(supervisor, getWindow);
+  ipcMain.handle(IPC.wizardComplete, (_event, mode: RuntimeMode) =>
+    onWizardComplete(mode),
+  );
   supervisor.on("statusChanged", onStatusForWindow);
 
   tray = createTray(supervisor, {
     openWindow: createWindow,
+    switchRuntime: showWizard,
     openLogs: () => {
       void shell.openPath(logsDir());
     },
@@ -209,14 +249,15 @@ async function init(): Promise<void> {
     },
   });
 
-  createWindow();
-
-  // @spec DI-040 (interim) — mode is resolved inside the supervisor
-  // (persisted choice, else inferred from prerequisites). The dedicated
-  // first-run runtime wizard replaces this default in Phase 2.
-  supervisor.start().catch((err) => {
-    log("error", `initial start failed: ${String(err)}`);
-  });
+  // @spec DI-040 — always ask on first run; otherwise honor the saved choice.
+  if (getMode()) {
+    createWindow();
+    supervisor.start().catch((err) => {
+      log("error", `initial start failed: ${String(err)}`);
+    });
+  } else {
+    showWizard();
+  }
 }
 
 // @spec DI-060 — single-instance lock; a second launch focuses the window.

@@ -11,6 +11,7 @@ import type { StackStatus } from "./types";
 
 export interface TrayActions {
   openWindow: () => void;
+  switchRuntime: () => void;
   openLogs: () => void;
   quit: () => void;
 }
@@ -74,6 +75,7 @@ function buildMenu(
       },
     },
     { type: "separator" },
+    { label: "Switch Runtime…", click: actions.switchRuntime },
     { label: "Open Logs", click: actions.openLogs },
     { type: "separator" },
     { label: "Quit Agent Canvas", click: actions.quit },
