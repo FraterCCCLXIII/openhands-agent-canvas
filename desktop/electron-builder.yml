@@ -34,6 +34,7 @@ extraResources:
 
 files:
   - dist/**/*
+  - assets/**/*
   - package.json
 
 mac:

@@ -4,10 +4,34 @@
 // The menu reflects live supervisor status and offers start/stop/restart plus
 // quick access to the window and logs.
 
-import { Menu, nativeImage, Tray } from "electron";
+import { join } from "node:path";
+
+import { Menu, nativeImage, Tray, type NativeImage } from "electron";
 
 import type { Supervisor } from "./supervisor";
 import type { StackStatus } from "./types";
+
+// Resolves at runtime to desktop/assets (dev) or app.asar/assets (packaged),
+// since this file lives in dist/ in both layouts.
+function assetPath(name: string): string {
+  return join(__dirname, "..", "assets", name);
+}
+
+/**
+ * Menu-bar icon. On macOS use the monochrome OpenHands mark as a template image
+ * so the OS recolors it for light/dark menu bars; elsewhere use the color icon.
+ */
+function trayImage(): NativeImage {
+  if (process.platform === "darwin") {
+    const img = nativeImage.createFromPath(assetPath("trayTemplate.png"));
+    if (!img.isEmpty()) {
+      img.setTemplateImage(true);
+      return img;
+    }
+  }
+  const color = nativeImage.createFromPath(assetPath("icon.png"));
+  return color.isEmpty() ? nativeImage.createEmpty() : color;
+}
 
 export interface TrayActions {
   openWindow: () => void;
@@ -20,10 +44,7 @@ export function createTray(
   supervisor: Supervisor,
   actions: TrayActions,
 ): Tray {
-  // No bundled icon yet (DI-094 / assets are Phase 3). Use an empty image and a
-  // short title on macOS so the menu-bar entry is still clickable.
-  const tray = new Tray(nativeImage.createEmpty());
-  if (process.platform === "darwin") tray.setTitle("AC");
+  const tray = new Tray(trayImage());
 
   const rebuild = (status: StackStatus): void => {
     tray.setToolTip(`Agent Canvas — ${status.state}`);
