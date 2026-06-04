@@ -12,13 +12,15 @@ import {
 
 export function loadingPageHtml(status: StackStatus): string {
   const isError = status.state === "error";
-  const title = isError ? "Couldn’t start the stack" : "Starting Agent Canvas";
-  const detail =
-    status.message ??
-    (isError
-      ? "See the logs for details."
-      : "Preparing the agent stack. This can take a minute…");
-  const loader = isError ? "" : '<div class="line-loader"></div>';
+  // Normal startup is intentionally text-free: just the logo + loading line.
+  // The error state keeps a heading, detail, and recovery actions.
+  const loader = isError
+    ? ""
+    : '<div class="line-loader" role="progressbar" aria-label="Starting"></div>';
+  const textBlock = isError
+    ? `<h1 class="error">${escapeHtml("Couldn’t start the stack")}</h1>
+      <p>${escapeHtml(status.message ?? "See the logs for details.")}</p>`
+    : "";
   const actions = isError
     ? `<div class="actions">
         <button class="primary" onclick="agentCanvasDesktop&&agentCanvasDesktop.stack.restart()">Retry</button>
@@ -51,8 +53,7 @@ export function loadingPageHtml(status: StackStatus): string {
   <div class="wrap">
     <div class="logo">${logoSvg()}</div>
     ${loader}
-    <h1${isError ? ' class="error"' : ""}>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(detail)}</p>
+    ${textBlock}
     ${actions}
   </div>
 </body></html>`;

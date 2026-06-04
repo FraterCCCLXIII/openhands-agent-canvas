@@ -54,8 +54,8 @@ export const LINE_LOADER_CSS = `
   .line-loader {
     position: relative;
     width: 180px;
-    height: 2px;
-    border-radius: 2px;
+    height: 3px;
+    border-radius: 999px;
     overflow: hidden;
     background: color-mix(in srgb, var(--white) 12%, transparent);
   }
@@ -66,7 +66,7 @@ export const LINE_LOADER_CSS = `
     left: 0;
     height: 100%;
     width: 40%;
-    border-radius: 2px;
+    border-radius: 999px;
     background: var(--white);
     animation: line-loader-slide 1.15s ease-in-out infinite;
   }
