@@ -155,6 +155,14 @@ post-v1.
   handle (`{ stop(), urls, on('service-exit', …) }`). `bin/agent-canvas.mjs`
   shall consume the same handle so CLI and desktop share one supervisor.
 
+> **POC status (landed):** the desktop POC supervises `bin/agent-canvas.mjs` as a
+> **child process** run via the Electron binary in Node mode
+> (`ELECTRON_RUN_AS_NODE=1`) — see `desktop/src/supervisor.ts`. This already
+> satisfies DI-011 (no duplicated supervision; the entire launcher is reused) and
+> removes the need for a separate Node install in a packaged app, while isolating
+> a stack crash from the Electron main process. The in-process handle above
+> remains the eventual refinement but is **not** required for the shell to work.
+
 #### DI-011: No duplicated supervision logic
 - [ ] The Electron main process shall import the embeddable supervisor rather
   than reimplement process spawning, port allocation, key generation, or shutdown.
@@ -460,13 +468,24 @@ that is *not* an engineering decision (accounts, certs, assets) lives in
 ### Decided — safe to start
 - [x] Architecture, runtime modes, update strategy, coexistence, IPC contract,
   and operations are all specified (DI-0xx above).
-- [ ] **Repo structure:** add an isolated `desktop/` workspace with its own
-  `package.json`. Electron / electron-builder / electron-updater shall live ONLY
-  there — never in the root `dependencies` / `devDependencies` — so they do not
-  leak into the published `@openhands/agent-canvas` npm library or the Docker
-  build. (Confirm before any code.)
-- [ ] **App identity:** appId `dev.openhands.agent-canvas`, product name
-  "Agent Canvas". (Confirm before any code.)
+- [x] **Repo structure:** isolated `desktop/` workspace with its own
+  `package.json` / `node_modules`; Electron tooling lives ONLY there. The root
+  `tsconfig.json` and `eslint.config.js` exclude `desktop/`, so it does not leak
+  into the published `@openhands/agent-canvas` library or the Docker build.
+- [x] **App identity:** appId `dev.openhands.agent-canvas`, product name
+  "Agent Canvas" (set in `desktop/electron-builder.yml`).
+
+### POC landed (Phase 0/1 foundation)
+- [x] `desktop/` Electron shell: hardened `BrowserWindow` + sandboxed/bundled
+  preload + typed `window.agentCanvasDesktop` IPC bridge (DI-012, DI-080–DI-085).
+- [x] Child-process supervisor reusing `bin/agent-canvas.mjs` via
+  `ELECTRON_RUN_AS_NODE` (DI-011); free-port pick, readiness poll, crash backoff,
+  disk logging (DI-062, DI-090, DI-091).
+- [x] Runtime-mode persistence + prereq detection for all four modes; Docker
+  mode via `docker run` against the all-in-one image (DI-020, DI-021, DI-092).
+- [x] Single-instance lock + tray-resident, close-≠-quit lifecycle
+  (DI-050–DI-052, DI-060); native folder picker over IPC (DI-093).
+- [x] `desktop/` typecheck + build pass; root `typecheck`/`build` unaffected.
 
 ### Needed before Phase 1 (Electron shell)
 - [ ] Phase 0 (`main()` refactor, DI-010) merged so the supervisor is importable.

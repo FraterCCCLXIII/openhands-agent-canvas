@@ -53,6 +53,7 @@ export default [
       "node_modules/**",
       "dist/**",
       "build/**",
+      "desktop/**",
       "coverage/**",
       ".react-router/**",
       "playwright-report/**",

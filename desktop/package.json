@@ -1,0 +1,24 @@
+{
+  "name": "@openhands/agent-canvas-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron desktop wrapper for agent-canvas (POC). Supervises the agent-canvas stack and lets the user choose where the Agent Server runs.",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "npm run build:main && npm run build:preload",
+    "build:main": "tsc -p tsconfig.json",
+    "build:preload": "esbuild src/preload.ts --bundle --platform=node --format=cjs --external:electron --outfile=dist/preload.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron .",
+    "dist": "npm run build && electron-builder"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.3"
+  }
+}

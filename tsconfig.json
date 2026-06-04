@@ -8,7 +8,7 @@
     "**/.client/**/*.tsx",
     ".react-router/types/**/*"
   ],
-  "exclude": ["__tests__/fixtures/**/*"],
+  "exclude": ["__tests__/fixtures/**/*", "desktop/**/*"],
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "es2022"],
     "target": "es2022",

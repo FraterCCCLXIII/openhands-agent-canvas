@@ -1,0 +1,49 @@
+# electron-builder configuration (Phase 3 — distribution).
+# Not exercised by the POC; kept here so packaging/signing work has a starting
+# point. See specs/desktop-installer.md DI-001..DI-005, DI-094.
+appId: dev.openhands.agent-canvas
+productName: Agent Canvas
+copyright: Copyright © OpenHands
+
+directories:
+  output: release
+  buildResources: assets
+
+# The desktop app reuses the repo's existing static build, launcher scripts, and
+# centralized config. They are bundled as extraResources so the packaged app can
+# run the same supervisor (bin/agent-canvas.mjs) via ELECTRON_RUN_AS_NODE.
+# Paths are relative to this file (desktop/), hence the ../ prefixes.
+extraResources:
+  - from: ../build
+    to: build
+  - from: ../bin
+    to: bin
+  - from: ../scripts
+    to: scripts
+  - from: ../config
+    to: config
+  - from: ../tools
+    to: tools
+  # TODO(DI-030): add per-arch `uv` binary under assets/uv/<platform>-<arch>/
+  #   - from: assets/uv/${os}-${arch}/uv
+  #     to: uv
+
+files:
+  - dist/**/*
+  - package.json
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+  # universal2 (arm64 + x64) — DI-094
+  # hardenedRuntime + notarization wired in Phase 3 (DI-003)
+
+win:
+  target:
+    - nsis
+
+linux:
+  target:
+    - AppImage
+  category: Development
