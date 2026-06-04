@@ -2,7 +2,7 @@
 # Not exercised by the POC; kept here so packaging/signing work has a starting
 # point. See specs/desktop-installer.md DI-001..DI-005, DI-094.
 appId: dev.openhands.agent-canvas
-productName: Agent Canvas
+productName: OpenHands
 copyright: Copyright © OpenHands
 
 directories:

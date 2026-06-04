@@ -27,6 +27,12 @@ import { IPC, type RuntimeMode, type StackStatus } from "./types";
 import { APP_BACKGROUND, toDataUrl } from "./ui-theme";
 import { createWizardWindow } from "./wizard";
 
+// Display name for the dock/app menu. Packaged builds get this from
+// electron-builder `productName`; in dev the binary is "Electron", so set it at
+// runtime (must happen before app is ready) so the dock/menu read correctly.
+const APP_NAME = "OpenHands";
+app.setName(APP_NAME);
+
 // @spec DI-090 — GPU mitigation. The Electron GPU process emits "Invalid
 // mailbox" / "ProduceOverlay" errors on some macOS setups and crashes the
 // renderer when canvas/WebGL-heavy views (xterm, Monaco) mount. Software
