@@ -7,7 +7,14 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { app, BrowserWindow, ipcMain, shell, type Tray } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  nativeImage,
+  shell,
+  type Tray,
+} from "electron";
 
 import { registerIpc } from "./ipc";
 import { log, logsDir } from "./logger";
@@ -223,6 +230,15 @@ async function init(): Promise<void> {
   mkdirSync(getStateDir(), { recursive: true });
   mkdirSync(logsDir(), { recursive: true });
   log("info", `Agent Canvas desktop ${app.getVersion()} starting`);
+
+  // Dock/app icon. Packaged builds embed the .icns via electron-builder, but
+  // `electron .` in dev shows the default icon, so set it explicitly here.
+  if (process.platform === "darwin" && app.dock) {
+    const dockIcon = nativeImage.createFromPath(
+      join(__dirname, "..", "assets", "icon.png"),
+    );
+    if (!dockIcon.isEmpty()) app.dock.setIcon(dockIcon);
+  }
 
   app.on("child-process-gone", (_event, details) => {
     log(
