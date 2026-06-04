@@ -34,6 +34,11 @@ import {
 import type { RuntimeMode, StackStatus, StartOptions } from "./types";
 
 const DOCKER_CONTAINER_NAME = "agent-canvas-desktop";
+// Container path where the host home directory is mounted in Docker mode so the
+// agent (and the file browser) can reach the user's real files — the container
+// is otherwise isolated from the host filesystem. Appears as a "Mac" favorite
+// under Home because the server lists top-level dirs of /home/openhands.
+const DOCKER_HOST_HOME_MOUNT = "/home/openhands/Mac";
 const PREFERRED_PORT = 8000;
 const READY_TIMEOUT_MS = 150_000; // generous: first-run uvx fetch / image pull
 const MAX_CRASH_RESTARTS = 3;
@@ -274,6 +279,12 @@ export class Supervisor extends EventEmitter {
       `${port}:8000`,
       "-v",
       `${homedir()}/.openhands:/home/openhands/.openhands`,
+      // Mount the host home so the agent can access the user's files; without
+      // this the container is fully isolated and the workspace browser can only
+      // see /projects. Docker Desktop maps host file ownership to the container
+      // user, so the openhands user can read/write the mounted tree.
+      "-v",
+      `${homedir()}:${DOCKER_HOST_HOME_MOUNT}`,
       ...(projectsDir ? ["-v", `${projectsDir}:/projects`] : []),
       image,
     ];

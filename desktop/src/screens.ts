@@ -68,13 +68,14 @@ interface ModeCard {
 }
 
 /**
- * Recommend (but never silently default to) the safest available mode: Docker
- * isolation when it's running, otherwise on-device when uv is present, otherwise
- * remote.
+ * Recommend (but never silently default to) on-device mode: it gives the agent
+ * native access to the user's files, which is what most desktop users expect.
+ * Docker mode is isolated from the host filesystem (only mounted folders are
+ * visible), so it's the fallback when uv isn't available, then remote.
  */
 function recommendedMode(prereqs: PrereqStatus): RuntimeMode {
-  if (prereqs.dockerRunning) return "docker";
   if (prereqs.uv) return "direct";
+  if (prereqs.dockerRunning) return "docker";
   return "remote";
 }
 
@@ -95,7 +96,7 @@ function cardsFor(prereqs: PrereqStatus): ModeCard[] {
       mode: "docker",
       title: "In Docker",
       blurb:
-        "Runs the Agent Server in a sandboxed container. Safer isolation from your machine.",
+        "Runs the Agent Server in a sandboxed container. Isolated from your machine; your home folder is mounted so the agent can still reach your files.",
       available: prereqs.dockerRunning,
       note: prereqs.docker
         ? prereqs.dockerRunning
