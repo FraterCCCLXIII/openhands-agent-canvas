@@ -24,9 +24,13 @@ extraResources:
     to: config
   - from: ../tools
     to: tools
-  # TODO(DI-030): add per-arch `uv` binary under assets/uv/<platform>-<arch>/
-  #   - from: assets/uv/${os}-${arch}/uv
-  #     to: uv
+  # Bundled `uv`/`uvx` per platform-arch (DI-030). Populated by
+  # `npm run fetch-uv` (gitignored vendor/). The supervisor prepends
+  # resources/uv/<platform>-<arch>/ to PATH for the spawned stack.
+  - from: vendor/uv
+    to: uv
+    filter:
+      - "**/*"
 
 files:
   - dist/**/*

@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-import { getRuntimeConfigPath } from "./paths";
+import { getBundledUvDir, getRuntimeConfigPath } from "./paths";
 import type { PrereqStatus, RuntimeMode } from "./types";
 
 const VALID_MODES: readonly RuntimeMode[] = [
@@ -72,7 +72,9 @@ function commandExists(cmd: string): boolean {
 
 /** @spec DI-041 — detect what the wizard can offer. */
 export function detectPrereqs(): PrereqStatus {
-  const uv = commandExists("uv") || commandExists("uvx");
+  // A bundled uv (DI-030) counts as available even if PATH has none.
+  const uv =
+    getBundledUvDir() !== null || commandExists("uv") || commandExists("uvx");
   const docker = commandExists("docker");
   let dockerRunning = false;
   if (docker) {

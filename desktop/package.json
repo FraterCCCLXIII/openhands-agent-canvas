@@ -10,9 +10,10 @@
     "build:main": "tsc -p tsconfig.json",
     "build:preload": "esbuild src/preload.ts --bundle --platform=node --format=cjs --external:electron --outfile=dist/preload.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "fetch-uv": "node scripts/fetch-uv.mjs",
     "start": "npm run build && electron .",
     "dev": "npm run build && electron .",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && npm run fetch-uv && electron-builder"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",

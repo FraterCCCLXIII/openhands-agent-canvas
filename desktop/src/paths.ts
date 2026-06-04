@@ -4,9 +4,11 @@
 // the shared `~/.openhands/agent-canvas` state directory. Keeping this in one
 // place avoids hardcoded paths scattered across the main process.
 
-import { app } from "electron";
+import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+
+import { app } from "electron";
 
 /**
  * Root that contains `bin/`, `scripts/`, `build/`, `config/`, `tools/`.
@@ -46,4 +48,19 @@ export function getRuntimeConfigPath(): string {
 /** Root config/defaults.json (version pins, image name) — DI-071. */
 export function getDefaultsConfigPath(): string {
   return join(getResourceRoot(), "config", "defaults.json");
+}
+
+/**
+ * Directory containing the bundled `uv`/`uvx` binaries for this platform, or
+ * `null` when none is bundled (dev without `npm run fetch-uv`). Packaged builds
+ * place them under `resources/uv/<platform>-<arch>/` via electron-builder
+ * `extraResources`; dev reads `desktop/vendor/uv/<platform>-<arch>/`. (DI-030)
+ */
+export function getBundledUvDir(): string | null {
+  const key = `${process.platform}-${process.arch}`;
+  const dir = app.isPackaged
+    ? join(process.resourcesPath, "uv", key)
+    : resolve(__dirname, "..", "vendor", "uv", key);
+  const uvName = process.platform === "win32" ? "uv.exe" : "uv";
+  return existsSync(join(dir, uvName)) ? dir : null;
 }

@@ -58,8 +58,20 @@ DI-040), the initial mode is inferred from detected prerequisites: `direct` if
 ## Prerequisites (dev)
 
 - A built frontend at the repo root: run `npm run build` in the repo root first.
-- For `direct` mode: [`uv`](https://docs.astral.sh/uv/) on `PATH`.
+- For `direct` mode: [`uv`](https://docs.astral.sh/uv/) — either a **bundled**
+  copy (`npm run fetch-uv`, see below) or `uv` on `PATH`.
 - For `docker` mode: Docker daemon running.
+
+### Bundled `uv` (DI-030)
+
+`npm run fetch-uv` downloads the official standalone `uv`/`uvx` for the host
+into `desktop/vendor/uv/<platform>-<arch>/` (gitignored). At runtime the
+supervisor prepends that directory to the spawned stack's `PATH`, so the
+launcher's `uvx` resolves to the bundled binary with no launcher changes; if no
+bundle is present it falls back to system `uv`. `npm run dist` runs `fetch-uv`
+automatically and electron-builder copies `vendor/uv` into `resources/uv/`.
+
+Cross-target fetch: `node scripts/fetch-uv.mjs darwin-arm64 darwin-x64 win32-x64`.
 
 ## Develop / run
 
@@ -93,7 +105,6 @@ Logs are written to `~/.openhands/agent-canvas/logs/` (`desktop.log`,
 
 - In-process embeddable launcher handle (DI-010) — POC uses subprocess instead.
 - First-run runtime wizard UI (DI-040) — interim default inference in `runtime.ts`.
-- Bundled `uv` binary (DI-030) — POC relies on system `uv`.
 - Auto-update (DI-004/DI-073), code-signing/notarization, icons/branding (DI-094).
-- Packaged-path resource resolution is sketched in `paths.ts` but only the dev
-  path is exercised so far.
+- Packaged-path resource resolution is implemented in `paths.ts`
+  (`process.resourcesPath`) but only the dev path has been exercised so far.

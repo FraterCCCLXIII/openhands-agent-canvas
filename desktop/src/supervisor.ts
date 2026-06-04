@@ -20,6 +20,7 @@ import { homedir } from "node:os";
 import { logStack, log } from "./logger";
 import {
   getBuildDir,
+  getBundledUvDir,
   getDefaultsConfigPath,
   getLauncherBin,
   getResourceRoot,
@@ -92,6 +93,24 @@ function isAgentCanvasIngress(port: number): Promise<boolean> {
       resolve(false);
     });
   });
+}
+
+/**
+ * Env for the spawned launcher. Runs the Electron binary as Node and, when a
+ * `uv` is bundled, prepends it to PATH so the launcher's `uvx` resolves to the
+ * bundled binary without any launcher changes. Falls back to system `uv`. (DI-030/031)
+ */
+function buildLauncherEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
+  const uvDir = getBundledUvDir();
+  if (uvDir) {
+    const sep = process.platform === "win32" ? ";" : ":";
+    env.PATH = `${uvDir}${sep}${env.PATH ?? ""}`;
+    log("info", `Using bundled uv from ${uvDir}`);
+  } else {
+    log("info", "No bundled uv; relying on system uv on PATH");
+  }
+  return env;
 }
 
 function readDockerImageRef(): string {
@@ -231,7 +250,7 @@ export class Supervisor extends EventEmitter {
     log("info", `Launching stack (mode=${mode}, port=${port})`);
     this.child = spawn(process.execPath, args, {
       cwd: getResourceRoot(),
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+      env: buildLauncherEnv(),
       stdio: ["ignore", "pipe", "pipe"],
     });
     this.wireChild(mode, port);
