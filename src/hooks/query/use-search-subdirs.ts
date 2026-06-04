@@ -35,8 +35,14 @@ export const useHomeDirectory = () => {
     queryKey: ["file", "home", active.backend.id, active.orgId],
     queryFn: async (): Promise<HomeDirectoryResponse> =>
       getFileClient().getHome(),
-    retry: false,
+    // The agent-server stack can still be booting when this first runs (the
+    // desktop app loads the UI as soon as the ingress is reachable). Without
+    // retries a single early "Failed to fetch" would be cached and leave the
+    // workspace browser permanently empty, so retry a few times with backoff
+    // and keep the result only briefly so reopening the browser re-checks.
+    retry: 4,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     meta: { disableToast: true },
-    staleTime: Infinity,
+    staleTime: 60_000,
   });
 };
