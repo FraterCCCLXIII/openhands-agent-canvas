@@ -72,6 +72,28 @@ function probeUrl(url: string, timeoutMs = 3000): Promise<boolean> {
   });
 }
 
+/**
+ * Detect an agent-canvas stack already serving on `port` by probing the
+ * agent-server `/server_info` route through the ingress. A plain 200 from `/`
+ * is not enough (could be any web server), so we require the API route. (DI-061)
+ */
+function isAgentCanvasIngress(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const req = httpGet(
+      `http://127.0.0.1:${port}/server_info`,
+      (res) => {
+        res.resume();
+        resolve(res.statusCode === 200);
+      },
+    );
+    req.on("error", () => resolve(false));
+    req.setTimeout(2000, () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
 function readDockerImageRef(): string {
   let image = "ghcr.io/openhands/agent-canvas";
   let version = "latest";
@@ -103,9 +125,21 @@ export class Supervisor extends EventEmitter {
 
   private usingDocker = false;
 
+  /** True when we attached to a stack we did not start (DI-061). */
+  private reusing = false;
+
   private stopping = false;
 
   private crashRestarts = 0;
+
+  /** Set once the ingress has answered at least once for this run. */
+  private everReady = false;
+
+  /** Captured failure detail when the stack exits before becoming ready. */
+  private startupError: string | null = null;
+
+  /** Ring buffer of the child's most recent stderr/stdout lines. */
+  private readonly recentLines: string[] = [];
 
   getStatus(): StackStatus {
     return { ...this.status };
@@ -126,20 +160,44 @@ export class Supervisor extends EventEmitter {
     }
     this.stopping = false;
     this.crashRestarts = 0;
+    this.everReady = false;
+    this.startupError = null;
+    this.recentLines.length = 0;
+    this.reusing = false;
 
     const mode = this.resolveMode(opts);
-    const port = await findFreePort(opts?.port ?? PREFERRED_PORT);
-    const url = `http://127.0.0.1:${port}/`;
-    this.setStatus({ mode, state: "starting", url, message: "Starting…" });
+    const preferred = opts?.port ?? PREFERRED_PORT;
 
-    if (!existsSync(getBuildDir())) {
+    // @spec DI-061 — reuse an agent-canvas stack already running on this
+    // machine instead of starting (and colliding with) a second one.
+    if (await isAgentCanvasIngress(preferred)) {
+      this.reusing = true;
+      const url = `http://127.0.0.1:${preferred}/`;
+      this.everReady = true;
       this.setStatus({
+        mode,
+        state: "running",
+        url,
+        message: "Connected to the agent-canvas stack already running here.",
+      });
+      log("info", `Reusing existing stack at ${url}`);
+      return this.getStatus();
+    }
+
+    if (mode !== "docker" && !existsSync(getBuildDir())) {
+      this.setStatus({
+        mode,
         state: "error",
+        url: null,
         message:
           "Frontend build not found. Run `npm run build` in the repo root.",
       });
       return this.getStatus();
     }
+
+    const port = await findFreePort(preferred);
+    const url = `http://127.0.0.1:${port}/`;
+    this.setStatus({ mode, state: "starting", url, message: "Starting…" });
 
     if (mode === "docker") {
       this.startDocker(port);
@@ -149,8 +207,11 @@ export class Supervisor extends EventEmitter {
 
     const ready = await this.waitForReady(url);
     if (ready) {
+      this.everReady = true;
       this.crashRestarts = 0;
       this.setStatus({ state: "running", message: undefined });
+    } else if (this.startupError) {
+      this.setStatus({ state: "error", message: this.startupError });
     } else if (!this.stopping) {
       this.setStatus({
         state: "degraded",
@@ -209,8 +270,17 @@ export class Supervisor extends EventEmitter {
     const child = this.child;
     if (!child) return;
 
-    child.stdout?.on("data", (d: Buffer) => logStack(d.toString().trimEnd()));
-    child.stderr?.on("data", (d: Buffer) => logStack(d.toString().trimEnd()));
+    const capture = (buf: Buffer): void => {
+      const text = buf.toString().trimEnd();
+      logStack(text);
+      for (const line of text.split("\n")) {
+        if (!line.trim()) continue;
+        this.recentLines.push(line);
+        if (this.recentLines.length > 40) this.recentLines.shift();
+      }
+    };
+    child.stdout?.on("data", capture);
+    child.stderr?.on("data", capture);
 
     child.on("exit", (code, signal) => {
       this.child = null;
@@ -219,9 +289,28 @@ export class Supervisor extends EventEmitter {
         return;
       }
       log("warn", `stack exited (code=${code}, signal=${signal})`);
+
+      // Startup failure (never became ready): a port conflict or bad config —
+      // retrying is futile, so surface the captured reason and stop. (DI-013)
+      if (!this.everReady) {
+        this.startupError = this.summarizeFailure(code);
+        this.setStatus({ state: "error", message: this.startupError });
+        return;
+      }
+
+      // Genuine crash after running: attempt bounded backoff restart (DI-090).
       this.emit("serviceExited", { code, signal, mode });
       void this.handleCrash(mode, port);
     });
+  }
+
+  private summarizeFailure(code: number | null): string {
+    const fatal = this.recentLines.find((l) => /fatal|error|in use/i.test(l));
+    const tail = fatal ?? this.recentLines[this.recentLines.length - 1];
+    const base = tail
+      ? tail.replace(/\u001b\[[0-9;]*m/g, "").trim()
+      : `Stack exited with code ${code ?? "unknown"}.`;
+    return base;
   }
 
   private async handleCrash(mode: RuntimeMode, port: number): Promise<void> {
@@ -252,7 +341,7 @@ export class Supervisor extends EventEmitter {
   private async waitForReady(url: string): Promise<boolean> {
     const deadline = Date.now() + READY_TIMEOUT_MS;
     while (Date.now() < deadline) {
-      if (this.stopping) return false;
+      if (this.stopping || this.startupError) return false;
       if (await probeUrl(url)) return true;
       await delay(750);
     }
@@ -261,6 +350,12 @@ export class Supervisor extends EventEmitter {
 
   async stop(): Promise<StackStatus> {
     this.stopping = true;
+    // @spec DI-061 — never tear down a stack we merely attached to.
+    if (this.reusing) {
+      this.reusing = false;
+      this.setStatus({ state: "stopped", url: null, message: undefined });
+      return this.getStatus();
+    }
     if (this.usingDocker) {
       spawnSync("docker", ["stop", "-t", "5", DOCKER_CONTAINER_NAME], {
         stdio: "ignore",
