@@ -16,6 +16,10 @@ import {
   useSearchSubdirs,
 } from "#/hooks/query/use-search-subdirs";
 import { useActiveBackend } from "#/contexts/active-backend-context";
+import {
+  isDesktopApp,
+  openFullDiskAccessSettings,
+} from "#/utils/desktop-bridge";
 import { cn } from "#/utils/utils";
 import { modalTitleSmClassName } from "#/utils/modal-classes";
 import FolderIcon from "#/icons/folder.svg?react";
@@ -95,6 +99,15 @@ function shouldDefaultToProjectsPath(
   return homeData?.home === "/home/openhands";
 }
 
+// macOS denies access to TCC-protected folders (Documents/Desktop/Downloads)
+// until the user grants Full Disk Access; the agent-server surfaces this as a
+// 403 / EPERM. Detect it so we can guide the user instead of showing a raw error.
+function isAccessDeniedError(message: string): boolean {
+  return /permission denied|forbidden|operation not permitted|errno\s*(1|13)\b/i.test(
+    message,
+  );
+}
+
 export function FolderBrowserModal({
   isOpen,
   onClose,
@@ -158,6 +171,8 @@ export function FolderBrowserModal({
 
   const subdirs = listing?.items ?? [];
   const parent = currentPath ? getParentPath(currentPath) : null;
+  const errorMessage = (error as Error | undefined)?.message ?? "";
+  const isAccessDenied = isError && isAccessDeniedError(errorMessage);
 
   // Signal that we're inside a container environment without the host
   // home mounted: the agent server reports `/home/openhands` as home and
@@ -283,12 +298,41 @@ export function FolderBrowserModal({
                   {t(I18nKey.HOME$LOADING)}
                 </li>
               )}
-              {isError && (
+              {isAccessDenied && (
+                <li
+                  className="px-4 py-3"
+                  data-testid="folder-browser-access-blocked"
+                >
+                  <div className="flex flex-col gap-2 max-w-md">
+                    <span className="text-sm font-semibold text-white">
+                      {t(I18nKey.HOME$ACCESS_BLOCKED_TITLE)}
+                    </span>
+                    <span className="text-sm text-[var(--oh-text-secondary)]">
+                      {t(I18nKey.HOME$ACCESS_BLOCKED_BODY)}
+                    </span>
+                    {isDesktopApp() && (
+                      <div className="mt-1">
+                        <BrandButton
+                          type="button"
+                          variant="primary"
+                          onClick={() => {
+                            void openFullDiskAccessSettings();
+                          }}
+                          testId="folder-browser-grant-access"
+                        >
+                          {t(I18nKey.HOME$GRANT_FULL_DISK_ACCESS)}
+                        </BrandButton>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              )}
+              {isError && !isAccessDenied && (
                 <li
                   className="px-4 py-2 text-sm text-red-400"
                   data-testid="folder-browser-error"
                 >
-                  {(error as Error | undefined)?.message ?? "Failed to load"}
+                  {errorMessage || t(I18nKey.HOME$NO_WORKSPACES)}
                 </li>
               )}
               {!isLoading && !isError && subdirs.length === 0 && (

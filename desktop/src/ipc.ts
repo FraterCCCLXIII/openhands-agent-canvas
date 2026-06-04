@@ -53,6 +53,17 @@ export function registerIpc(
     await shell.openPath(logsDir());
   });
 
+  // macOS gates Documents/Desktop/Downloads behind TCC; the agent-server (a
+  // child of this app) inherits the app's grant. Deep-link to the Full Disk
+  // Access pane so the user can enable it. Other platforms have no equivalent.
+  ipcMain.handle(IPC.systemOpenFullDiskAccess, async () => {
+    if (process.platform !== "darwin") return false;
+    await shell.openExternal(
+      "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
+    );
+    return true;
+  });
+
   ipcMain.handle(IPC.appGetVersion, () => app.getVersion());
   ipcMain.handle(IPC.appCheckForUpdates, () => ({
     available: false,

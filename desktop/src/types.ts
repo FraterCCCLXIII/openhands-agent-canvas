@@ -56,6 +56,7 @@ export const IPC = {
   dialogPickFolder: "dialog:pickFolder",
   logsGetPath: "logs:getPath",
   logsOpen: "logs:open",
+  systemOpenFullDiskAccess: "system:openFullDiskAccess",
   appGetVersion: "app:getVersion",
   appCheckForUpdates: "app:checkForUpdates",
 
@@ -93,6 +94,13 @@ export interface DesktopBridge {
   logs: {
     getPath(): Promise<string>;
     open(): Promise<void>;
+  };
+  system: {
+    /**
+     * Open the OS privacy pane where the user grants the app filesystem access
+     * (macOS: Full Disk Access). No-op / resolves false on platforms without one.
+     */
+    openFullDiskAccess(): Promise<boolean>;
   };
   app: {
     getVersion(): Promise<string>;

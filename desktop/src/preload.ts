@@ -49,6 +49,9 @@ const bridge: DesktopBridge = {
     getPath: () => ipcRenderer.invoke(IPC.logsGetPath),
     open: () => ipcRenderer.invoke(IPC.logsOpen),
   },
+  system: {
+    openFullDiskAccess: () => ipcRenderer.invoke(IPC.systemOpenFullDiskAccess),
+  },
   app: {
     getVersion: () => ipcRenderer.invoke(IPC.appGetVersion),
     checkForUpdates: () => ipcRenderer.invoke(IPC.appCheckForUpdates),
