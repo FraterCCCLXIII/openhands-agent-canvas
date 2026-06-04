@@ -38,10 +38,15 @@ files:
 
 mac:
   category: public.app-category.developer-tools
+  icon: assets/icon.png
+  # POC: ad-hoc sign so the arm64 app actually launches locally (an unsigned
+  # arm64 binary is killed by the kernel). Run with
+  # CSC_IDENTITY_AUTO_DISCOVERY=false so electron-builder signs ad-hoc ("-")
+  # instead of hunting for a real cert. Phase 3 swaps this for Developer ID +
+  # hardened runtime + notarization (DI-003).
   target:
     - dmg
   # universal2 (arm64 + x64) — DI-094
-  # hardenedRuntime + notarization wired in Phase 3 (DI-003)
 
 win:
   target:

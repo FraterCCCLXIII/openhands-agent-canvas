@@ -85,7 +85,24 @@ Other scripts:
 
 - `npm run typecheck` — type-check the main + preload sources.
 - `npm run build` — compile `src/` → `dist/` and bundle the sandboxed preload.
-- `npm run dist` — `electron-builder` packaging (Phase 3; config-only for now).
+- `npm run fetch-uv` — download the bundled `uv` for this host (see above).
+- `npm run dist` — build + fetch `uv` + `electron-builder` packaging.
+
+### Packaging (`npm run dist`)
+
+Produces an installable artifact under `desktop/release/` (gitignored). On
+macOS this is a `.dmg` that bundles the frontend, launcher scripts, config, and
+the per-arch `uv`. For a runnable **local** (unsigned) build, ad-hoc sign so the
+arm64 app launches:
+
+```bash
+CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dmg --publish never
+```
+
+The app is ad-hoc signed (`Signature=adhoc`), so Gatekeeper still shows an
+"unidentified developer" prompt — right-click → Open the first time. Real
+Developer ID signing + notarization (and Windows/Linux targets) are Phase 3
+(DI-003/DI-094).
 
 Logs are written to `~/.openhands/agent-canvas/logs/` (`desktop.log`,
 `stack.log`) and are reachable from the tray's **Open Logs** item.
@@ -104,7 +121,11 @@ Logs are written to `~/.openhands/agent-canvas/logs/` (`desktop.log`,
 ## Not yet implemented (tracked in the spec)
 
 - In-process embeddable launcher handle (DI-010) — POC uses subprocess instead.
-- First-run runtime wizard UI (DI-040) — interim default inference in `runtime.ts`.
-- Auto-update (DI-004/DI-073), code-signing/notarization, icons/branding (DI-094).
-- Packaged-path resource resolution is implemented in `paths.ts`
-  (`process.resourcesPath`) but only the dev path has been exercised so far.
+- Real code-signing / notarization (Developer ID, Windows cert) — current
+  builds are ad-hoc signed only (DI-003).
+- Auto-update (DI-004/DI-073) and final branding/icons (DI-094) — a placeholder
+  icon is in place.
+- Windows/Linux packaging targets and CI release job (DI-094).
+- The packaged-app path in `paths.ts` (`process.resourcesPath`) is wired and the
+  `.dmg` bundles all resources, but launching the installed `.app` end-to-end
+  hasn't been exercised in CI yet.

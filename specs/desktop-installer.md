@@ -486,6 +486,15 @@ that is *not* an engineering decision (accounts, certs, assets) lives in
 - [x] Single-instance lock + tray-resident, close-≠-quit lifecycle
   (DI-050–DI-052, DI-060); native folder picker over IPC (DI-093).
 - [x] `desktop/` typecheck + build pass; root `typecheck`/`build` unaffected.
+- [x] Self-start verified: with ports free, the app spawns its own
+  agent-server + automation + ingress (direct mode) and the renderer loads.
+- [x] Bundled `uv` (DI-030/031): `scripts/fetch-uv.mjs` + PATH-prepend; verified
+  self-start logs "Using bundled uv" and comes up healthy.
+- [x] First-run runtime wizard (DI-040): native always-ask picker + tray
+  "Switch Runtime…"; verified Docker mode end-to-end.
+- [x] Packaging: `electron-builder` produces an ad-hoc-signed macOS `.dmg`
+  (~134 MB) bundling build/bin/scripts/config/tools + per-arch `uv`; placeholder
+  icon in place. Real signing/notarization + Win/Linux targets remain (DI-003/094).
 
 ### Needed before Phase 1 (Electron shell)
 - [ ] Phase 0 (`main()` refactor, DI-010) merged so the supervisor is importable.
