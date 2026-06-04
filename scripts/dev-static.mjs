@@ -213,6 +213,14 @@ function checkPrerequisites() {
 const processes = new Map();
 let shuttingDown = false;
 
+// See dev-with-automation.mjs: when launched inside Electron there is no `node`
+// on PATH, so reuse the Electron binary (as Node) for our own .mjs helpers.
+const RUNNING_IN_ELECTRON = Boolean(process.versions.electron);
+const NODE_RUNTIME = RUNNING_IN_ELECTRON ? process.execPath : "node";
+const NODE_RUNTIME_ENV = RUNNING_IN_ELECTRON
+  ? { ELECTRON_RUN_AS_NODE: "1" }
+  : {};
+
 function spawnService(name, command, args, options = {}) {
   const proc = spawn(
     command,
@@ -379,7 +387,7 @@ function startStaticServer(config) {
   const staticServerScript = join(projectRoot, "scripts", "static-server.mjs");
   spawnService(
     "static",
-    "node",
+    NODE_RUNTIME,
     [
       staticServerScript,
       "--dir",
@@ -415,6 +423,7 @@ function startStaticServer(config) {
     {
       cwd: config.canvasPath,
       color: c.magenta,
+      env: NODE_RUNTIME_ENV,
     },
   );
 }
@@ -426,7 +435,7 @@ function startIngress(config) {
 
   spawnService(
     "ingress",
-    "node",
+    NODE_RUNTIME,
     [
       ingressScript,
       "--port",
@@ -457,6 +466,7 @@ function startIngress(config) {
     {
       cwd: projectRoot,
       color: c.yellow,
+      env: NODE_RUNTIME_ENV,
     },
   );
 }

@@ -508,6 +508,18 @@ function registerShutdownHook(hook) {
   return shutdownHooks.add(hook);
 }
 
+// Node runtime for our own .mjs helpers (static-server, ingress). When this
+// launcher runs inside the Electron desktop app (via ELECTRON_RUN_AS_NODE),
+// there is no standalone `node` on PATH — a Finder-launched app gets a minimal
+// PATH — so reuse the Electron binary as Node. `spawnService` inherits
+// process.env, but we set ELECTRON_RUN_AS_NODE explicitly so the spawned
+// Electron binary runs the script as plain Node instead of opening a window.
+const RUNNING_IN_ELECTRON = Boolean(process.versions.electron);
+const NODE_RUNTIME = RUNNING_IN_ELECTRON ? process.execPath : "node";
+const NODE_RUNTIME_ENV = RUNNING_IN_ELECTRON
+  ? { ELECTRON_RUN_AS_NODE: "1" }
+  : {};
+
 function spawnService(name, command, args, options = {}) {
   const proc = spawn(
     command,
@@ -848,7 +860,7 @@ function startIngress(config) {
 
   spawnService(
     "ingress",
-    "node",
+    NODE_RUNTIME,
     [
       ingressScript,
       "--port",
@@ -859,6 +871,7 @@ function startIngress(config) {
     {
       cwd: projectRoot,
       color: c.yellow,
+      env: NODE_RUNTIME_ENV,
     },
   );
 }
@@ -1272,7 +1285,7 @@ function startStaticFrontend(config, staticDir) {
   const staticServerScript = join(projectRoot, "scripts", "static-server.mjs");
   spawnService(
     "static",
-    "node",
+    NODE_RUNTIME,
     [
       staticServerScript,
       "--dir",
@@ -1297,6 +1310,7 @@ function startStaticFrontend(config, staticDir) {
     {
       cwd: config.canvasPath,
       color: c.magenta,
+      env: NODE_RUNTIME_ENV,
     },
   );
 }
