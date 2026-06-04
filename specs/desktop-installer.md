@@ -106,6 +106,47 @@ post-v1.
   single-source-of-truth rule. The release skill (`.agents/skills/release.md`)
   shall be updated to cover desktop artifacts.
 
+### Update strategy (two-tier versioning)
+
+> Two version axes update independently: the Electron **shell** (`package.json`,
+> via `electron-updater`) and the **backend stack** (agent-server + automation,
+> pinned in `config/defaults.json`, materialized by `uvx` in direct mode or the
+> `ghcr.io/openhands/agent-canvas:<tag>` image in docker mode). These specs
+> define how they stay coherent.
+
+#### DI-070: Lockstep by default; shell is the source of truth for local modes
+- [ ] For `direct` and `docker` modes, the backend version shall be the version
+  pinned in the shell's bundled `config/defaults.json`. A shell update therefore
+  updates the backend (lockstep). Each shell release ships the backend version it
+  was tested against (CI mock-llm + live-e2e run against those pins), so lockstep
+  equals the tested combination and there is no N×M compatibility matrix.
+
+#### DI-071: Docker tag derived from shell version
+- [ ] Docker mode shall pull `images.agentCanvas:<shellVersion>` (a monolithic
+  image — inherently single-version). The tag shall derive from the shell version
+  + `config/defaults.json`, never a floating `latest`.
+
+#### DI-072: Offline fallback to last-good backend version
+- [ ] The shell shall record the last backend version it successfully started. If
+  a newly-pinned version cannot be fetched offline (uvx wheels uncached / image
+  not pulled), the app shall offer to run the last-good version with a warning
+  rather than hard-fail. (This removes the need for DI-033 in the *update* path;
+  DI-033 remains only for the first-ever-install offline case.)
+
+#### DI-073: Updates apply only when idle
+- [ ] `electron-updater` shall not force a restart while agents/automations are
+  running. It shall download in the background and apply on next quit or with
+  explicit user approval, so an update never interrupts a live conversation
+  (interplays with DI-051/DI-013 lifecycle).
+
+#### DI-074: Remote/cloud are detect-and-warn, never enforced
+- [ ] For `remote`/`cloud` modes the shell does not control the backend version.
+  It shall read `/server_info.version` and show a non-blocking compatibility
+  banner when outside the tested range, but shall never hard-block (keep
+  `/settings/agent-server` reachable for recovery, per existing rules). Power
+  users may pin a different *local* backend via the existing
+  `OH_AGENT_SERVER_VERSION` / `OH_AGENT_SERVER_GIT_REF` escape hatches.
+
 ### Supervisor (Electron main process)
 
 #### DI-010: Embeddable supervisor
@@ -127,7 +168,49 @@ post-v1.
 #### DI-013: Lifecycle & port conflicts
 - [ ] On quit, the app shall stop all child services (agent-server, automation,
   ingress, any container). Port conflicts (`assertPortsFree`) shall surface as a
-  native dialog with a retry/alternate-port path, never a silent exit.
+  native dialog with a retry/alternate-port path, never a silent exit. (Desktop
+  default behavior is refined by DI-062.)
+
+### Coexistence, single-instance & lease lifecycle
+
+> Correctness invariant: **at most one agent-server per state dir
+> (`~/.openhands/agent-canvas`) at a time.** Two agent-servers sharing the
+> conversations dir fight over `owner_lease.json` (45 s TTL; orphaned on hard
+> kill) and conversations silently vanish from `/api/conversations/search`. The
+> invariant is upheld by single-instance lock + reuse-if-present + guarded
+> stale-lease recovery.
+
+#### DI-060: Single-instance lock
+- [ ] The app shall acquire `app.requestSingleInstanceLock()`; a second launch
+  shall focus the existing window and exit, preventing two desktop supervisors
+  against the same state dir.
+
+#### DI-061: Reuse a healthy running stack instead of duplicating
+- [ ] Before spawning, the supervisor shall probe the expected agent-server
+  (`isPortBusy` + `GET /server_info` OK + auth OK with the persisted
+  `api-key.txt` key). If a healthy compatible stack is found — e.g. a CLI
+  `npx`/Docker run already running against the same `~/.openhands` — the app shall
+  adopt it (register as a backend and connect) rather than spawn a second
+  agent-server.
+
+#### DI-062: Dynamic port fallback for foreign processes
+- [ ] When a required port is held by an *unrecognized* process (not our
+  agent-server), the supervisor shall fall back to OS-assigned ports
+  (`findFreePort` / `findFreePorts`) and load the window at the resolved ingress
+  URL, instead of the hard `assertPortsFree` throw. Internal agent-server /
+  automation ports are abstracted by the ingress, so the renderer is unaffected.
+
+#### DI-063: Guarded stale-lease recovery
+- [ ] When (and only when) the supervisor spawns its own agent-server and has
+  confirmed no server is bound to the backend port, it shall call
+  `releaseStaleConversationLeases(conversationsDir)` before start, so
+  conversations orphaned by a crash/force-quit reload. It shall never release
+  leases while any agent-server is bound to that port.
+
+#### DI-064: (Optional) Isolated instance with a separate state dir
+- [ ] Advanced path: allow launching against an alternate state dir
+  (`OH_CANVAS_SAFE_STATE_DIR`) so a second concurrent stack can run without
+  violating the one-server-per-state-dir invariant. May land post-v1.
 
 ### Runtime selection & management
 
@@ -227,17 +310,22 @@ post-v1.
 1. **Phase 0 — Embeddable launcher (DI-010, DI-011).** Refactor `main()` to
    return a handle and stop calling `process.exit()`. Benefits CLI users too.
    Lowest risk; unblocks everything else.
-2. **Phase 1 — Minimal Electron shell (DI-012, DI-013, DI-030, DI-031).**
-   BrowserWindow → existing ingress; supervisor runs `direct` mode with bundled
-   `uv`. Unsigned dev builds.
+2. **Phase 1 — Minimal Electron shell + coexistence (DI-012, DI-013, DI-030,
+   DI-031, DI-060–DI-063, DI-070, DI-072).** BrowserWindow → existing ingress;
+   supervisor runs `direct` mode with bundled `uv`; single-instance lock,
+   reuse-if-present, dynamic ports, guarded lease recovery; shell-pinned backend
+   version with offline last-good fallback. Unsigned dev builds.
 3. **Phase 2 — Runtime selection + tray (DI-020–DI-023, DI-040–DI-042,
-   DI-050–DI-052).** Wizard step + Settings page + Docker mode in the Runtime
-   Manager, reusing backend-registry and health UI; menu-bar/tray resident,
-   close-≠-quit lifecycle, and launch-at-login.
-4. **Phase 3 — Distribution (DI-001–DI-005, DI-032).** electron-builder targets,
-   signing/notarization, `electron-updater`, CI release job.
-5. **Phase 4 — Optional embedded Python (DI-033).** Remove first-run network
-   dependency. Defer until demand exists.
+   DI-050–DI-052, DI-071, DI-074).** Wizard step + Settings page + Docker mode in
+   the Runtime Manager (shell-derived image tag; remote/cloud detect-and-warn),
+   reusing backend-registry and health UI; menu-bar/tray resident, close-≠-quit
+   lifecycle, and launch-at-login.
+4. **Phase 3 — Distribution (DI-001–DI-005, DI-032, DI-073).** electron-builder
+   targets, signing/notarization, `electron-updater` with idle-only apply, CI
+   release job.
+5. **Phase 4 — Optional embedded Python + isolated instance (DI-033, DI-064).**
+   Remove first-run network dependency; allow concurrent stacks via separate
+   state dir. Defer until demand exists.
 
 ---
 
@@ -250,19 +338,13 @@ Electron code; Tier 2 shapes Phase 1–2; Tier 3 can be decided during the build
 
 - **v1 scope:** RESOLVED — v1 ships all four runtime modes (see "Scope decision"
   above). Docker mode is in-scope.
-- **Two-tier update strategy:** `electron-updater` updates the *shell*, but the
-  agent-server + automation versions are a separate axis (pinned in
-  `config/defaults.json`, fetched by `uvx` or pulled as a Docker image). Decide:
-  do shell and backend versions bump together? What happens offline (shell
-  updates but `uvx` can't fetch wheels)? How do we keep shell↔backend compatible
-  when tool names/APIs change? (`/server_info` only *detects* version, it does
-  not *guarantee* compatibility.)
-- **Coexistence with an already-running stack + conversation-lease conflict:** if
-  the user has run `npx`/Docker, `~/.openhands/agent-canvas` already has
-  keys/conversations and something may hold `:8000`. `assertPortsFree` currently
-  throws, and two agent-servers sharing the conversations dir fight over
-  `owner_lease.json` (cf. `releaseStaleConversationLeases`). Decide: reuse a
-  running stack, pick new ports, or refuse?
+- **Two-tier update strategy:** RESOLVED — lockstep by default with the shell as
+  source of truth for local modes, detect-and-warn for remote/cloud, offline
+  last-good fallback, idle-only apply. See DI-070–DI-074.
+- **Coexistence with an already-running stack + conversation-lease conflict:**
+  RESOLVED — invariant of one agent-server per state dir, upheld by
+  single-instance lock + reuse-if-present + dynamic port fallback + guarded
+  stale-lease recovery. See DI-060–DI-064.
 - **Renderer↔main IPC / security contract:** lock in `contextIsolation: true`,
   `nodeIntegration: false`, and a typed `preload` bridge. Define the API surface
   the renderer may call (start/stop stack, pick folder, runtime status, open
