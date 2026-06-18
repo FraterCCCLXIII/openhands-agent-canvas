@@ -9400,6 +9400,23 @@
     "tr": "'{{name}}' profiline geçilemedi",
     "uk": "Не вдалося перемкнутися на профіль '{{name}}'"
   },
+  "MODEL$EFFORT": {
+    "en": "Effort",
+    "ja": "努力度",
+    "zh-CN": "力度",
+    "zh-TW": "力度",
+    "ko-KR": "노력",
+    "no": "Innsats",
+    "ar": "جهد",
+    "de": "Aufwand",
+    "fr": "Effort",
+    "it": "Sforzo",
+    "pt": "Esforço",
+    "es": "Esfuerzo",
+    "ca": "Esforç",
+    "tr": "Çaba",
+    "uk": "Зусилля"
+  },
   "MODEL$OPEN_SETTINGS": {
     "en": "Open LLM settings",
     "ja": "LLM 設定を開く",

@@ -4,13 +4,23 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "test-utils";
 
 const useLlmProfilesMock = vi.fn();
+const useLlmProfileDetailMock = vi.fn();
 const useActiveConversationMock = vi.fn();
 const useSettingsMock = vi.fn();
 const useSwitchLlmProfileAndLogMock = vi.fn();
+const useUpdateReasoningEffortMock = vi.fn();
 const useOptionalConversationIdMock = vi.fn();
 
 vi.mock("#/hooks/query/use-llm-profiles", () => ({
   useLlmProfiles: () => useLlmProfilesMock(),
+}));
+
+vi.mock("#/hooks/query/use-llm-profile-detail", () => ({
+  useLlmProfileDetail: () => useLlmProfileDetailMock(),
+}));
+
+vi.mock("#/hooks/mutation/use-update-reasoning-effort", () => ({
+  useUpdateReasoningEffort: () => useUpdateReasoningEffortMock(),
 }));
 
 vi.mock("#/hooks/query/use-active-conversation", () => ({
@@ -61,22 +71,33 @@ const sameModelProfiles = [
 
 describe("SwitchProfileButton", () => {
   const switchAndLog = vi.fn();
+  const updateEffort = vi.fn();
 
   beforeEach(() => {
     switchAndLog.mockReset();
+    updateEffort.mockReset();
     useLlmProfilesMock.mockReset();
+    useLlmProfileDetailMock.mockReset();
     useActiveConversationMock.mockReset();
     useSettingsMock.mockReset();
     useSwitchLlmProfileAndLogMock.mockReset();
+    useUpdateReasoningEffortMock.mockReset();
     useOptionalConversationIdMock.mockReset();
 
     useLlmProfilesMock.mockReturnValue({
       data: { profiles, active_profile: "haiku" },
     });
+    useLlmProfileDetailMock.mockReturnValue({
+      data: { config: { reasoning_effort: "medium" } },
+    });
     useActiveConversationMock.mockReturnValue({ data: undefined });
     useSettingsMock.mockReturnValue({ data: undefined });
     useSwitchLlmProfileAndLogMock.mockReturnValue({
       switchAndLog,
+      isPending: false,
+    });
+    useUpdateReasoningEffortMock.mockReturnValue({
+      mutate: updateEffort,
       isPending: false,
     });
     useOptionalConversationIdMock.mockReturnValue({ conversationId: "conv-1" });
@@ -102,6 +123,9 @@ describe("SwitchProfileButton", () => {
     expect(screen.getByTestId("switch-profile-button")).toHaveTextContent(
       "haiku",
     );
+    expect(
+      screen.getByTestId("switch-profile-effort-label"),
+    ).toBeInTheDocument();
   });
 
   it("calls switchAndLog with null conversationId when clicked from the home page", () => {
@@ -242,5 +266,19 @@ describe("SwitchProfileButton", () => {
     expect(screen.getByTestId("switch-profile-button")).toHaveTextContent(
       "broken",
     );
+  });
+
+  it("shows the effort submenu and updates reasoning effort on selection", () => {
+    renderWithProviders(<SwitchProfileButton />);
+    fireEvent.click(screen.getByTestId("switch-profile-button"));
+    expect(screen.getByTestId("switch-profile-effort-icon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("switch-profile-effort-button"));
+    fireEvent.click(screen.getByTestId("switch-profile-effort-option-high"));
+
+    expect(updateEffort).toHaveBeenCalledWith({
+      profileName: "haiku",
+      effort: "high",
+      conversationId: "conv-1",
+    });
   });
 });

@@ -3,11 +3,22 @@ import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import { ComboboxCaretInline } from "#/ui/combobox-caret";
 import { useLlmProfiles } from "#/hooks/query/use-llm-profiles";
+import { useLlmProfileDetail } from "#/hooks/query/use-llm-profile-detail";
 import { useSwitchLlmProfileAndLog } from "#/hooks/mutation/use-switch-llm-profile-and-log";
+import { useUpdateReasoningEffort } from "#/hooks/mutation/use-update-reasoning-effort";
 import { useActiveConversation } from "#/hooks/query/use-active-conversation";
 import { useSettings } from "#/hooks/query/use-settings";
 import { useOptionalConversationId } from "#/hooks/use-conversation-id";
 import { useModelStore } from "#/stores/model-store";
+import {
+  DEFAULT_REASONING_EFFORT,
+  normalizeReasoningEffort,
+  type ReasoningEffort,
+} from "#/constants/reasoning-effort";
+import {
+  getReasoningEffortLabel,
+  getReasoningEffortTextClassName,
+} from "#/utils/reasoning-effort-display";
 import { cn } from "#/utils/utils";
 import { chatInputPillButtonClassName } from "#/utils/form-control-classes";
 import { SwitchProfileContextMenu } from "./switch-profile-context-menu";
@@ -21,7 +32,10 @@ export function SwitchProfileButton() {
   const { data } = useLlmProfiles();
   const { data: conversation } = useActiveConversation();
   const { data: settings } = useSettings();
-  const { switchAndLog, isPending } = useSwitchLlmProfileAndLog();
+  const { switchAndLog, isPending: isSwitchPending } =
+    useSwitchLlmProfileAndLog();
+  const { mutate: updateEffort, isPending: isEffortPending } =
+    useUpdateReasoningEffort();
   // Optimistic value written by recordSwitch on a successful switch — gives
   // instant in-conversation feedback before the conversation refetch lands
   // with the new `llm_model`.
@@ -72,6 +86,13 @@ export function SwitchProfileButton() {
     conversationModel ??
     null;
 
+  const { data: activeProfileDetail } = useLlmProfileDetail(activeProfileName, {
+    enabled: !!activeProfileName,
+  });
+  const reasoningEffort = normalizeReasoningEffort(
+    activeProfileDetail?.config?.reasoning_effort ?? DEFAULT_REASONING_EFFORT,
+  );
+
   if (profiles.length === 0 || isAcpActive) {
     return null;
   }
@@ -87,24 +108,46 @@ export function SwitchProfileButton() {
     switchAndLog(conversationId, profileName);
   };
 
+  const handleEffortSelect = (effort: ReasoningEffort) => {
+    if (!activeProfileName || effort === reasoningEffort) return;
+    updateEffort({
+      profileName: activeProfileName,
+      effort,
+      conversationId,
+    });
+  };
+
+  const effortLabel = getReasoningEffortLabel(t, reasoningEffort);
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={handleClick}
-        disabled={isPending}
+        disabled={isSwitchPending || isEffortPending}
         data-testid="switch-profile-button"
         title={activeProfileModel ?? undefined}
         aria-haspopup="menu"
         aria-expanded={contextMenuOpen}
         className={cn(
           chatInputPillButtonClassName,
-          "max-w-[200px]",
+          "max-w-[260px]",
           "disabled:opacity-50 disabled:cursor-not-allowed",
         )}
       >
-        <span className="truncate">
-          {activeProfileName ?? t(I18nKey.LLM$SELECT_MODEL_PLACEHOLDER)}
+        <span className="flex min-w-0 items-baseline gap-1">
+          <span className="truncate">
+            {activeProfileName ?? t(I18nKey.LLM$SELECT_MODEL_PLACEHOLDER)}
+          </span>
+          <span
+            className={cn(
+              "shrink-0 text-xs leading-4",
+              getReasoningEffortTextClassName(reasoningEffort),
+            )}
+            data-testid="switch-profile-effort-label"
+          >
+            {effortLabel}
+          </span>
         </span>
         <ComboboxCaretInline isOpen={contextMenuOpen} />
       </button>
@@ -112,7 +155,10 @@ export function SwitchProfileButton() {
         <SwitchProfileContextMenu
           profiles={profiles}
           activeProfileName={activeProfileName}
+          reasoningEffort={reasoningEffort}
+          isEffortPending={isEffortPending}
           onSelect={handleSelect}
+          onEffortSelect={handleEffortSelect}
           onClose={() => setContextMenuOpen(false)}
         />
       )}
