@@ -6,6 +6,7 @@ let manifest: WorkManifest = {
   name: "Default Work Workspace",
   grantedFolders: [],
   deliverablesPath: "",
+  defaultEnabledApps: [],
   defaultOptionalTools: [],
 };
 
@@ -15,6 +16,7 @@ export const resetWorkRuntimeMockData = () => {
     name: "Default Work Workspace",
     grantedFolders: [],
     deliverablesPath: "",
+    defaultEnabledApps: [],
     defaultOptionalTools: [],
   };
 };

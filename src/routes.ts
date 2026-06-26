@@ -21,6 +21,7 @@ export default [
     route("skills", "routes/skills-settings.tsx"),
     route("plugins", "routes/skills-plugins.tsx"),
     route("mcp", "routes/mcp.tsx"),
+    route("apps", "routes/customize-apps.tsx"),
     route("settings", "routes/settings.tsx", [
       index("routes/settings-index.tsx"),
       route("llm", "routes/llm-settings.tsx"),
@@ -29,6 +30,7 @@ export default [
       route("verification", "routes/verification-settings.tsx"),
       route("app", "routes/app-settings.tsx"),
       route("work", "routes/work-settings.tsx"),
+      route("integrations", "routes/odysseus-settings.tsx"),
       route("secrets", "routes/secrets-settings.tsx"),
     ]),
     route("oauth/device/verify", "routes/device-verify.tsx"),

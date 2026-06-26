@@ -56,6 +56,7 @@ describe("WorkWorkspaceSetup", () => {
           name: "Default",
           grantedFolders: [],
           deliverablesPath: "",
+          defaultEnabledApps: [],
           defaultOptionalTools: [],
         }}
       />,

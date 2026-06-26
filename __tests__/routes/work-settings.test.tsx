@@ -52,6 +52,7 @@ describe("WorkSettingsScreen", () => {
         name: "Personal",
         grantedFolders: ["/tmp/docs"],
         deliverablesPath: "/tmp/docs/deliverables",
+        defaultEnabledApps: [],
         defaultOptionalTools: [],
       },
       isLoading: false,

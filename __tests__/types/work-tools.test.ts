@@ -31,9 +31,9 @@ describe("work-tools", () => {
     ]);
   });
 
-  it("parses and strips WORK_TOOL_REQUEST tags", () => {
+  it("parses and strips WORK_APP_REQUEST tags", () => {
     const text =
-      'Need web access.\n<WORK_TOOL_REQUEST tool="browser" reason="Look up tax rates"/>';
+      'Need web access.\n<WORK_APP_REQUEST app="browser" reason="Look up tax rates"/>';
     expect(parseWorkToolRequests(text)).toEqual([
       { toolId: "browser", reason: "Look up tax rates" },
     ]);

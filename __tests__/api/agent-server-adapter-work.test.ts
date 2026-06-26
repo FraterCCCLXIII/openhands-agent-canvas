@@ -2,9 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS } from "#/services/settings";
 import type { WorkManifest } from "#/types/work-manifest";
 
-const mockIsAgentServerToolAvailable = vi.fn(
-  (name: string) => name === "browser_tool_set",
-);
+const { mockIsAgentServerToolAvailable } = vi.hoisted(() => ({
+  mockIsAgentServerToolAvailable: vi.fn(
+    (name: string) => name === "browser_tool_set",
+  ),
+}));
 
 vi.mock("#/api/agent-server-compatibility", () => ({
   isAgentServerToolAvailable: (name: string) =>
@@ -22,6 +24,7 @@ describe("buildWorkStartConversationRequest", () => {
     name: "Personal",
     grantedFolders: ["/tmp/docs"],
     deliverablesPath: "/tmp/docs/deliverables",
+    defaultEnabledApps: [],
     defaultOptionalTools: [],
   };
 
@@ -38,6 +41,7 @@ describe("buildWorkStartConversationRequest", () => {
     expect(payload.tags).toEqual({
       appmode: "work",
       workwsid: "workspace1",
+      workapps: "",
       worktools: "",
     });
     expect(payload.worktree).toBe(false);
@@ -50,6 +54,7 @@ describe("buildWorkStartConversationRequest", () => {
       workingDir: manifest.deliverablesPath,
       workManifest: {
         ...manifest,
+        defaultEnabledApps: ["browser"],
         defaultOptionalTools: ["browser"],
       },
     });
@@ -57,10 +62,26 @@ describe("buildWorkStartConversationRequest", () => {
     const toolNames = payload.agent_settings.tools?.map((tool) => tool.name);
     expect(toolNames).toContain("browser_tool_set");
     expect(payload.tags?.worktools).toBe("browser");
+    expect(payload.tags?.workapps).toBe("browser");
   });
 
-  it("includes tool request guidance when browser is off", () => {
-    expect(buildWorkSystemSuffix(manifest)).toContain("WORK_TOOL_REQUEST");
+  it("includes notes tool when notes app is enabled", () => {
+    const payload = buildWorkStartConversationRequest({
+      settings: DEFAULT_SETTINGS,
+      query: "Add a reminder",
+      workingDir: manifest.deliverablesPath,
+      workManifest: {
+        ...manifest,
+        defaultEnabledApps: ["notes"],
+      },
+    });
+
+    const toolNames = payload.agent_settings.tools?.map((tool) => tool.name);
+    expect(toolNames).toContain("notes");
+  });
+
+  it("includes WORK_APP_REQUEST guidance when apps are off", () => {
+    expect(buildWorkSystemSuffix(manifest)).toContain("WORK_APP_REQUEST");
   });
 
   it("includes granted folders in the work suffix", () => {

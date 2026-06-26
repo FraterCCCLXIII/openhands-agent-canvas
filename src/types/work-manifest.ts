@@ -1,12 +1,18 @@
-import type { WorkOptionalToolId } from "#/types/work-tools";
+import {
+  getDefaultEnabledWorkAppIds,
+  migrateLegacyWorkToolIds,
+  parseEnabledAppIds,
+} from "#/apps/registry";
 
 export interface WorkManifest {
   id: string;
   name: string;
   grantedFolders: string[];
   deliverablesPath: string;
-  /** Optional Work tools enabled by default for new tasks (e.g. `"browser"`). */
-  defaultOptionalTools: WorkOptionalToolId[];
+  /** Work apps enabled by default for new tasks. */
+  defaultEnabledApps: string[];
+  /** @deprecated Use defaultEnabledApps */
+  defaultOptionalTools?: string[];
 }
 
 export function normalizeWorkManifest(
@@ -16,9 +22,18 @@ export function normalizeWorkManifest(
     return null;
   }
 
+  const hasExplicitApps =
+    manifest.defaultEnabledApps !== undefined ||
+    manifest.defaultOptionalTools !== undefined;
+  const legacy = manifest.defaultOptionalTools ?? [];
+  const defaultEnabledApps = hasExplicitApps
+    ? (manifest.defaultEnabledApps ?? migrateLegacyWorkToolIds(legacy))
+    : getDefaultEnabledWorkAppIds();
+
   return {
     ...manifest,
-    defaultOptionalTools: manifest.defaultOptionalTools ?? [],
+    defaultEnabledApps,
+    defaultOptionalTools: defaultEnabledApps,
   };
 }
 
@@ -44,6 +59,24 @@ export function isWorkManifestReady(
     manifest.grantedFolders.length > 0 &&
     manifest.deliverablesPath.trim().length > 0,
   );
+}
+
+export function getManifestEnabledApps(
+  manifest: WorkManifest | null | undefined,
+): string[] {
+  const normalized = normalizeWorkManifest(manifest);
+  return normalized?.defaultEnabledApps ?? getDefaultEnabledWorkAppIds();
+}
+
+export function parseManifestEnabledAppsFromTag(
+  workapps?: string | null,
+  worktools?: string | null,
+): string[] {
+  const fromApps = parseEnabledAppIds(workapps);
+  if (fromApps.length > 0) {
+    return fromApps;
+  }
+  return parseEnabledAppIds(worktools);
 }
 
 export const WORK_MODE_TAG = "appmode";

@@ -183,12 +183,18 @@ Cloud coding sandboxes cannot access the user's desktop folders.
 ### WM-010: Work task route and list
 - [x] `/work/tasks/:taskId` and tag-filtered sidebar/home lists.
 
-### WM-011: Work tool policy
-- [x] `WorkManifest.defaultOptionalTools` persisted in Work Runtime.
-- [x] Setup + in-conversation toggles for optional tools (browser/internet first).
-- [x] Conversation tag `worktools` and agent `<WORK_TOOL_REQUEST tool="…"/>` permit UI.
+### WM-011: Work app policy
+- [x] `WorkManifest.defaultEnabledApps` persisted in Work Runtime (legacy `defaultOptionalTools` synced).
+- [x] Setup + in-conversation toggles for Work apps (browser, notes, email, …).
+- [x] Conversation tags `workapps` / `worktools` and agent `<WORK_APP_REQUEST app="…"/>` permit UI.
 - [x] `POST /switch_tools` when agent-server supports it (SDK #1787).
 - [x] Fork-with-agent fallback, then recreate Work task with tools at creation time.
+
+### WM-012: Work Apps (built-in)
+- [x] App registry (`src/apps/`) with Odysseus-backed tools for Notes, Email,
+  Calendar, Contacts, Documents, Research, Scheduled Tasks, and Browser.
+- [x] `/apps` customize hub and `/settings/integrations` Odysseus connection.
+- [x] Product-wide Memory (Code + Work) via context injection + `memory` tool.
 
 ---
 
@@ -223,7 +229,7 @@ so override policy stays centralized.
 
 ## Not built yet (post-MVP)
 
-- Apps marketplace / Work apps
+- Apps marketplace (external npm packages)
 - Hosted Work (`execution: "hosted"`) and cloud volume routing
 - Backend/org UI to set `workExecution`
 - Sidebar copy for dual-host (“Code on … / Work on …”)

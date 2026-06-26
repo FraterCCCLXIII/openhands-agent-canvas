@@ -33,15 +33,20 @@ import {
   WORK_MODE_TAG,
   WORK_MODE_TAG_VALUE,
   WORK_WORKSPACE_ID_TAG,
+  getManifestEnabledApps,
 } from "#/types/work-manifest";
 import {
   getAvailableWorkOptionalTools,
   resolveWorkAgentToolNames,
   serializeWorkOptionalToolIds,
-  WORK_ENABLED_TOOLS_TAG,
   WORK_TOOL_REQUEST_TAG,
 } from "#/types/work-tools";
 import type { WorkOptionalToolId } from "#/types/work-tools";
+import {
+  buildAppToolModuleQualnames,
+  getProductAgentToolNames,
+} from "#/apps/tool-registration";
+import { appendSuffix } from "#/apps/enrich-context";
 
 export interface DirectConversationInfo {
   id: string;
@@ -576,6 +581,10 @@ function getAgentTools(agentSettings: SettingsRecord): AgentToolSpec[] {
     }
   }
 
+  for (const name of getProductAgentToolNames()) {
+    tools.set(name, { name, params: {} });
+  }
+
   const configuredTools = agentSettings.tools;
   if (
     Array.isArray(configuredTools) &&
@@ -664,7 +673,10 @@ function buildBundledSkills(): BundledSkill[] {
   });
 }
 
-function buildAgentContext(agentSettings: SettingsRecord): SettingsRecord {
+function buildAgentContext(
+  agentSettings: SettingsRecord,
+  extraSuffix?: string,
+): SettingsRecord {
   const runtimeServicesSuffix = buildRuntimeServicesSystemSuffix();
   const existingContext = toRecord(agentSettings.agent_context);
 
@@ -675,24 +687,22 @@ function buildAgentContext(agentSettings: SettingsRecord): SettingsRecord {
     : [];
   const mergedSkills = [...existingSkills, ...buildBundledSkills()];
 
+  const existingSuffix =
+    typeof existingContext.system_message_suffix === "string"
+      ? existingContext.system_message_suffix
+      : "";
+  const combinedSuffix = appendSuffix(
+    appendSuffix(existingSuffix, runtimeServicesSuffix),
+    extraSuffix ?? "",
+  );
+
   return {
     ...existingContext,
-    // Public skills are bundled at build time from the @openhands/extensions
-    // npm package and passed directly in agent_context.skills. Setting
-    // load_public_skills to false tells the agent-server SDK to skip its own
-    // extensions-repo clone — the frontend is the sole source of public
-    // skills now.
-    //
-    // Migration: the former VITE_LOAD_PUBLIC_SKILLS env var was removed
-    // because bundled skills have no clone latency. Users who previously set
-    // VITE_LOAD_PUBLIC_SKILLS=false to avoid clone delays no longer need it.
     skills: mergedSkills,
     load_public_skills: false,
     load_user_skills: true,
     load_project_skills: true,
-    ...(runtimeServicesSuffix
-      ? { system_message_suffix: runtimeServicesSuffix }
-      : {}),
+    ...(combinedSuffix ? { system_message_suffix: combinedSuffix } : {}),
   };
 }
 
@@ -1008,7 +1018,9 @@ export function buildStartConversationRequest(
     payload.hook_config = conversationSettings.hook_config;
   }
 
-  const toolModuleQualnames: Record<string, string> = {};
+  const toolModuleQualnames: Record<string, string> = {
+    ...buildAppToolModuleQualnames([]),
+  };
   const canvasUiAvailable = isAgentServerToolAvailable(CANVAS_UI_TOOL_NAME);
   if (canvasUiAvailable) {
     toolModuleQualnames[CANVAS_UI_TOOL_NAME] = CANVAS_UI_TOOL_MODULE;
@@ -1084,7 +1096,13 @@ export async function assertSubscriptionAuthReady(
 export function getWorkAgentTools(
   enabledOptionalToolIds: Iterable<string> = [],
 ): AgentToolSpec[] {
-  return resolveWorkAgentToolNames(enabledOptionalToolIds).map((name) => ({
+  const names = resolveWorkAgentToolNames(enabledOptionalToolIds);
+  for (const name of getProductAgentToolNames()) {
+    if (!names.includes(name)) {
+      names.push(name);
+    }
+  }
+  return names.map((name) => ({
     name,
     params: {},
   }));
@@ -1093,9 +1111,13 @@ export function getWorkAgentTools(
 export function buildWorkSystemSuffix(
   manifest: Pick<
     WorkManifest,
-    "grantedFolders" | "deliverablesPath" | "defaultOptionalTools"
+    | "grantedFolders"
+    | "deliverablesPath"
+    | "defaultEnabledApps"
+    | "defaultOptionalTools"
   >,
-  enabledOptionalToolIds: Iterable<string> = manifest.defaultOptionalTools ??
+  enabledOptionalToolIds: Iterable<string> = manifest.defaultEnabledApps ??
+    manifest.defaultOptionalTools ??
     [],
 ): string {
   const enabledOptional = Array.from(
@@ -1118,22 +1140,24 @@ export function buildWorkSystemSuffix(
     `Granted folders: ${manifest.grantedFolders.join(", ")}`,
     `Deliverables path: ${manifest.deliverablesPath}`,
     "Save finished outputs for the user under the deliverables path.",
+    "Reminders → Notes with due_date. Meetings → Calendar.",
+    "403 from Odysseus means the user must enable that scope in Odysseus settings.",
   ];
 
   if (enabledOptional.length > 0) {
     lines.push(
-      `Enabled optional tools: ${enabledOptional.join(", ")}.`,
-      "You may use enabled optional tools when needed.",
+      `Enabled Work apps: ${enabledOptional.join(", ")}.`,
+      "You may use enabled app tools when needed.",
     );
   }
 
   if (disabledOptional.length > 0) {
     lines.push(
-      `Optional tools currently off: ${disabledOptional.map((tool) => tool.id).join(", ")}.`,
-      "Do not use optional tools until the user enables them.",
-      `To request an optional tool, include a self-closing tag on its own line:`,
-      `<${WORK_TOOL_REQUEST_TAG} tool="browser" reason="why you need it"/>`,
-      "Wait for the user to approve in the UI before using the requested tool.",
+      `Work apps currently off: ${disabledOptional.map((tool) => tool.id).join(", ")}.`,
+      "Do not use disabled app tools until the user enables them.",
+      `To request an app, include a self-closing tag on its own line:`,
+      `<${WORK_TOOL_REQUEST_TAG} app="email" reason="why you need it"/>`,
+      "Wait for the user to approve in the UI before using the requested app.",
     );
   }
 
@@ -1146,7 +1170,10 @@ export function buildWorkToolGrantAgentPatch(
   sourceAgent: unknown,
   workManifest: Pick<
     WorkManifest,
-    "grantedFolders" | "deliverablesPath" | "defaultOptionalTools"
+    | "grantedFolders"
+    | "deliverablesPath"
+    | "defaultEnabledApps"
+    | "defaultOptionalTools"
   >,
   enabledOptionalToolIds: Iterable<string>,
 ): Record<string, unknown> {
@@ -1173,28 +1200,27 @@ export function buildWorkToolGrantAgentPatch(
 function buildWorkAgentContext(
   agentSettings: SettingsRecord,
   workManifest: WorkManifest,
-  enabledOptionalToolIds: Iterable<string> = workManifest.defaultOptionalTools ??
+  enabledOptionalToolIds: Iterable<string> = workManifest.defaultEnabledApps ??
+    workManifest.defaultOptionalTools ??
     [],
+  memorySuffix?: string,
 ): SettingsRecord {
   const workSuffix = buildWorkSystemSuffix(
     workManifest,
     enabledOptionalToolIds,
   );
-  const runtimeServicesSuffix = buildRuntimeServicesSystemSuffix();
-  const combinedSuffix = [workSuffix, runtimeServicesSuffix]
-    .filter(Boolean)
-    .join("\n\n");
+  const workAndMemory = appendSuffix(workSuffix, memorySuffix ?? "");
 
   return {
-    ...toRecord(agentSettings.agent_context),
+    ...buildAgentContext(agentSettings, workAndMemory),
     load_public_skills: import.meta.env.VITE_LOAD_PUBLIC_SKILLS === "true",
     load_user_skills: true,
-    ...(combinedSuffix ? { system_message_suffix: combinedSuffix } : {}),
   };
 }
 
 export interface WorkStartConversationOptions extends StartConversationOptions {
   workManifest: WorkManifest;
+  memoryContextSuffix?: string;
 }
 
 /** @spec WM-010 — Restricted Work agent profile */
@@ -1205,7 +1231,7 @@ export function buildWorkStartConversationRequest(
   const sourceAgentSettings = options.encryptedAgentSettings
     ? { ...options.settings, agent_settings: options.encryptedAgentSettings }
     : options.settings;
-  const enabledOptionalTools = options.workManifest.defaultOptionalTools ?? [];
+  const enabledOptionalTools = getManifestEnabledApps(options.workManifest);
   const agentSettings = {
     ...payload.agent_settings,
     tools: getWorkAgentTools(enabledOptionalTools),
@@ -1213,8 +1239,17 @@ export function buildWorkStartConversationRequest(
       toRecord(sourceAgentSettings.agent_settings),
       options.workManifest,
       enabledOptionalTools,
+      options.memoryContextSuffix,
     ),
   };
+
+  const workAppQualnames = buildAppToolModuleQualnames(enabledOptionalTools);
+  if (Object.keys(workAppQualnames).length > 0) {
+    payload.tool_module_qualnames = {
+      ...(payload.tool_module_qualnames ?? {}),
+      ...workAppQualnames,
+    };
+  }
 
   return {
     ...payload,
@@ -1225,8 +1260,8 @@ export function buildWorkStartConversationRequest(
       [WORK_WORKSPACE_ID_TAG]: options.workManifest.id
         .replace(/[^a-z0-9]/gi, "")
         .toLowerCase(),
-      [WORK_ENABLED_TOOLS_TAG]:
-        serializeWorkOptionalToolIds(enabledOptionalTools),
+      workapps: serializeWorkOptionalToolIds(enabledOptionalTools),
+      worktools: serializeWorkOptionalToolIds(enabledOptionalTools),
     },
   };
 }
@@ -1235,11 +1270,14 @@ export async function buildWorkStartConversationRequestWithEncryptedSettings(
   options: Omit<WorkStartConversationOptions, "encryptedAgentSettings">,
 ): Promise<Record<string, unknown>> {
   const { SecretsService } = await import("./secrets-service");
+  const { fetchMemoryContextSuffix } = await import("#/apps/enrich-context");
 
-  const [settingsResult, customSecrets] = await Promise.all([
-    SettingsService.getSettingsForConversation(),
-    SecretsService.getSecrets(),
-  ]);
+  const [settingsResult, customSecrets, memoryContextSuffix] =
+    await Promise.all([
+      SettingsService.getSettingsForConversation(),
+      SecretsService.getSecrets(),
+      fetchMemoryContextSuffix(options.query),
+    ]);
 
   const { agentSettings, conversationSettings, secretsEncrypted } =
     settingsResult;
@@ -1250,6 +1288,7 @@ export async function buildWorkStartConversationRequestWithEncryptedSettings(
     encryptedConversationSettings: conversationSettings,
     secretsEncrypted,
     customSecrets,
+    memoryContextSuffix,
   });
 }
 
@@ -1263,24 +1302,37 @@ export async function buildStartConversationRequestWithEncryptedSettings(options
   worktree?: boolean;
 }): Promise<Record<string, unknown>> {
   const { SecretsService } = await import("./secrets-service");
+  const { fetchMemoryContextSuffix } = await import("#/apps/enrich-context");
 
-  const [settingsResult, customSecrets] = await Promise.all([
-    SettingsService.getSettingsForConversation(),
-    SecretsService.getSecrets(),
-  ]);
+  const [settingsResult, customSecrets, memoryContextSuffix] =
+    await Promise.all([
+      SettingsService.getSettingsForConversation(),
+      SecretsService.getSecrets(),
+      fetchMemoryContextSuffix(options.query),
+    ]);
 
   const { agentSettings, conversationSettings, secretsEncrypted } =
     settingsResult;
 
   await assertSubscriptionAuthReady(agentSettings);
 
-  return buildStartConversationRequest({
+  const payload = buildStartConversationRequest({
     ...options,
     encryptedAgentSettings: agentSettings,
     encryptedConversationSettings: conversationSettings,
     secretsEncrypted,
     customSecrets,
   });
+
+  if (memoryContextSuffix && payload.agent_settings) {
+    const agent = toRecord(payload.agent_settings);
+    payload.agent_settings = {
+      ...agent,
+      agent_context: buildAgentContext(agent, memoryContextSuffix),
+    };
+  }
+
+  return payload;
 }
 
 export function emptyHooksResponse(): GetHooksResponse {

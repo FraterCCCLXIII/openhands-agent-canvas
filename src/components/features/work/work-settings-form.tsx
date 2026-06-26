@@ -9,6 +9,7 @@ import { useUpdateWorkManifest } from "#/hooks/mutation/use-update-work-manifest
 import { useWorkRuntimeHealth } from "#/hooks/query/use-work-runtime-health";
 import { I18nKey } from "#/i18n/declaration";
 import type { WorkManifest } from "#/types/work-manifest";
+import { getManifestEnabledApps } from "#/types/work-manifest";
 import type { WorkOptionalToolId } from "#/types/work-tools";
 import {
   displayErrorToast,
@@ -54,13 +55,13 @@ export function WorkSettingsForm({
   );
   const [defaultOptionalTools, setDefaultOptionalTools] = useState<
     WorkOptionalToolId[]
-  >(manifest.defaultOptionalTools ?? []);
+  >(getManifestEnabledApps(manifest));
 
   useEffect(() => {
     setWorkspaceName(manifest.name);
     setSelectedFolders(manifest.grantedFolders);
     setDeliverablesPath(manifest.deliverablesPath);
-    setDefaultOptionalTools(manifest.defaultOptionalTools ?? []);
+    setDefaultOptionalTools(getManifestEnabledApps(manifest));
   }, [manifest]);
 
   const runtimeReady = healthData?.status === "ok";
@@ -99,6 +100,7 @@ export function WorkSettingsForm({
         name: workspaceName.trim() || manifest.name,
         grantedFolders: selectedFolders,
         deliverablesPath: resolvedDeliverables,
+        defaultEnabledApps: defaultOptionalTools,
         defaultOptionalTools,
       },
       {

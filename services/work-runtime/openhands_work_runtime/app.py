@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 API_PREFIX = "/api/work"
 MANIFEST_PATH_ENV = "WORK_RUNTIME_MANIFEST_PATH"
@@ -21,7 +21,16 @@ class WorkManifest(BaseModel):
     name: str = "Default Work Workspace"
     grantedFolders: list[str] = Field(default_factory=list)
     deliverablesPath: str = ""
+    defaultEnabledApps: list[str] = Field(default_factory=list)
     defaultOptionalTools: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def sync_legacy_apps(self) -> "WorkManifest":
+        if not self.defaultEnabledApps and self.defaultOptionalTools:
+            self.defaultEnabledApps = list(self.defaultOptionalTools)
+        elif self.defaultEnabledApps and not self.defaultOptionalTools:
+            self.defaultOptionalTools = list(self.defaultEnabledApps)
+        return self
 
 
 class ValidatePathsRequest(BaseModel):

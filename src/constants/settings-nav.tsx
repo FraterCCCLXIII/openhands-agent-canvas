@@ -60,6 +60,12 @@ export const OSS_NAV_ITEMS: SettingsNavItem[] = [
     subtitle: "SETTINGS$PAGE_WORK_SUBLINE",
   },
   {
+    icon: <AppWindow className="size-4" strokeWidth={2} aria-hidden />,
+    to: "/settings/integrations",
+    text: "SETTINGS$NAV_INTEGRATIONS",
+    subtitle: "SETTINGS$PAGE_INTEGRATIONS_SUBLINE",
+  },
+  {
     icon: <KeyIcon width={16} height={16} />,
     to: "/settings/secrets",
     text: "SETTINGS$NAV_SECRETS",

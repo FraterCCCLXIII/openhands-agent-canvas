@@ -1,19 +1,30 @@
-import { isAgentServerToolAvailable } from "#/api/agent-server-compatibility";
+import {
+  getAppById,
+  getAvailableWorkApps,
+  getDefaultEnabledWorkAppIds,
+  isAppAvailable,
+  isKnownAppId,
+  migrateLegacyWorkToolIds,
+  parseEnabledAppIds,
+  resolveAgentToolNamesForApps,
+  serializeEnabledAppIds,
+} from "#/apps/registry";
+import type { AppManifest } from "#/apps/types";
+import { WORK_ENABLED_APPS_TAG } from "#/apps/types";
 
-/** Conversation tag storing comma-separated optional Work tool ids. */
-export const WORK_ENABLED_TOOLS_TAG = "worktools";
+/** @deprecated Use WORK_ENABLED_APPS_TAG — kept for backward compatibility. */
+export const WORK_ENABLED_TOOLS_TAG = WORK_ENABLED_APPS_TAG;
 
-/** Self-closing tag the agent emits to request an optional tool (see buildWorkSystemSuffix). */
-export const WORK_TOOL_REQUEST_TAG = "WORK_TOOL_REQUEST";
+/** Self-closing tag the agent emits to request an optional Work app. */
+export const WORK_TOOL_REQUEST_TAG = "WORK_APP_REQUEST";
+export const WORK_APP_REQUEST_TAG = WORK_TOOL_REQUEST_TAG;
 
-export type WorkOptionalToolId = "browser";
+export type WorkOptionalToolId = string;
 
 export interface WorkOptionalToolDefinition {
   id: WorkOptionalToolId;
   agentToolName: string;
-  /** i18n key for the toggle label */
   labelKey: string;
-  /** i18n key for short description in setup */
   descriptionKey: string;
 }
 
@@ -23,18 +34,57 @@ export const WORK_BASE_TOOL_NAMES = [
   "canvas_ui",
 ] as const;
 
-export const WORK_OPTIONAL_TOOLS: WorkOptionalToolDefinition[] = [
-  {
-    id: "browser",
-    agentToolName: "browser_tool_set",
-    labelKey: "WORK$TOOL_BROWSER_LABEL",
-    descriptionKey: "WORK$TOOL_BROWSER_DESCRIPTION",
-  },
-];
+function appToOptionalTool(app: AppManifest): WorkOptionalToolDefinition {
+  return {
+    id: app.id,
+    agentToolName: app.agentToolNames[0] ?? app.id,
+    labelKey: `APPS$${app.id.toUpperCase()}_LABEL`,
+    descriptionKey: app.descriptionKey,
+  };
+}
 
-const OPTIONAL_TOOL_BY_ID = new Map(
-  WORK_OPTIONAL_TOOLS.map((tool) => [tool.id, tool]),
-);
+export function getWorkOptionalToolsCatalog(): WorkOptionalToolDefinition[] {
+  return getAvailableWorkApps().map(appToOptionalTool);
+}
+
+export function isKnownWorkOptionalToolId(
+  value: string,
+): value is WorkOptionalToolId {
+  return isKnownAppId(value);
+}
+
+export function isWorkOptionalToolAvailable(
+  toolId: WorkOptionalToolId,
+): boolean {
+  const app = getAppById(toolId);
+  return Boolean(app && isAppAvailable(app));
+}
+
+export function getAvailableWorkOptionalTools(): WorkOptionalToolDefinition[] {
+  return getAvailableWorkApps().map(appToOptionalTool);
+}
+
+export function serializeWorkOptionalToolIds(ids: string[]): string {
+  return serializeEnabledAppIds(migrateLegacyWorkToolIds(ids));
+}
+
+export function parseWorkOptionalToolIds(
+  raw?: string | null,
+): WorkOptionalToolId[] {
+  return parseEnabledAppIds(raw);
+}
+
+export function resolveWorkAgentToolNames(
+  enabledOptionalToolIds: Iterable<string>,
+): string[] {
+  const names = new Set<string>(WORK_BASE_TOOL_NAMES);
+  for (const toolName of resolveAgentToolNamesForApps(
+    migrateLegacyWorkToolIds(Array.from(enabledOptionalToolIds)),
+  )) {
+    names.add(toolName);
+  }
+  return Array.from(names);
+}
 
 export interface WorkToolRequest {
   toolId: WorkOptionalToolId;
@@ -42,90 +92,7 @@ export interface WorkToolRequest {
 }
 
 const WORK_TOOL_REQUEST_PATTERN =
-  /<WORK_TOOL_REQUEST\s+tool="([^"]+)"(?:\s+reason="([^"]*)")?\s*\/?>/gi;
-
-function browserToolsEnabled() {
-  return import.meta.env.VITE_ENABLE_BROWSER_TOOLS !== "false";
-}
-
-export function isKnownWorkOptionalToolId(
-  value: string,
-): value is WorkOptionalToolId {
-  return OPTIONAL_TOOL_BY_ID.has(value as WorkOptionalToolId);
-}
-
-export function isWorkOptionalToolAvailable(
-  toolId: WorkOptionalToolId,
-): boolean {
-  const definition = OPTIONAL_TOOL_BY_ID.get(toolId);
-  if (!definition) {
-    return false;
-  }
-
-  if (definition.id === "browser") {
-    return (
-      browserToolsEnabled() &&
-      isAgentServerToolAvailable(definition.agentToolName)
-    );
-  }
-
-  return isAgentServerToolAvailable(definition.agentToolName);
-}
-
-export function getAvailableWorkOptionalTools(): WorkOptionalToolDefinition[] {
-  return WORK_OPTIONAL_TOOLS.filter((tool) =>
-    isWorkOptionalToolAvailable(tool.id),
-  );
-}
-
-export function serializeWorkOptionalToolIds(ids: string[]): string {
-  const unique = Array.from(
-    new Set(
-      ids.filter(
-        (id): id is WorkOptionalToolId =>
-          isKnownWorkOptionalToolId(id) && isWorkOptionalToolAvailable(id),
-      ),
-    ),
-  );
-  return unique.join(",");
-}
-
-export function parseWorkOptionalToolIds(
-  raw?: string | null,
-): WorkOptionalToolId[] {
-  if (!raw?.trim()) {
-    return [];
-  }
-
-  return raw
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(
-      (entry): entry is WorkOptionalToolId =>
-        isKnownWorkOptionalToolId(entry) && isWorkOptionalToolAvailable(entry),
-    );
-}
-
-export function resolveWorkAgentToolNames(
-  enabledOptionalToolIds: Iterable<string>,
-): string[] {
-  const names = new Set<string>(WORK_BASE_TOOL_NAMES);
-
-  for (const toolId of enabledOptionalToolIds) {
-    if (!isKnownWorkOptionalToolId(toolId)) {
-      continue;
-    }
-    if (!isWorkOptionalToolAvailable(toolId)) {
-      continue;
-    }
-    const definition = OPTIONAL_TOOL_BY_ID.get(toolId);
-    if (definition) {
-      names.add(definition.agentToolName);
-    }
-  }
-
-  return Array.from(names);
-}
+  /<WORK_(?:TOOL|APP)_REQUEST\s+(?:tool|app)="([^"]+)"(?:\s+reason="([^"]*)")?\s*\/?>/gi;
 
 export function parseWorkToolRequests(text: string): WorkToolRequest[] {
   const requests: WorkToolRequest[] = [];
@@ -151,5 +118,12 @@ export function stripWorkToolRequests(text: string): string {
 }
 
 export function getWorkOptionalToolDefinition(toolId: WorkOptionalToolId) {
-  return OPTIONAL_TOOL_BY_ID.get(toolId);
+  const app = getAppById(toolId);
+  return app ? appToOptionalTool(app) : undefined;
 }
+
+export function getDefaultWorkEnabledAppIds(): string[] {
+  return getDefaultEnabledWorkAppIds();
+}
+
+export { parseEnabledAppIds, serializeEnabledAppIds };
