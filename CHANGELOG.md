@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Loops (Phase 0 scaffold):** `/loops` hub with morning-triage template, five-move
+  checklist UI, mock `/api/loops` API, and `specs/loops.md`. Enable with
+  `VITE_LOOPS_ENABLED=false` to hide the sidebar entry.
 ## [1.0.0-alpha.2] - 2025-05-11
 
 ### Added

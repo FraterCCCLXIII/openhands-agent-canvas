@@ -31,6 +31,8 @@ export default [
     route("oauth/device/verify", "routes/device-verify.tsx"),
     route("automations", "routes/automations-list.tsx"),
     route("automations/:automationId", "routes/automation-detail.tsx"),
+    route("loops", "routes/loops-list.tsx"),
+    route("loops/:loopId", "routes/loop-detail.tsx"),
   ]),
   route(
     "shared/conversations/:conversationId",

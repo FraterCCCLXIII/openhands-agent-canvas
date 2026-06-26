@@ -18,6 +18,7 @@ import { BackendSelector } from "#/components/features/backends/backend-selector
 import { BackendStatusDot } from "#/components/features/backends/backend-status-dot";
 import { SidebarConversationList } from "./sidebar-conversation-list";
 import AutomationsIcon from "#/icons/automations.svg?react";
+import { isLoopsFeatureEnabled } from "#/utils/loops-feature";
 import {
   SIDEBAR_COLLAPSE_TOGGLE_OVERLAY_CLASS,
   SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS,
@@ -208,6 +209,36 @@ export function SidebarRailBody({
           collapsed={collapsed}
           icon={<AutomationsIcon width={ICON_SIZE} height={ICON_SIZE} />}
         />
+        {isLoopsFeatureEnabled() ? (
+          <SidebarNavLink
+            to="/loops"
+            label={t(I18nKey.SIDEBAR$LOOPS)}
+            testId="sidebar-loops-link"
+            disabled={linkDisabled}
+            collapsed={collapsed}
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                width={ICON_SIZE}
+                height={ICON_SIZE}
+                aria-hidden="true"
+              >
+                <path d="M17 2v4" />
+                <path d="M7 2v4" />
+                <path d="M3 10h18" />
+                <path d="M21 14a7 7 0 0 1-7 7H9a7 7 0 0 1-7-7v-2" />
+                <path d="M12 14v4" />
+                <path d="M8 18h8" />
+              </svg>
+            }
+          />
+        ) : null}
       </nav>
 
       <SidebarConversationList collapsed={collapsed} />
