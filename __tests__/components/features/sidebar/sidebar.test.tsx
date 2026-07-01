@@ -437,6 +437,24 @@ describe("Sidebar", () => {
       const link = screen.getByTestId(testId);
       expect(link.querySelector("svg")).not.toBeNull();
     }
+
+    const nav = screen.getByTestId("sidebar-automations-link").closest("nav");
+    expect(nav).not.toBeNull();
+    const topLevelLinks = nav!.querySelectorAll(
+      "[data-testid^='sidebar-'][data-testid$='-link']",
+    );
+    expect(topLevelLinks[0]).toHaveAttribute(
+      "data-testid",
+      "sidebar-conversations-link",
+    );
+    expect(topLevelLinks[1]).toHaveAttribute(
+      "data-testid",
+      "sidebar-automations-link",
+    );
+    expect(topLevelLinks[2]).toHaveAttribute(
+      "data-testid",
+      "sidebar-skills-link",
+    );
   });
 
   it("renders the renamed top-level nav labels", () => {
@@ -451,7 +469,7 @@ describe("Sidebar", () => {
       "Customize",
     );
     expect(screen.getByTestId("sidebar-automations-link")).toHaveTextContent(
-      "Automate",
+      "Schedule",
     );
   });
 });

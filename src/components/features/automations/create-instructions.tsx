@@ -1,42 +1,9 @@
-import { useState, type ReactNode } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 import ChevronDownIcon from "#/icons/chevron-down.svg?react";
-import MessageSquareShareIcon from "#/icons/message-square-share.svg?react";
 import { cn } from "#/utils/utils";
-import { BrandButton } from "#/components/features/settings/brand-button";
-import { useLaunchSkillInChat } from "#/hooks/use-launch-skill-in-chat";
-
-const DOCS_URL =
-  "https://docs.openhands.dev/openhands/usage/automations/overview";
-
-function InlineExampleWrap({ children }: { children?: ReactNode }) {
-  return <span className="whitespace-nowrap">{children}</span>;
-}
-
-function InlineCodeChip({ children }: { children?: ReactNode }) {
-  return (
-    <code
-      data-testid="automations-create-instructions-example"
-      className={cn(
-        "mx-0.5 inline-block rounded-sm border border-[var(--oh-border-subtle)]",
-        "bg-[var(--oh-surface-raised)] px-1.5 py-0.5 align-baseline font-mono text-[11px] text-white",
-      )}
-    >
-      {children}
-    </code>
-  );
-}
-
-function InlinePunctuation({ children }: { children?: ReactNode }) {
-  return <>{children}</>;
-}
-
-const CREATE_INSTRUCTIONS_INLINE_COMPONENTS = {
-  example: <InlineExampleWrap />,
-  cmd: <InlineCodeChip />,
-  punct: <InlinePunctuation />,
-};
+import { CreateAutomationStarterTemplates } from "./create-automation-starter-templates";
 
 interface CreateInstructionsProps {
   /** If true, the instructions are collapsible and start collapsed */
@@ -47,48 +14,17 @@ interface CreateInstructionsContentProps {
   onLaunch?: () => void;
 }
 
-export function CreateInstructionsContent({
+function CreateInstructionsContent({
   onLaunch,
 }: CreateInstructionsContentProps = {}) {
   const { t } = useTranslation("openhands");
-  const launchInChat = useLaunchSkillInChat();
-
-  const handleCreateAutomation = () => {
-    launchInChat(t(I18nKey.AUTOMATIONS$CREATE_AUTOMATION_PROMPT), onLaunch);
-  };
 
   return (
-    <div className="flex flex-col gap-5">
-      <p className="text-sm leading-relaxed text-tertiary-light">
-        <Trans
-          ns="openhands"
-          i18nKey={I18nKey.AUTOMATIONS$EMPTY_OPTION_CONVERSATION_DESC}
-          components={CREATE_INSTRUCTIONS_INLINE_COMPONENTS}
-        />{" "}
-        {t(I18nKey.AUTOMATIONS$CREATE_INSTRUCTIONS_GUIDANCE)}
+    <div className="flex flex-col items-center gap-4">
+      <p className="w-full text-center text-sm text-tertiary-light">
+        {t(I18nKey.AUTOMATIONS$EMPTY_STARTER_SUBLINE)}
       </p>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <a
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-muted underline transition-colors hover:text-foreground"
-        >
-          {t(I18nKey.AUTOMATIONS$EMPTY_LEARN_MORE)}
-        </a>
-        <BrandButton
-          type="button"
-          variant="primary"
-          testId="automations-create-automation"
-          onClick={handleCreateAutomation}
-          startContent={
-            <MessageSquareShareIcon className="size-4" aria-hidden />
-          }
-        >
-          {t(I18nKey.AUTOMATIONS$CREATE_AUTOMATION_BUTTON)}
-        </BrandButton>
-      </div>
+      <CreateAutomationStarterTemplates onLaunch={onLaunch} />
     </div>
   );
 }
@@ -98,6 +34,12 @@ export function CreateInstructions({
 }: CreateInstructionsProps) {
   const { t } = useTranslation("openhands");
   const [isExpanded, setIsExpanded] = useState(!collapsible);
+
+  const heading = (
+    <h3 className="text-sm font-medium text-content">
+      {t(I18nKey.AUTOMATIONS$EMPTY_HOW_TO_CREATE_TITLE)}
+    </h3>
+  );
 
   if (collapsible) {
     return (
@@ -113,13 +55,13 @@ export function CreateInstructions({
           </span>
           <ChevronDownIcon
             className={cn(
-              "size-5 text-muted transition-transform",
+              "size-5 shrink-0 text-muted transition-transform",
               isExpanded && "rotate-180",
             )}
           />
         </button>
         {isExpanded ? (
-          <div className="px-4 pb-4">
+          <div className="border-t border-[var(--oh-border)] px-4 pb-4 pt-3">
             <CreateInstructionsContent />
           </div>
         ) : null}
@@ -128,13 +70,9 @@ export function CreateInstructions({
   }
 
   return (
-    <div className="w-full max-w-2xl">
-      <h3 className="text-center text-sm font-medium text-content">
-        {t(I18nKey.AUTOMATIONS$EMPTY_HOW_TO_CREATE_TITLE)}
-      </h3>
-      <div className="mt-4">
-        <CreateInstructionsContent />
-      </div>
+    <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-1.5 text-center">
+      {heading}
+      <CreateInstructionsContent />
     </div>
   );
 }

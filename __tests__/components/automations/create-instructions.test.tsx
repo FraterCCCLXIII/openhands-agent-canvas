@@ -1,97 +1,44 @@
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  NavigationProvider,
-  type NavigationContextValue,
-} from "#/context/navigation-context";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { CreateInstructions } from "#/components/features/automations/create-instructions";
 import { I18nKey } from "#/i18n/declaration";
-import { useConversationStore } from "#/stores/conversation-store";
+
+vi.mock("#/hooks/use-create-automation-in-chat", () => ({
+  useCreateAutomationInChat: () => vi.fn(),
+}));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        [I18nKey.AUTOMATIONS$CREATE_AUTOMATION_BUTTON]: "Create Automation",
-        [I18nKey.AUTOMATIONS$CREATE_AUTOMATION_PROMPT]: "Create an automation",
-        [I18nKey.AUTOMATIONS$CREATE_INSTRUCTIONS_GUIDANCE]:
-          "Include what the automation should do, when it should run, and where to send the results.",
+        [I18nKey.AUTOMATIONS$EMPTY_HOW_TO_CREATE_TITLE]:
+          "Create your first scheduled task",
+        [I18nKey.AUTOMATIONS$EMPTY_STARTER_SUBLINE]:
+          "Pick a quick-start template below, or choose from the recommendations to get started.",
+        [I18nKey.AUTOMATIONS$STARTER_STANDUP_DIGEST]: "Standup digest",
+        [I18nKey.AUTOMATIONS$STARTER_SHIP_REPORT]: "Ship report",
+        [I18nKey.AUTOMATIONS$STARTER_CI_WATCHDOG]: "CI watchdog",
       };
       return translations[key] || key;
     },
   }),
-  Trans: ({
-    i18nKey,
-    components,
-  }: {
-    i18nKey: string;
-    components?: Record<string, React.ReactElement>;
-  }) => {
-    if (i18nKey !== I18nKey.AUTOMATIONS$EMPTY_OPTION_CONVERSATION_DESC) {
-      return i18nKey;
-    }
-
-    return (
-      <>
-        Start a new conversation and tell OpenHands to{" "}
-        {components?.example
-          ? React.cloneElement(
-              components.example,
-              {},
-              <>
-                {components.cmd
-                  ? React.cloneElement(
-                      components.cmd,
-                      {},
-                      "Create an automation",
-                    )
-                  : null}
-                {components.punct
-                  ? React.cloneElement(components.punct, {}, ".")
-                  : null}
-              </>,
-            )
-          : null}
-      </>
-    );
-  },
 }));
 
-function renderCreateInstructions() {
-  const value: NavigationContextValue = {
-    currentPath: "/automations",
-    conversationId: null,
-    isNavigating: false,
-    navigate: vi.fn(),
-  };
-
-  const result = render(
-    <NavigationProvider value={value}>
-      <CreateInstructions />
-    </NavigationProvider>,
-  );
-
-  return { ...result, navigate: value.navigate };
-}
-
 describe("CreateInstructions", () => {
-  beforeEach(() => {
-    useConversationStore.setState({ messageToSend: null });
-  });
+  it("renders the title, subline, and starter templates", () => {
+    render(<CreateInstructions />);
 
-  it("navigates to conversations with a prefilled prompt when Create Automation is clicked", async () => {
-    const user = userEvent.setup();
-    const setMessageToSend = vi.fn();
-    useConversationStore.setState({ setMessageToSend });
-    const { navigate } = renderCreateInstructions();
-
-    await user.click(screen.getByTestId("automations-create-automation"));
-
-    expect(navigate).toHaveBeenCalledWith("/conversations");
-    await waitFor(() => {
-      expect(setMessageToSend).toHaveBeenCalledWith("Create an automation");
-    });
+    expect(
+      screen.getByRole("heading", { name: "Create your first scheduled task" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Pick a quick-start template below, or choose from the recommendations to get started.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("automations-starter-templates"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Standup digest" })).toBeInTheDocument();
   });
 });

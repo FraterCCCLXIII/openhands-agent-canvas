@@ -29,8 +29,9 @@ import { BackendNotConfigured } from "#/components/features/automations/backend-
 import { DeleteConfirmationModal } from "#/components/features/automations/delete-confirmation-modal";
 import { EditAutomationModal } from "#/components/features/automations/detail/edit-automation-modal";
 import { AddAutomationModal } from "#/components/features/automations/add-automation-modal";
+import { AddAutomationMenu } from "#/components/features/automations/add-automation-menu";
 import { RecommendedAutomationsLauncher } from "#/components/features/automations/recommended-automations-launcher";
-import { BrandButton } from "#/components/features/settings/brand-button";
+import { LocalScheduleNotice } from "#/components/features/automations/local-schedule-notice";
 import { useTracking } from "#/hooks/use-tracking";
 import type { Automation } from "#/types/automation";
 
@@ -206,15 +207,9 @@ export default function AutomationsList() {
               {t(I18nKey.AUTOMATIONS$SUBTITLE)}
             </p>
           </div>
-          <BrandButton
-            type="button"
-            variant="secondary"
-            testId="automations-add-automation"
-            className="shrink-0 whitespace-nowrap"
-            onClick={() => setIsAddAutomationOpen(true)}
-          >
-            {t(I18nKey.AUTOMATIONS$ADD_AUTOMATION)}
-          </BrandButton>
+          <AddAutomationMenu
+            onSetupManually={() => setIsAddAutomationOpen(true)}
+          />
         </div>
 
         {/* Search */}
@@ -226,6 +221,12 @@ export default function AutomationsList() {
             disabled={hasNoAutomations}
           />
         </div>
+
+        {canEdit ? (
+          <div className="mt-3">
+            <LocalScheduleNotice />
+          </div>
+        ) : null}
 
         {/* Content */}
         <div className="mt-6 flex flex-col gap-6">

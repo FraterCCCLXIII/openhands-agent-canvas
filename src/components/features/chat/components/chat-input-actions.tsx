@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Cpu } from "lucide-react";
 import { AgentStatus } from "#/components/features/controls/agent-status";
 import { ChangeAgentButton } from "../change-agent-button";
-import { ChatInputModel, ChatInputModelMenuContent } from "./chat-input-model";
-import { SwitchProfileButton } from "../switch-profile-button";
+import { ChatInputModelMenuContent } from "./chat-input-model";
+import { ChatInputModelControl } from "../chat-input-model-control";
 import { ChatAddFileButton } from "../chat-add-file-button";
 import { ChatSendButton } from "../chat-send-button";
 import CarretRightFillIcon from "#/icons/carret-right-fill.svg?react";
@@ -406,11 +406,7 @@ export function ChatInputActions({
             </div>
           )}
           <div ref={modelRef} className={cn(!showModelInline && "hidden")}>
-            {isCloud || modelState.isAcpContext ? (
-              <ChatInputModel />
-            ) : (
-              <SwitchProfileButton />
-            )}
+            <ChatInputModelControl />
           </div>
 
           {hasOverflowItems && (

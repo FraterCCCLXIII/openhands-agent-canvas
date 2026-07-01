@@ -106,6 +106,37 @@ afterEach(() => {
   __resetActiveStoreForTests();
 });
 
+describe("AutomationsList — local schedule notice", () => {
+  it("shows the local awake notice when the active backend is local", async () => {
+    renderList();
+    await waitFor(() => {
+      expect(AutomationService.getAutomations).toHaveBeenCalledTimes(1);
+    });
+
+    expect(
+      screen.getByTestId("automations-local-schedule-notice"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(I18nKey.AUTOMATIONS$LOCAL_AWAKE_NOTICE),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("automations-local-schedule-notice-dismiss"),
+    ).toBeInTheDocument();
+  });
+
+  it("hides the local awake notice when the active backend is cloud", async () => {
+    setActiveSelection({ backendId: cloudBackend.id });
+    renderList();
+    await waitFor(() => {
+      expect(AutomationService.getAutomations).toHaveBeenCalledTimes(1);
+    });
+
+    expect(
+      screen.queryByTestId("automations-local-schedule-notice"),
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe("AutomationsList — Edit from the row kebab is local-only", () => {
   it("opens the Edit modal pre-filled with the row's values when the active backend is local", async () => {
     // Arrange — local backend is active (default beforeEach); render the list

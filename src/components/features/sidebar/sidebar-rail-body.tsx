@@ -18,7 +18,7 @@ import { BackendSelector } from "#/components/features/backends/backend-selector
 import { BackendStatusDot } from "#/components/features/backends/backend-status-dot";
 import { CommandMenuTrigger } from "#/components/features/command-menu/command-menu-trigger";
 import { SidebarConversationList } from "./sidebar-conversation-list";
-import AutomationsIcon from "#/icons/automations.svg?react";
+import ClockIcon from "#/icons/clock.svg?react";
 import {
   SIDEBAR_COLLAPSE_TOGGLE_OVERLAY_CLASS,
   SIDEBAR_COLLAPSED_LOGO_WRAPPER_CLASS,
@@ -168,6 +168,14 @@ export function SidebarRailBody({
           icon={<Plus width={ICON_SIZE} height={ICON_SIZE} />}
         />
         <SidebarNavLink
+          to="/automations"
+          label={t(I18nKey.SIDEBAR$AUTOMATIONS)}
+          testId="sidebar-automations-link"
+          disabled={linkDisabled}
+          collapsed={collapsed}
+          icon={<ClockIcon width={ICON_SIZE} height={ICON_SIZE} />}
+        />
+        <SidebarNavLink
           to="/customize"
           label={t(I18nKey.NAV$CUSTOMIZE)}
           testId="sidebar-skills-link"
@@ -201,14 +209,6 @@ export function SidebarRailBody({
               <path d="M12 13.5V8" />
             </svg>
           }
-        />
-        <SidebarNavLink
-          to="/automations"
-          label={t(I18nKey.SIDEBAR$AUTOMATIONS)}
-          testId="sidebar-automations-link"
-          disabled={linkDisabled}
-          collapsed={collapsed}
-          icon={<AutomationsIcon width={ICON_SIZE} height={ICON_SIZE} />}
         />
       </nav>
 
