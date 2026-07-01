@@ -33,6 +33,7 @@ import { CreateAutomationWizardModal } from "#/components/features/automations/c
 import { AddAutomationMenu } from "#/components/features/automations/add-automation-menu";
 import { RecommendedAutomationsLauncher } from "#/components/features/automations/recommended-automations-launcher";
 import { LocalScheduleNotice } from "#/components/features/automations/local-schedule-notice";
+import { ScheduledTasksIntroModal } from "#/components/features/automations/scheduled-tasks-intro-modal";
 import { useTracking } from "#/hooks/use-tracking";
 import type { Automation } from "#/types/automation";
 
@@ -198,6 +199,7 @@ export default function AutomationsList() {
 
   return (
     <div className="min-h-full">
+      <ScheduledTasksIntroModal />
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
@@ -225,11 +227,9 @@ export default function AutomationsList() {
           />
         </div>
 
-        {canEdit ? (
-          <div className="mt-3">
-            <LocalScheduleNotice />
-          </div>
-        ) : null}
+        <div className="mt-3">
+          <LocalScheduleNotice />
+        </div>
 
         {/* Content */}
         <div className="mt-6 flex flex-col gap-6">

@@ -86,6 +86,7 @@ function ScheduleTriggerPanel({
         testId="create-automation-wizard-schedule"
         title={t(I18nKey.AUTOMATIONS$WIZARD_SCHEDULE)}
         description={t(I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_INTRO)}
+        descriptionPlacement="inline"
         defaultExpanded
       >
         <WizardScheduleControls state={state} onChange={onChange} />

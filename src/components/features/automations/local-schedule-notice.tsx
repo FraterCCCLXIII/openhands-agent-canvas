@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useActiveBackend } from "#/contexts/active-backend-context";
 import InfoCircleIcon from "#/icons/info-circle.svg?react";
 import XMarkIcon from "#/icons/x-mark.svg?react";
 import { I18nKey } from "#/i18n/declaration";
@@ -16,11 +17,12 @@ const DISMISS_BUTTON_CLASSNAME = cn(
 
 export function LocalScheduleNotice() {
   const { t } = useTranslation("openhands");
+  const { backend } = useActiveBackend();
   const [isDismissed, setIsDismissed] = useState(
     readLocalScheduleNoticeDismissed,
   );
 
-  if (isDismissed) {
+  if (backend.kind !== "local" || isDismissed) {
     return null;
   }
 

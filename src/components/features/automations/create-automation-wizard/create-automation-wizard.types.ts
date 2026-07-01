@@ -6,6 +6,12 @@ export type CreateAutomationWizardStep =
 
 export type CreateAutomationWizardTriggerType = "schedule" | "event";
 
+export type CreateAutomationWizardScheduleMode =
+  | "interval"
+  | "daily"
+  | "weekly"
+  | "monthly";
+
 export type CreateAutomationWizardActionType =
   | "run-script"
   | "create-script-llm"
@@ -15,6 +21,7 @@ export interface CreateAutomationWizardState {
   name: string;
   description: string;
   triggerType: CreateAutomationWizardTriggerType;
+  scheduleMode: CreateAutomationWizardScheduleMode;
   schedulePreset: string | null;
   useAdvancedCron: boolean;
   cronExpression: string;
@@ -29,6 +36,11 @@ export interface CreateAutomationWizardState {
   jitterMaxSeconds: string;
   pollingInterval: string;
   pollingUnit: string;
+  dailyRunTime: string;
+  weeklyRunDay: string;
+  weeklyRunTime: string;
+  monthlyRunDay: string;
+  monthlyRunTime: string;
   integration: string;
   selectedEvents: string[];
   repository: string;

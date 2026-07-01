@@ -8,10 +8,12 @@ import {
   WIZARD_PREVIOUS_RUN_OPTIONS,
   WIZARD_TIMEZONE_OPTIONS,
   WIZARD_WAIT_PERIOD_OPTIONS,
+  WIZARD_WEEKDAY_OPTIONS,
   getWizardBranchLabel,
 } from "./create-automation-wizard.constants";
 import type { CreateAutomationWizardState } from "./create-automation-wizard.types";
 import { getWizardActionTypeLabel } from "./create-automation-wizard-action-summary";
+import { getWizardScheduleDescription } from "./wizard-schedule.utils";
 
 interface WizardReviewStepProps {
   state: CreateAutomationWizardState;
@@ -60,21 +62,10 @@ export function WizardReviewStep({ state }: WizardReviewStepProps) {
         />
         {state.triggerType === "schedule" ? (
           <>
-            {state.useAdvancedCron ? (
-              <ReviewRow
-                label={t(I18nKey.AUTOMATIONS$WIZARD_CRON_EXPRESSION)}
-                value={state.cronExpression}
-              />
-            ) : (
-              <ReviewRow
-                label={t(I18nKey.AUTOMATIONS$WIZARD_RUN_EVERY)}
-                value={`${state.pollingInterval} ${t(
-                  state.pollingUnit === "hours"
-                    ? I18nKey.AUTOMATIONS$WIZARD_UNIT_HOURS
-                    : I18nKey.AUTOMATIONS$WIZARD_UNIT_MINUTES,
-                )}`}
-              />
-            )}
+            <ReviewRow
+              label={t(I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_FREQUENCY)}
+              value={getWizardScheduleDescription(state, t)}
+            />
             <ReviewRow
               label={t(I18nKey.AUTOMATIONS$WIZARD_TIMEZONE)}
               value={timezoneLabel}
@@ -152,6 +143,43 @@ export function buildWizardTriggerSummary(
         jitter: jitterLabel,
       });
     }
+
+    if (state.scheduleMode === "daily") {
+      return t(I18nKey.AUTOMATIONS$WIZARD_SUMMARY_DAILY, {
+        time: state.dailyRunTime,
+        timezone: timezoneLabel,
+        maxRuns: state.maxRunsPerHour,
+        previousRun: previousRunLabel,
+        jitter: jitterLabel,
+      });
+    }
+
+    if (state.scheduleMode === "weekly") {
+      const weekday =
+        WIZARD_WEEKDAY_OPTIONS.find(
+          (option) => option.key === state.weeklyRunDay,
+        )?.labelKey ?? I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_MONDAY;
+      return t(I18nKey.AUTOMATIONS$WIZARD_SUMMARY_WEEKLY, {
+        day: t(weekday),
+        time: state.weeklyRunTime,
+        timezone: timezoneLabel,
+        maxRuns: state.maxRunsPerHour,
+        previousRun: previousRunLabel,
+        jitter: jitterLabel,
+      });
+    }
+
+    if (state.scheduleMode === "monthly") {
+      return t(I18nKey.AUTOMATIONS$WIZARD_SUMMARY_MONTHLY, {
+        day: state.monthlyRunDay,
+        time: state.monthlyRunTime,
+        timezone: timezoneLabel,
+        maxRuns: state.maxRunsPerHour,
+        previousRun: previousRunLabel,
+        jitter: jitterLabel,
+      });
+    }
+
     const unitLabel = t(
       state.pollingUnit === "hours"
         ? I18nKey.AUTOMATIONS$WIZARD_UNIT_HOURS

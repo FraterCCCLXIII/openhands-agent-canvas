@@ -88,6 +88,13 @@ export const formControlSettingsFieldClassName = cn(
   formControlHeroUiWrapperTransitionClassName,
 );
 
+/** Visible labels on settings form controls. */
+export const formControlSettingsLabelClassName = "text-sm text-content";
+
+/** HeroUI Autocomplete inner input — override default-foreground in dark surfaces. */
+export const formControlHeroUiInputClassName =
+  "!text-white group-data-[has-value=true]:!text-white placeholder:text-tertiary-alt";
+
 /** Multiline fields share border/radius/focus styling without a fixed height. */
 export const formControlMultilineFieldClassName = cn(
   formControlRadiusClassName,

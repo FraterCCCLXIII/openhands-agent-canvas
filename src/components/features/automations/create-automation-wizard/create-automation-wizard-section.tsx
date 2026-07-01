@@ -7,6 +7,7 @@ import { cn } from "#/utils/utils";
 interface WizardSectionProps {
   title: ReactNode;
   description?: string;
+  descriptionPlacement?: "inline" | "content";
   children: ReactNode;
   className?: string;
   testId?: string;
@@ -16,6 +17,7 @@ interface WizardSectionProps {
 export function WizardSection({
   title,
   description,
+  descriptionPlacement = "content",
   children,
   className,
   testId,
@@ -44,7 +46,12 @@ export function WizardSection({
         }
         onClick={() => setExpanded((previous) => !previous)}
       >
-        <h3 className="min-w-0 text-sm font-medium text-content">{title}</h3>
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-1">
+          <h3 className="shrink-0 text-sm font-medium text-content">{title}</h3>
+          {description && descriptionPlacement === "inline" ? (
+            <p className="text-sm font-normal text-muted">{description}</p>
+          ) : null}
+        </div>
         <ChevronDown
           className={cn(
             "size-4 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none",
@@ -55,7 +62,7 @@ export function WizardSection({
       </button>
       {expanded ? (
         <div id={contentId} className="mt-4 flex flex-col gap-4">
-          {description ? (
+          {description && descriptionPlacement === "content" ? (
             <p className="text-sm text-muted">{description}</p>
           ) : null}
           {children}

@@ -1,6 +1,9 @@
 import { forwardRef } from "react";
 import { cn } from "#/utils/utils";
-import { formControlSettingsFieldClassName } from "#/utils/form-control-classes";
+import {
+  formControlSettingsFieldClassName,
+  formControlSettingsLabelClassName,
+} from "#/utils/form-control-classes";
 import { OptionalTag } from "./optional-tag";
 
 interface SettingsInputProps {
@@ -74,18 +77,32 @@ export const SettingsInput = forwardRef<HTMLInputElement, SettingsInputProps>(
     ref,
   ) {
     const errorId = error && testId ? `${testId}-error` : undefined;
+    const isScreenReaderOnlyLabel =
+      typeof labelClassName === "string" && labelClassName.includes("sr-only");
+
     return (
-      <label className={cn("flex flex-col gap-2.5 w-full min-w-0", className)}>
-        <div className="flex items-center gap-2">
-          {startContent}
-          <span className={cn("text-sm", labelClassName)}>{label}</span>
-          {showRequiredTag && (
-            <span className="text-red-400 text-sm leading-none" aria-hidden>
-              *
+      <label className={cn("flex flex-col w-full min-w-0", className)}>
+        {label ? (
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              isScreenReaderOnlyLabel ? "sr-only" : "mb-2.5",
+            )}
+          >
+            {startContent}
+            <span
+              className={cn(formControlSettingsLabelClassName, labelClassName)}
+            >
+              {label}
             </span>
-          )}
-          {showOptionalTag && <OptionalTag />}
-        </div>
+            {showRequiredTag && (
+              <span className="text-red-400 text-sm leading-none" aria-hidden>
+                *
+              </span>
+            )}
+            {showOptionalTag && <OptionalTag />}
+          </div>
+        ) : null}
         <input
           ref={ref}
           data-testid={testId}

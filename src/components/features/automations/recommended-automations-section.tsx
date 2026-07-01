@@ -55,21 +55,6 @@ export function getAutomationsByPopularity(
 
 const RECOMMENDED_AUTOMATIONS = getAutomationsByPopularity(AUTOMATION_CATALOG);
 
-/**
- * Launch allowlist — proven automations featured above the Beta group.
- * NOT derived from popularityRank (slack-standup-digest@94 outranks
- * slack-channel-monitor@92 yet is Beta). A future flag could swap this set.
- */
-export const PROVEN_AUTOMATION_IDS = [
-  "github-pr-reviewer",
-  "github-repo-monitor",
-  "slack-channel-monitor",
-] as const;
-
-function isProvenAutomation(automation: RecommendedAutomation): boolean {
-  return (PROVEN_AUTOMATION_IDS as readonly string[]).includes(automation.id);
-}
-
 function getRequiredEntries(automation: RecommendedAutomation) {
   const mcpMarketplace = getMcpMarketplaceCatalog(MCP_MARKETPLACE);
   return automation.requiredIntegrationIds
@@ -242,11 +227,6 @@ export function RecommendedAutomationsSection({
 
   if (visibleAutomations.length === 0) return null;
 
-  const provenAutomations = visibleAutomations.filter(isProvenAutomation);
-  const betaAutomations = visibleAutomations.filter(
-    (automation) => !isProvenAutomation(automation),
-  );
-
   return (
     <section
       data-testid="recommended-automations-section"
@@ -263,50 +243,25 @@ export function RecommendedAutomationsSection({
             "min-h-0 flex-1 overflow-y-auto custom-scrollbar-always",
         )}
       >
-        {provenAutomations.length > 0 && (
-          <>
-            <div className="flex items-center">
-              <h2 className="text-base font-semibold text-foreground">
-                {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
-              </h2>
-              <StatusBadge count={provenAutomations.length} />
-            </div>
-            <p className="mt-1 text-sm text-muted">
-              {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
-            </p>
+        <div
+          data-testid="recommended-automations-templates-heading"
+          className="flex items-center"
+        >
+          <h2 className="text-base font-semibold text-foreground">
+            {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_TITLE)}
+          </h2>
+          <StatusBadge count={visibleAutomations.length} />
+        </div>
+        <p className="mt-1 text-sm text-muted">
+          {t(I18nKey.RECOMMENDED_AUTOMATIONS$SECTION_DESCRIPTION)}
+        </p>
 
-            <AutomationCardGrid
-              automations={provenAutomations}
-              installedServers={installedServers}
-              onSelect={onSelect}
-              translate={t}
-            />
-          </>
-        )}
-
-        {betaAutomations.length > 0 && (
-          <section
-            data-testid="recommended-automations-beta-section"
-            className={cn(provenAutomations.length > 0 && "mt-8")}
-          >
-            <div
-              data-testid="recommended-automations-beta-heading"
-              className="flex items-center"
-            >
-              <h2 className="text-base font-semibold text-foreground">
-                {t(I18nKey.RECOMMENDED_AUTOMATIONS$BETA_LABEL)}
-              </h2>
-              <StatusBadge count={betaAutomations.length} />
-            </div>
-
-            <AutomationCardGrid
-              automations={betaAutomations}
-              installedServers={installedServers}
-              onSelect={onSelect}
-              translate={t}
-            />
-          </section>
-        )}
+        <AutomationCardGrid
+          automations={visibleAutomations}
+          installedServers={installedServers}
+          onSelect={onSelect}
+          translate={t}
+        />
       </div>
     </section>
   );

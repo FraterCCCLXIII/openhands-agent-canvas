@@ -111,6 +111,34 @@ export const WIZARD_POLLING_UNIT_OPTIONS = [
   { key: "hours", labelKey: I18nKey.AUTOMATIONS$WIZARD_UNIT_HOURS },
 ];
 
+export const WIZARD_SCHEDULE_MODE_OPTIONS: Array<{
+  key: CreateAutomationWizardState["scheduleMode"];
+  labelKey: I18nKey;
+}> = [
+  { key: "interval", labelKey: I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_INTERVAL },
+  { key: "daily", labelKey: I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_DAILY },
+  { key: "weekly", labelKey: I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_WEEKLY },
+  { key: "monthly", labelKey: I18nKey.AUTOMATIONS$WIZARD_SCHEDULE_MONTHLY },
+];
+
+export const WIZARD_MONTH_DAY_OPTIONS = Array.from(
+  { length: 31 },
+  (_, index) => {
+    const day = String(index + 1);
+    return { key: day, label: day };
+  },
+);
+
+export const WIZARD_WEEKDAY_OPTIONS = [
+  { key: "1", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_MONDAY },
+  { key: "2", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_TUESDAY },
+  { key: "3", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_WEDNESDAY },
+  { key: "4", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_THURSDAY },
+  { key: "5", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_FRIDAY },
+  { key: "6", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_SATURDAY },
+  { key: "0", labelKey: I18nKey.AUTOMATIONS$WIZARD_WEEKDAY_SUNDAY },
+];
+
 export const WIZARD_INTEGRATION_OPTIONS = [
   { key: "github", label: "GitHub" },
   { key: "slack", label: "Slack" },
@@ -189,6 +217,7 @@ export const DEFAULT_CREATE_AUTOMATION_WIZARD_STATE: CreateAutomationWizardState
     name: "",
     description: "",
     triggerType: "schedule",
+    scheduleMode: "interval",
     schedulePreset: "15m",
     useAdvancedCron: false,
     cronExpression: "*/15 * * * *",
@@ -203,6 +232,11 @@ export const DEFAULT_CREATE_AUTOMATION_WIZARD_STATE: CreateAutomationWizardState
     jitterMaxSeconds: "30",
     pollingInterval: "15",
     pollingUnit: "minutes",
+    dailyRunTime: "09:00",
+    weeklyRunDay: "1",
+    weeklyRunTime: "09:00",
+    monthlyRunDay: "1",
+    monthlyRunTime: "09:00",
     integration: "github",
     selectedEvents: [
       "pull_request.opened",

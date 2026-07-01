@@ -3,7 +3,11 @@ import React, { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { OptionalTag } from "./optional-tag";
 import { cn } from "#/utils/utils";
-import { formControlSettingsFieldClassName } from "#/utils/form-control-classes";
+import {
+  formControlHeroUiInputClassName,
+  formControlSettingsFieldClassName,
+  formControlSettingsLabelClassName,
+} from "#/utils/form-control-classes";
 import { heroUiAutocompleteSelectorButtonClassName } from "#/ui/combobox-caret";
 import { I18nKey } from "#/i18n/declaration";
 
@@ -12,6 +16,7 @@ interface SettingsDropdownInputProps {
   name: string;
   items: { key: React.Key; label: string }[];
   label?: ReactNode;
+  labelClassName?: string;
   wrapperClassName?: string;
   placeholder?: string;
   showOptionalTag?: boolean;
@@ -28,11 +33,13 @@ interface SettingsDropdownInputProps {
   startContent?: ReactNode;
   inputWrapperClassName?: string;
   inputClassName?: string;
+  autocompleteClassName?: string;
 }
 
 export function SettingsDropdownInput({
   testId,
   label,
+  labelClassName,
   wrapperClassName,
   name,
   items,
@@ -51,21 +58,38 @@ export function SettingsDropdownInput({
   startContent,
   inputWrapperClassName,
   inputClassName,
+  autocompleteClassName,
 }: SettingsDropdownInputProps) {
   const { t } = useTranslation("openhands");
+  const isScreenReaderOnlyLabel =
+    typeof labelClassName === "string" && labelClassName.includes("sr-only");
 
   return (
     <label
-      className={cn("flex flex-col gap-2.5 w-full min-w-0", wrapperClassName)}
+      className={cn(
+        "flex flex-col w-full min-w-0",
+        isScreenReaderOnlyLabel ? "gap-0" : "gap-2.5",
+        wrapperClassName,
+      )}
     >
-      {label && (
+      {label && !isScreenReaderOnlyLabel ? (
         <div className="flex items-center gap-1">
-          <span className="text-sm">{label}</span>
+          <span
+            className={cn(formControlSettingsLabelClassName, labelClassName)}
+          >
+            {label}
+          </span>
           {showOptionalTag && <OptionalTag />}
         </div>
-      )}
+      ) : null}
       <Autocomplete
-        aria-label={typeof label === "string" ? label : name}
+        aria-label={
+          typeof label === "string"
+            ? label
+            : typeof name === "string"
+              ? name
+              : undefined
+        }
         data-testid={testId}
         name={name}
         defaultItems={items}
@@ -79,10 +103,13 @@ export function SettingsDropdownInput({
         placeholder={isLoading ? t(I18nKey.HOME$LOADING) : placeholder}
         allowsCustomValue={allowsCustomValue}
         isRequired={required}
-        className="w-full"
+        className={cn("w-full", autocompleteClassName)}
         classNames={{
           popoverContent: "bg-content1 rounded-xl",
-          selectorButton: heroUiAutocompleteSelectorButtonClassName,
+          selectorButton: cn(
+            heroUiAutocompleteSelectorButtonClassName,
+            "text-muted",
+          ),
         }}
         selectorButtonProps={{ disableRipple: true }}
         inputProps={{
@@ -91,7 +118,7 @@ export function SettingsDropdownInput({
               formControlSettingsFieldClassName,
               inputWrapperClassName,
             ),
-            input: inputClassName,
+            input: cn(formControlHeroUiInputClassName, inputClassName),
           },
         }}
         defaultFilter={defaultFilter}
