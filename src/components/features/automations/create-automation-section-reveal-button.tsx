@@ -47,7 +47,7 @@ export function CreateAutomationSectionRevealButton({
         extensionModuleCardPillClassName,
         "h-8 cursor-pointer gap-1.5 px-3 py-1.5 text-sm font-normal transition-none",
         isRevealed
-          ? "bg-primary text-[var(--oh-color-base)]"
+          ? "bg-white text-[var(--oh-color-base)]"
           : "text-muted hover:bg-white/10 hover:text-white",
       )}
     >

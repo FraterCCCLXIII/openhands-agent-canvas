@@ -29,6 +29,7 @@ import { BackendNotConfigured } from "#/components/features/automations/backend-
 import { DeleteConfirmationModal } from "#/components/features/automations/delete-confirmation-modal";
 import { EditAutomationModal } from "#/components/features/automations/detail/edit-automation-modal";
 import { AddAutomationModal } from "#/components/features/automations/add-automation-modal";
+import { CreateAutomationWizardModal } from "#/components/features/automations/create-automation-wizard/create-automation-wizard-modal";
 import { AddAutomationMenu } from "#/components/features/automations/add-automation-menu";
 import { RecommendedAutomationsLauncher } from "#/components/features/automations/recommended-automations-launcher";
 import { LocalScheduleNotice } from "#/components/features/automations/local-schedule-notice";
@@ -50,6 +51,7 @@ export default function AutomationsList() {
   } | null>(null);
   const [editTarget, setEditTarget] = useState<Automation | null>(null);
   const [isAddAutomationOpen, setIsAddAutomationOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const active = useActiveBackend();
   // Edit is a local-backend-only feature in MVP — cloud automations
@@ -209,6 +211,7 @@ export default function AutomationsList() {
           </div>
           <AddAutomationMenu
             onSetupManually={() => setIsAddAutomationOpen(true)}
+            onUseWizard={() => setIsWizardOpen(true)}
           />
         </div>
 
@@ -312,6 +315,10 @@ export default function AutomationsList() {
         <AddAutomationModal
           isOpen={isAddAutomationOpen}
           onClose={() => setIsAddAutomationOpen(false)}
+        />
+        <CreateAutomationWizardModal
+          isOpen={isWizardOpen}
+          onClose={() => setIsWizardOpen(false)}
         />
       </div>
     </div>

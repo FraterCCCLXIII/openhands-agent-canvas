@@ -1,9 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentType,
+} from "react";
 import ReactDOM from "react-dom";
 import { useTranslation } from "react-i18next";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { ContextMenuListItem } from "#/components/features/context-menu/context-menu-list-item";
 import { I18nKey } from "#/i18n/declaration";
+import { Wand } from "lucide-react";
 import ChevronDownSmallIcon from "#/icons/chevron-down-small.svg?react";
 import CogIcon from "#/icons/cog.svg?react";
 import MessageSquareShareIcon from "#/icons/message-square-share.svg?react";
@@ -16,13 +23,14 @@ import { cn } from "#/utils/utils";
 
 interface AddAutomationMenuProps {
   onSetupManually: () => void;
+  onUseWizard: () => void;
 }
 
 function MenuItemContent({
   icon: Icon,
   label,
 }: {
-  icon: typeof MessageSquareShareIcon;
+  icon: ComponentType<{ className?: string }>;
   label: string;
 }) {
   return (
@@ -35,7 +43,10 @@ function MenuItemContent({
   );
 }
 
-export function AddAutomationMenu({ onSetupManually }: AddAutomationMenuProps) {
+export function AddAutomationMenu({
+  onSetupManually,
+  onUseWizard,
+}: AddAutomationMenuProps) {
   const { t } = useTranslation("openhands");
   const [open, setOpen] = useState(false);
   const [portalStyle, setPortalStyle] = useState<React.CSSProperties>();
@@ -104,6 +115,11 @@ export function AddAutomationMenu({ onSetupManually }: AddAutomationMenuProps) {
     createAutomationInChat();
   };
 
+  const handleUseWizard = () => {
+    setOpen(false);
+    onUseWizard();
+  };
+
   const handleSetupManually = () => {
     setOpen(false);
     onSetupManually();
@@ -127,6 +143,18 @@ export function AddAutomationMenu({ onSetupManually }: AddAutomationMenuProps) {
             <MenuItemContent
               icon={MessageSquareShareIcon}
               label={t(I18nKey.AUTOMATIONS$CREATE_IN_CHAT)}
+            />
+          </ContextMenuListItem>
+        </li>
+        <li>
+          <ContextMenuListItem
+            testId="automations-add-automation-use-wizard"
+            onClick={handleUseWizard}
+            className="group"
+          >
+            <MenuItemContent
+              icon={Wand}
+              label={t(I18nKey.AUTOMATIONS$USE_WIZARD)}
             />
           </ContextMenuListItem>
         </li>

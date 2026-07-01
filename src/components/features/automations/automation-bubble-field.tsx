@@ -138,7 +138,7 @@ export function AutomationBubbleField({
           aria-expanded={menuOpen}
           className={cn(
             extensionModuleCardPillClassName,
-            "group h-7 cursor-pointer gap-1.5 px-2 py-1 text-muted hover:bg-primary hover:text-[var(--oh-color-base)]",
+            "group h-7 cursor-pointer gap-1.5 px-2 py-1 text-muted hover:bg-white/10 hover:text-white",
           )}
           onClick={handleAddClick}
         >

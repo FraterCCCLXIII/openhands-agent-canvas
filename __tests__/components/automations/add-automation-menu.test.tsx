@@ -32,7 +32,9 @@ describe("AddAutomationMenu", () => {
 
   it("opens the menu and launches create-in-chat from the first item", async () => {
     const user = userEvent.setup();
-    render(<AddAutomationMenu onSetupManually={vi.fn()} />);
+    render(
+      <AddAutomationMenu onSetupManually={vi.fn()} onUseWizard={vi.fn()} />,
+    );
 
     await user.click(screen.getByTestId("automations-add-automation"));
     expect(
@@ -49,10 +51,34 @@ describe("AddAutomationMenu", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("opens the setup modal callback from the second item", async () => {
+  it("opens the wizard callback from the second item", async () => {
+    const onUseWizard = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <AddAutomationMenu
+        onSetupManually={vi.fn()}
+        onUseWizard={onUseWizard}
+      />,
+    );
+
+    await user.click(screen.getByTestId("automations-add-automation"));
+    await user.click(
+      screen.getByTestId("automations-add-automation-use-wizard"),
+    );
+
+    expect(onUseWizard).toHaveBeenCalledTimes(1);
+    expect(createAutomationInChat).not.toHaveBeenCalled();
+  });
+
+  it("opens the setup modal callback from the third item", async () => {
     const onSetupManually = vi.fn();
     const user = userEvent.setup();
-    render(<AddAutomationMenu onSetupManually={onSetupManually} />);
+    render(
+      <AddAutomationMenu
+        onSetupManually={onSetupManually}
+        onUseWizard={vi.fn()}
+      />,
+    );
 
     await user.click(screen.getByTestId("automations-add-automation"));
     await user.click(
@@ -65,12 +91,17 @@ describe("AddAutomationMenu", () => {
 
   it("renders localized menu labels", async () => {
     const user = userEvent.setup();
-    render(<AddAutomationMenu onSetupManually={vi.fn()} />);
+    render(
+      <AddAutomationMenu onSetupManually={vi.fn()} onUseWizard={vi.fn()} />,
+    );
 
     await user.click(screen.getByTestId("automations-add-automation"));
 
     expect(
       screen.getByRole("button", { name: I18nKey.AUTOMATIONS$CREATE_IN_CHAT }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: I18nKey.AUTOMATIONS$USE_WIZARD }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: I18nKey.AUTOMATIONS$SETUP_MANUALLY }),
