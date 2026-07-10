@@ -23,6 +23,7 @@ import {
   getMcpMarketplaceCatalog,
 } from "#/utils/mcp-marketplace-utils";
 import { cn } from "#/utils/utils";
+import { AUTOMATIONS_TEMPLATES_SECTION_ID } from "./automations-page.constants";
 import {
   extensionModuleCardInteractiveClassName,
   extensionModuleCardGridClassName,
@@ -229,6 +230,7 @@ export function RecommendedAutomationsSection({
 
   return (
     <section
+      id={AUTOMATIONS_TEMPLATES_SECTION_ID}
       data-testid="recommended-automations-section"
       className={cn(scrollableGrid && "flex min-h-0 flex-1 flex-col")}
     >

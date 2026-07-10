@@ -4,6 +4,9 @@ import { SCHEDULED_TASKS_INTRO_DOCS_URL } from "#/components/features/automation
 export const SIDEBAR_ONBOARDING_CHECKLIST_DISMISSED_STORAGE_KEY =
   "openhands-sidebar-onboarding-checklist-dismissed";
 
+export const SIDEBAR_ONBOARDING_CHECKLIST_DISMISSED_CHANGE_EVENT =
+  "openhands-sidebar-onboarding-checklist-dismissed-change";
+
 export const SIDEBAR_ONBOARDING_CHECKLIST_MINIMIZED_STORAGE_KEY =
   "openhands-sidebar-onboarding-checklist-minimized";
 

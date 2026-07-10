@@ -9,12 +9,12 @@ import { BtwMessages } from "./btw-messages";
 import { ModelMessages } from "./model-messages";
 import { useModelStore } from "#/stores/model-store";
 import { InteractiveChatBox } from "./interactive-chat-box";
+import { isAgentNotificationsStagingEnabled } from "./agent-notifications.constants";
 import { AgentState } from "#/types/agent-state";
 import { useFilteredEvents } from "#/hooks/use-filtered-events";
 import { useScrollToBottom } from "#/hooks/use-scroll-to-bottom";
 import { useLoadOlderEvents } from "#/hooks/use-load-older-events";
 import { TypingIndicator } from "./typing-indicator";
-import { ChatSuggestions } from "./chat-suggestions";
 import { ScrollProvider } from "#/context/scroll-context";
 import { useInitialQueryStore } from "#/stores/initial-query-store";
 import { useSendMessage } from "#/hooks/use-send-message";
@@ -44,6 +44,7 @@ import { useConversationWebSocket } from "#/contexts/conversation-websocket-cont
 import ChatStatusIndicator from "./chat-status-indicator";
 import { getStatusColor, getStatusText } from "#/utils/utils";
 import { useNewConversationCommand } from "#/hooks/mutation/use-new-conversation-command";
+import { useDrainAgentNotificationPrompts } from "#/hooks/chat/use-drain-agent-notification-prompts";
 import { useOptionalConversationId } from "#/hooks/use-conversation-id";
 import { useActiveConversation } from "#/hooks/query/use-active-conversation";
 import { I18nKey } from "#/i18n/declaration";
@@ -58,6 +59,7 @@ function getEntryPoint(
 }
 
 export function ChatInterface() {
+  useDrainAgentNotificationPrompts();
   const { trackInitialQuerySubmitted, trackUserMessageSent } = useTracking();
   const { setMessageToSend } = useConversationStore();
   const { errorMessage, errorCode, removeErrorMessage, setErrorMessage } =
@@ -253,16 +255,34 @@ export function ChatInterface() {
   const isHistoryLoading = !showConversationMessages;
   const isChatLoading = isHistoryLoading && !isTask;
 
-  // The empty-state ChatSuggestions overlay is absolutely positioned with
-  // `pointer-events-auto`, so it would block clicks on any /model entry
-  // rendered behind it. Once the user has run /model, the conversation is
-  // no longer logically empty — hide suggestions so the profile list is
-  // interactive.
+  // The empty-state prompt suggestion row sits above the input. Once the user
+  // has run /model, the conversation is no longer logically empty — hide
+  // suggestions so the profile list is interactive.
   const hasModelEntries = useModelStore((s) =>
     conversationId
       ? (s.entriesByConversation[conversationId]?.length ?? 0) > 0
       : false,
   );
+
+  const showPromptSuggestions =
+    !hasSubstantiveAgentActions &&
+    !hasPendingUserMessages &&
+    !userEventsExist &&
+    !hasModelEntries &&
+    !isChatLoading &&
+    !isProvisioningTask &&
+    totalEvents === 0 &&
+    !isArchivedConversation &&
+    !llmBlocked;
+
+  const showAgentNotifications =
+    isAgentNotificationsStagingEnabled() ||
+    (hasSubstantiveAgentActions &&
+      !isAgentRunning &&
+      !isChatLoading &&
+      !isProvisioningTask &&
+      !isArchivedConversation &&
+      !llmBlocked);
 
   const handleSendMessage = async (
     content: string,
@@ -454,25 +474,6 @@ export function ChatInterface() {
         className="relative flex h-full flex-col justify-between px-4"
         data-testid="chat-interface"
       >
-        {!hasSubstantiveAgentActions &&
-          !hasPendingUserMessages &&
-          !userEventsExist &&
-          !hasModelEntries &&
-          !isChatLoading &&
-          !isProvisioningTask &&
-          totalEvents === 0 &&
-          !isArchivedConversation &&
-          // With no usable LLM the suggestions can't be acted on (the input is
-          // disabled). They're also a `pointer-events-auto` overlay that would
-          // sit over the LlmNotConfiguredBanner below and swallow clicks on its
-          // setup button — so hide them and let the banner be the lone CTA.
-          !llmBlocked && (
-            <ChatSuggestions
-              onSuggestionsClick={(message) => setMessageToSend(message)}
-            />
-          )}
-        {/* Note: We only hide chat suggestions when there's a user message */}
-
         <div
           ref={scrollRef}
           data-testid="chat-scroll-container"
@@ -607,6 +608,8 @@ export function ChatInterface() {
               <InteractiveChatBox
                 onSubmit={handleSendMessage}
                 disabled={isNewConversationPending || llmBlocked}
+                showPromptSuggestions={showPromptSuggestions}
+                showAgentNotifications={showAgentNotifications}
               />
             </div>
           )}

@@ -78,10 +78,8 @@ export default function AutomationDetail() {
   // Show loading state while checking health
   if (isHealthLoading) {
     return (
-      <div className="min-h-full">
-        <div className="p-6 max-w-4xl mx-auto">
-          <DetailSkeleton />
-        </div>
+      <div data-testid="automation-detail-screen" className="pb-8">
+        <DetailSkeleton />
       </div>
     );
   }
@@ -89,40 +87,32 @@ export default function AutomationDetail() {
   // Show backend not configured state if health check failed
   if (!isBackendHealthy) {
     return (
-      <div className="min-h-full">
-        <div className="p-6 max-w-4xl mx-auto">
-          <BackendNotConfigured onRetry={refetchHealth} />
-        </div>
+      <div data-testid="automation-detail-screen" className="pb-8">
+        <BackendNotConfigured onRetry={refetchHealth} />
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-full">
-        <div className="p-6 max-w-4xl mx-auto">
-          <DetailSkeleton />
-        </div>
+      <div data-testid="automation-detail-screen" className="pb-8">
+        <DetailSkeleton />
       </div>
     );
   }
 
   if (is404) {
     return (
-      <div className="min-h-full">
-        <div className="p-6 max-w-4xl mx-auto">
-          <NotFoundState />
-        </div>
+      <div data-testid="automation-detail-screen" className="pb-8">
+        <NotFoundState />
       </div>
     );
   }
 
   if (isError || !automation) {
     return (
-      <div className="min-h-full">
-        <div className="p-6 max-w-4xl mx-auto">
-          <ErrorState onRetry={() => refetch()} />
-        </div>
+      <div data-testid="automation-detail-screen" className="pb-8">
+        <ErrorState onRetry={() => refetch()} />
       </div>
     );
   }
@@ -168,43 +158,42 @@ export default function AutomationDetail() {
   const canEdit = active.backend.kind === "local";
 
   return (
-    <div className="min-h-full">
-      <div className="p-6 max-w-4xl mx-auto">
-        <div className="flex flex-col gap-4">
-          <BackLink />
-          <DetailHeader
-            automation={automation}
-            onToggle={handleToggle}
-            onEdit={canEdit ? () => setShowEditModal(true) : undefined}
-            onDelete={() => setShowDeleteModal(true)}
-            onRunNow={handleRunNow}
-            isRunningNow={dispatchMutation.isPending}
-          />
-          {automation.prompt && <PromptSection prompt={automation.prompt} />}
-          <ConfigurationSection automation={automation} />
-          {automation.plugins && automation.plugins.length > 0 && (
-            <PluginsSection plugins={automation.plugins} />
-          )}
-          <ActivitySection
-            createdAt={automation.created_at}
-            lastRunAt={automation.last_triggered_at}
-          />
-          <ActivityLogSection automationId={automation.id} />
-          <DeleteConfirmationModal
-            automationName={automation.name}
-            isOpen={showDeleteModal}
-            onConfirm={handleDelete}
-            onCancel={() => setShowDeleteModal(false)}
-          />
-          {canEdit && (
-            <EditAutomationModal
-              automation={automation}
-              isOpen={showEditModal}
-              onClose={() => setShowEditModal(false)}
-            />
-          )}
-        </div>
-      </div>
+    <div
+      data-testid="automation-detail-screen"
+      className="flex flex-col gap-4 pb-8"
+    >
+      <BackLink />
+      <DetailHeader
+        automation={automation}
+        onToggle={handleToggle}
+        onEdit={canEdit ? () => setShowEditModal(true) : undefined}
+        onDelete={() => setShowDeleteModal(true)}
+        onRunNow={handleRunNow}
+        isRunningNow={dispatchMutation.isPending}
+      />
+      {automation.prompt && <PromptSection prompt={automation.prompt} />}
+      <ConfigurationSection automation={automation} />
+      {automation.plugins && automation.plugins.length > 0 && (
+        <PluginsSection plugins={automation.plugins} />
+      )}
+      <ActivitySection
+        createdAt={automation.created_at}
+        lastRunAt={automation.last_triggered_at}
+      />
+      <ActivityLogSection automationId={automation.id} />
+      <DeleteConfirmationModal
+        automationName={automation.name}
+        isOpen={showDeleteModal}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
+      {canEdit && (
+        <EditAutomationModal
+          automation={automation}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>
   );
 }

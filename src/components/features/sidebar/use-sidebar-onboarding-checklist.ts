@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useOnboardingCompletion } from "#/components/features/onboarding/use-onboarding-completion";
 import { useNavigation } from "#/context/navigation-context";
 import { useAutomations } from "#/hooks/query/use-automations";
@@ -16,8 +16,9 @@ import {
 import { isConfigureLlmChecklistItemComplete } from "./sidebar-onboarding-checklist-llm-complete";
 import {
   readSidebarOnboardingChecklistCustomizeExplored,
-  readSidebarOnboardingChecklistDismissed,
   readSidebarOnboardingChecklistMinimized,
+  subscribeSidebarOnboardingChecklistDismissed,
+  getSidebarOnboardingChecklistDismissedSnapshot,
   writeSidebarOnboardingChecklistCustomizeExplored,
   writeSidebarOnboardingChecklistDismissed,
   writeSidebarOnboardingChecklistMinimized,
@@ -40,8 +41,10 @@ function hasConfiguredMcpServers(mcpConfig: unknown): boolean {
 export function useSidebarOnboardingChecklist() {
   const { isCompleted: onboardingCompleted } = useOnboardingCompletion();
   const { currentPath } = useNavigation();
-  const [isDismissed, setIsDismissed] = useState(
-    readSidebarOnboardingChecklistDismissed,
+  const isDismissed = useSyncExternalStore(
+    subscribeSidebarOnboardingChecklistDismissed,
+    getSidebarOnboardingChecklistDismissedSnapshot,
+    () => false,
   );
   const [isMinimized, setIsMinimized] = useState(
     readSidebarOnboardingChecklistMinimized,
@@ -123,7 +126,6 @@ export function useSidebarOnboardingChecklist() {
 
   const dismiss = () => {
     writeSidebarOnboardingChecklistDismissed(true);
-    setIsDismissed(true);
   };
 
   const toggleMinimized = () => {

@@ -14,6 +14,7 @@ import {
   setRegisteredBackends,
 } from "#/api/backend-registry/active-store";
 import { ActiveBackendProvider } from "#/contexts/active-backend-context";
+import { AutomateAddAutomationProvider } from "#/components/features/automations/automate-add-automation-provider";
 import AutomationsList from "#/routes/automations-list";
 import type { Backend } from "#/api/backend-registry/types";
 import {
@@ -80,9 +81,11 @@ function renderList(queryClient?: QueryClient) {
   return render(
     <QueryClientProvider client={client}>
       <ActiveBackendProvider>
-        <MemoryRouter initialEntries={["/automations"]}>
-          <AutomationsList />
-        </MemoryRouter>
+        <AutomateAddAutomationProvider>
+          <MemoryRouter initialEntries={["/automations"]}>
+            <AutomationsList />
+          </MemoryRouter>
+        </AutomateAddAutomationProvider>
       </ActiveBackendProvider>
     </QueryClientProvider>,
   );
@@ -104,6 +107,28 @@ beforeEach(() => {
 afterEach(() => {
   window.localStorage.clear();
   __resetActiveStoreForTests();
+});
+
+describe("AutomationsList — Add automation header action", () => {
+  it("shows the Add automation button in the page header while health is loading", () => {
+    vi.mocked(AutomationService.checkHealth).mockImplementation(
+      () => new Promise(() => {}),
+    );
+    renderList();
+
+    expect(screen.getByTestId("automations-add-automation")).toBeInTheDocument();
+  });
+
+  it("shows the Add automation button when the automation backend is not configured", async () => {
+    vi.mocked(AutomationService.checkHealth).mockResolvedValue({
+      status: "error",
+    });
+    renderList();
+
+    expect(
+      await screen.findByTestId("automations-add-automation"),
+    ).toBeInTheDocument();
+  });
 });
 
 describe("AutomationsList — local schedule notice", () => {

@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Tooltip } from "@heroui/react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Lightbulb } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { I18nKey } from "#/i18n/declaration";
@@ -10,6 +11,8 @@ import {
   type SidebarOnboardingChecklistItemId,
 } from "./sidebar-onboarding-checklist.constants";
 import { SidebarOnboardingChecklistItemPreview } from "./sidebar-onboarding-checklist-item-preview";
+import { SidebarOnboardingAgentNotificationsModal } from "./sidebar-onboarding-agent-notifications-modal";
+import { useSidebarOnboardingAgentNotifications } from "#/hooks/sidebar/use-sidebar-onboarding-agent-notifications";
 import { useSidebarOnboardingChecklist } from "./use-sidebar-onboarding-checklist";
 
 const CHECKLIST_ITEM_TOOLTIP_CLASS =
@@ -86,76 +89,120 @@ export function SidebarOnboardingChecklist({
   const { t } = useTranslation("openhands");
   const { items, completedCount, isVisible, isMinimized, toggleMinimized } =
     useSidebarOnboardingChecklist();
+  const { agentNotifications, hasAgentNotifications, createAll, isCreating } =
+    useSidebarOnboardingAgentNotifications();
+  const [isAgentNotificationsModalOpen, setIsAgentNotificationsModalOpen] =
+    useState(false);
 
   if (collapsed || !isVisible) {
     return null;
   }
 
   return (
-    <div
-      data-testid="sidebar-onboarding-checklist"
-      data-minimized={isMinimized ? "true" : "false"}
-      className={cn(
-        "w-full shrink-0 overflow-hidden rounded-xl border border-[var(--oh-border)]",
-        "bg-[var(--oh-surface-raised)] shadow-sm",
-      )}
-    >
-      <button
-        type="button"
-        data-testid="sidebar-onboarding-checklist-toggle"
-        aria-expanded={!isMinimized}
-        aria-label={
-          isMinimized
-            ? t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_EXPAND)
-            : t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_COLLAPSE)
-        }
-        onClick={toggleMinimized}
+    <>
+      <div
+        data-testid="sidebar-onboarding-checklist"
+        data-minimized={isMinimized ? "true" : "false"}
         className={cn(
-          "flex w-full gap-1 px-2.5 text-left",
-          "transition-colors hover:bg-[var(--oh-surface)]",
-          isMinimized ? "items-center py-2" : "items-start pt-3 pb-2",
+          "w-full shrink-0 overflow-hidden rounded-xl border border-[var(--oh-border)]",
+          "bg-[var(--oh-surface-raised)] shadow-sm",
         )}
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-            <span className="text-sm font-semibold text-content">
-              {t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_TITLE)}
-            </span>
-            <span className="text-xs text-muted">
-              {t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_PROGRESS, {
-                completed: completedCount,
-              })}
-            </span>
-          </div>
-        </div>
-
-        <span
-          aria-hidden
+        <div
           className={cn(
-            "inline-flex size-7 shrink-0 items-center justify-center",
-            "text-[var(--oh-muted)]",
+            "flex w-full items-start gap-0.5 px-2.5",
+            isMinimized ? "items-center py-2" : "pt-3 pb-2",
           )}
         >
-          <ChevronDown
+          <button
+            type="button"
+            data-testid="sidebar-onboarding-checklist-toggle"
+            aria-expanded={!isMinimized}
+            aria-label={
+              isMinimized
+                ? t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_EXPAND)
+                : t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_COLLAPSE)
+            }
+            onClick={toggleMinimized}
             className={cn(
-              "size-4 transition-transform motion-reduce:transition-none",
-              isMinimized && "-rotate-90",
+              "flex min-w-0 flex-1 gap-1 text-left",
+              "transition-colors hover:bg-[var(--oh-surface)] rounded-md",
+              isMinimized ? "items-center py-0" : "items-start",
             )}
-          />
-        </span>
-      </button>
+          >
+            <div className="min-w-0 flex-1 px-0.5">
+              <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-sm font-semibold text-content">
+                  {t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_TITLE)}
+                </span>
+                <span className="text-xs text-muted">
+                  {t(I18nKey.SIDEBAR$ONBOARDING_CHECKLIST_PROGRESS, {
+                    completed: completedCount,
+                  })}
+                </span>
+              </div>
+            </div>
+          </button>
 
-      {!isMinimized ? (
-        <ul className="flex flex-col gap-0.5 px-2.5 pb-2">
-          {items.map((item) => (
-            <ChecklistItem
-              key={item.id}
-              id={item.id}
-              isComplete={item.isComplete}
+          {hasAgentNotifications ? (
+            <button
+              type="button"
+              data-testid="sidebar-onboarding-agent-notifications-open"
+              aria-label={t(
+                I18nKey.SIDEBAR$ONBOARDING_AGENT_NOTIFICATIONS_OPEN,
+              )}
+              onClick={() => setIsAgentNotificationsModalOpen(true)}
+              className={cn(
+                "inline-flex size-7 shrink-0 items-center justify-center rounded-md",
+                "text-[var(--oh-muted)] transition-colors",
+                "hover:bg-[var(--oh-surface)] hover:text-content",
+              )}
+            >
+              <Lightbulb className="size-4" aria-hidden />
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            data-testid="sidebar-onboarding-checklist-chevron"
+            aria-hidden
+            tabIndex={-1}
+            onClick={toggleMinimized}
+            className={cn(
+              "inline-flex size-7 shrink-0 items-center justify-center rounded-md",
+              "text-[var(--oh-muted)] transition-colors",
+              "hover:bg-[var(--oh-surface)]",
+            )}
+          >
+            <ChevronDown
+              className={cn(
+                "size-4 transition-transform motion-reduce:transition-none",
+                isMinimized && "-rotate-90",
+              )}
             />
-          ))}
-        </ul>
-      ) : null}
-    </div>
+          </button>
+        </div>
+
+        {!isMinimized ? (
+          <ul className="flex flex-col gap-0.5 px-2.5 pb-2">
+            {items.map((item) => (
+              <ChecklistItem
+                key={item.id}
+                id={item.id}
+                isComplete={item.isComplete}
+              />
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      <SidebarOnboardingAgentNotificationsModal
+        agentNotifications={agentNotifications}
+        isOpen={isAgentNotificationsModalOpen}
+        isCreating={isCreating}
+        onClose={() => setIsAgentNotificationsModalOpen(false)}
+        onCreateAll={createAll}
+      />
+    </>
   );
 }

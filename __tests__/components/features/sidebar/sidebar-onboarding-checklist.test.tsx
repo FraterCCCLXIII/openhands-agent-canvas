@@ -21,6 +21,7 @@ const mockUseAutomations = vi.fn();
 const mockUseSettings = vi.fn();
 const mockUseLlmConfigured = vi.fn();
 const mockUseLlmProfiles = vi.fn();
+const mockUseCreateConversation = vi.fn();
 
 vi.mock("#/hooks/query/use-paginated-conversations", () => ({
   usePaginatedConversations: () => mockUsePaginatedConversations(),
@@ -44,6 +45,14 @@ vi.mock("#/hooks/use-llm-configured", () => ({
 
 vi.mock("#/hooks/query/use-llm-profiles", () => ({
   useLlmProfiles: () => mockUseLlmProfiles(),
+}));
+
+vi.mock("#/hooks/mutation/use-create-conversation", () => ({
+  useCreateConversation: () => mockUseCreateConversation(),
+}));
+
+vi.mock("#/hooks/use-is-creating-conversation", () => ({
+  useIsCreatingConversation: () => false,
 }));
 
 function renderChecklist() {
@@ -99,6 +108,11 @@ describe("SidebarOnboardingChecklist", () => {
       data: { active_profile: null, profiles: [] },
       isLoading: false,
     });
+    mockUseCreateConversation.mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    });
+    vi.stubEnv("VITE_STAGE_AGENT_NOTIFICATIONS", "false");
   });
 
   it("renders setup items including LLM keys and schedule a task", () => {
@@ -221,6 +235,33 @@ describe("SidebarOnboardingChecklist", () => {
       screen.getByTestId("sidebar-onboarding-checklist-item-schedule-task"),
     ).toBeInTheDocument();
     expect(readSidebarOnboardingChecklistMinimized()).toBe(false);
+  });
+
+  it("shows agentNotifications modal from the lightbulb button when staging is enabled", async () => {
+    const user = userEvent.setup();
+    vi.stubEnv("VITE_STAGE_AGENT_NOTIFICATIONS", "true");
+    renderChecklist();
+
+    expect(
+      screen.getByTestId("sidebar-onboarding-agent-notifications-open"),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByTestId("sidebar-onboarding-agent-notifications-open"),
+    );
+
+    expect(
+      screen.getByTestId("sidebar-onboarding-agent-notifications-modal"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Standup digest helper")).toBeInTheDocument();
+  });
+
+  it("hides the lightbulb button when staging agentNotifications are disabled", () => {
+    renderChecklist();
+
+    expect(
+      screen.queryByTestId("sidebar-onboarding-agent-notifications-open"),
+    ).not.toBeInTheDocument();
   });
 
   it("hides when collapsed", () => {

@@ -17,7 +17,6 @@ import {
 import { MemoryRouter, Route, Routes } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderWithProviders, useParamsMock } from "test-utils";
-import { SUGGESTIONS } from "#/utils/suggestions";
 import { ChatInterface } from "#/components/features/chat/chat-interface";
 import {
   useConversationId,
@@ -223,7 +222,7 @@ describe("ChatInterface - Chat Suggestions", () => {
     renderWithQueryClient(<ChatInterface />, queryClient);
 
     // Check if ChatSuggestions is not rendered with user events
-    expect(screen.queryByTestId("chat-suggestions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("chat-prompt-suggestion-row")).not.toBeInTheDocument();
   });
 
   test("should hide chat suggestions when there is an optimistic user message", () => {
@@ -235,7 +234,7 @@ describe("ChatInterface - Chat Suggestions", () => {
     renderWithQueryClient(<ChatInterface />, queryClient);
 
     // Check if ChatSuggestions is not rendered with optimistic user message
-    expect(screen.queryByTestId("chat-suggestions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("chat-prompt-suggestion-row")).not.toBeInTheDocument();
   });
 
   test("should hide chat suggestions while a cloud start task is provisioning", () => {
@@ -261,7 +260,7 @@ describe("ChatInterface - Chat Suggestions", () => {
       "/task-abc",
     );
 
-    expect(screen.queryByTestId("chat-suggestions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("chat-prompt-suggestion-row")).not.toBeInTheDocument();
   });
 
   test("should hide chat suggestions on a task route even when the task is READY", () => {
@@ -287,27 +286,23 @@ describe("ChatInterface - Chat Suggestions", () => {
       "/task-abc",
     );
 
-    expect(screen.queryByTestId("chat-suggestions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("chat-prompt-suggestion-row")).not.toBeInTheDocument();
   });
 });
 
 describe("ChatInterface - Empty state", () => {
   it.todo("should render suggestions if empty");
 
-  it("should render the default suggestions", () => {
+  it("should render prompt suggestion chips above the input", () => {
     renderChatInterfaceWithRouter();
 
-    const suggestions = screen.getByTestId("chat-suggestions");
-    const repoSuggestions = Object.keys(SUGGESTIONS.repo);
-
-    // check that there are at most 4 suggestions displayed
+    const suggestions = screen.getByTestId("chat-prompt-suggestion-row");
     const displayedSuggestions = within(suggestions).getAllByRole("button");
-    expect(displayedSuggestions.length).toBeLessThanOrEqual(4);
 
-    // Check that each displayed suggestion is one of the repo suggestions
-    displayedSuggestions.forEach((suggestion) => {
-      expect(repoSuggestions).toContain(suggestion.textContent);
-    });
+    expect(displayedSuggestions.length).toBeGreaterThan(0);
+    expect(
+      screen.getByTestId("chat-prompt-suggestion-standup-digest"),
+    ).toBeInTheDocument();
   });
 });
 
@@ -597,7 +592,7 @@ describe("ChatInterface - Scroll-up loads older events", () => {
 
     // ChatSuggestions should NOT take over the chat area when agent
     // actions are present in the loaded window.
-    expect(screen.queryByTestId("chat-suggestions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("chat-prompt-suggestion-row")).not.toBeInTheDocument();
 
     // The Messages list should be rendered (the bug was that it was
     // gated on `conversationUserEventsExist` and stayed hidden here,
