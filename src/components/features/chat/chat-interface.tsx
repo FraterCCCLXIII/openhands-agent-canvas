@@ -45,6 +45,7 @@ import ChatStatusIndicator from "./chat-status-indicator";
 import { getStatusColor, getStatusText } from "#/utils/utils";
 import { useNewConversationCommand } from "#/hooks/mutation/use-new-conversation-command";
 import { useDrainAgentNotificationPrompts } from "#/hooks/chat/use-drain-agent-notification-prompts";
+import { useIngestAgentNotificationsFromEvents } from "#/hooks/chat/use-ingest-agent-notifications-from-events";
 import { useOptionalConversationId } from "#/hooks/use-conversation-id";
 import { useActiveConversation } from "#/hooks/query/use-active-conversation";
 import { I18nKey } from "#/i18n/declaration";
@@ -151,6 +152,7 @@ export function ChatInterface() {
 
   const { selectedRepository, replayJson } = useInitialQueryStore();
   const { conversationId } = useOptionalConversationId();
+  useIngestAgentNotificationsFromEvents(conversationId);
   const { mutateAsync: uploadFiles } = useUnifiedUploadFiles();
 
   // Lazy "scroll up to load older events" backfill. Initial REST fetch only

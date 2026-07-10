@@ -1,11 +1,45 @@
 import { create } from "zustand";
-import type { AgentNotification } from "#/components/features/chat/agent-notifications.constants";
+import {
+  isAgentNotificationsStagingEnabled,
+  isStagedAgentNotificationId,
+  type AgentNotification,
+} from "#/components/features/chat/agent-notifications.constants";
 import {
   readAgentNotificationsHistory,
   readSeenAgentNotificationIds,
   writeAgentNotificationsHistory,
   writeSeenAgentNotificationIds,
 } from "#/components/features/chat/agent-notifications-storage";
+
+function readSanitizedHistory(conversationId: string): AgentNotification[] {
+  const history = readAgentNotificationsHistory(conversationId);
+  if (isAgentNotificationsStagingEnabled()) {
+    return history;
+  }
+
+  const withoutStaged = history.filter(
+    (notification) => !isStagedAgentNotificationId(notification.id),
+  );
+  if (withoutStaged.length !== history.length) {
+    writeAgentNotificationsHistory(conversationId, withoutStaged);
+  }
+  return withoutStaged;
+}
+
+function readSanitizedSeenIds(conversationId: string): string[] {
+  const seenIds = readSeenAgentNotificationIds(conversationId);
+  if (isAgentNotificationsStagingEnabled()) {
+    return seenIds;
+  }
+
+  const withoutStaged = seenIds.filter(
+    (id) => !isStagedAgentNotificationId(id),
+  );
+  if (withoutStaged.length !== seenIds.length) {
+    writeSeenAgentNotificationIds(conversationId, withoutStaged);
+  }
+  return withoutStaged;
+}
 
 interface AgentNotificationsStoreState {
   historyByConversation: Record<string, AgentNotification[]>;
@@ -36,11 +70,11 @@ export const useAgentNotificationsStore = create<AgentNotificationsStoreState>(
       set((state) => ({
         historyByConversation: {
           ...state.historyByConversation,
-          [conversationId]: readAgentNotificationsHistory(conversationId),
+          [conversationId]: readSanitizedHistory(conversationId),
         },
         seenByConversation: {
           ...state.seenByConversation,
-          [conversationId]: readSeenAgentNotificationIds(conversationId),
+          [conversationId]: readSanitizedSeenIds(conversationId),
         },
       }));
     },

@@ -6,6 +6,7 @@ import {
   isAgentNotificationsStagingEnabled,
   type AgentNotification,
 } from "#/components/features/chat/agent-notifications.constants";
+import { hasAgentNotificationsHistoryEntry } from "#/components/features/chat/agent-notifications-storage";
 import { useAgentNotificationsStore } from "#/stores/use-agent-notifications-store";
 
 const EMPTY_AGENT_NOTIFICATIONS: AgentNotification[] = [];
@@ -57,13 +58,14 @@ export function useAgentNotifications({
     }
   }, [conversationId, ensureHydrated]);
 
-  // Demo fallback so the feature can be previewed before the detection
-  // skill has produced any real history for this conversation.
+  // Demo fallback on first open only. Do not re-seed after the user clears
+  // history — an empty persisted entry means they removed everything.
   useEffect(() => {
     if (
       conversationId &&
       isAgentNotificationsStagingEnabled() &&
-      history.length === 0
+      history.length === 0 &&
+      !hasAgentNotificationsHistoryEntry(conversationId)
     ) {
       addNotifications(conversationId, STAGED_AGENT_NOTIFICATIONS);
     }

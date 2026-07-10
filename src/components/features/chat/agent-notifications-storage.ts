@@ -47,6 +47,20 @@ export function readAgentNotificationsHistory(
   );
 }
 
+/** True when this conversation has ever been written to history storage. */
+export function hasAgentNotificationsHistoryEntry(
+  conversationId: string,
+): boolean {
+  if (!conversationId) {
+    return false;
+  }
+
+  const map = readJsonMap<AgentNotification[]>(
+    AGENT_NOTIFICATIONS_HISTORY_STORAGE_KEY,
+  );
+  return Object.prototype.hasOwnProperty.call(map, conversationId);
+}
+
 export function writeAgentNotificationsHistory(
   conversationId: string,
   notifications: AgentNotification[],

@@ -1,6 +1,12 @@
-/** Set `VITE_STAGE_AGENT_NOTIFICATIONS=true` to preview the UI locally. */
+/** Set `VITE_STAGE_AGENT_NOTIFICATIONS=true` to preview the UI with demo data. */
 export const isAgentNotificationsStagingEnabled = () =>
   import.meta.env.VITE_STAGE_AGENT_NOTIFICATIONS === "true";
+
+export const STAGED_AGENT_NOTIFICATION_ID_PREFIX = "staged-";
+
+export function isStagedAgentNotificationId(id: string): boolean {
+  return id.startsWith(STAGED_AGENT_NOTIFICATION_ID_PREFIX);
+}
 
 export type AgentNotificationKind =
   | "skill"

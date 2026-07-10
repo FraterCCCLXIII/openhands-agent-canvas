@@ -9,6 +9,7 @@ import {
 import type { AgentNotification } from "#/components/features/chat/agent-notifications.constants";
 import { I18nKey } from "#/i18n/declaration";
 import { useAgentNotificationsStore } from "#/stores/use-agent-notifications-store";
+import { useEventStore, type OHEvent } from "#/stores/use-event-store";
 import { renderWithProviders } from "test-utils";
 
 const conversationId = "test-conversation-id";
@@ -36,6 +37,11 @@ vi.mock("#/hooks/use-send-message", () => ({
   useSendMessage: () => ({ send: mockSend }),
 }));
 
+vi.mock("#/utils/custom-toast-handlers", () => ({
+  displaySuccessToast: vi.fn(),
+  displayErrorToast: vi.fn(),
+}));
+
 vi.mock("#/components/features/chat/agent-notifications.constants", async () => {
   const actual = await vi.importActual<
     typeof import("#/components/features/chat/agent-notifications.constants")
@@ -55,6 +61,12 @@ describe("AgentNotificationsBell", () => {
     useAgentNotificationsStore.setState({
       historyByConversation: { [conversationId]: [] },
       seenByConversation: { [conversationId]: [] },
+    });
+    useEventStore.setState({
+      events: [],
+      eventIds: new Set(),
+      uiEvents: [],
+      loadedConversationId: null,
     });
   });
 
@@ -91,6 +103,9 @@ describe("AgentNotificationsBell", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByTestId("agent-notifications-bell-empty-state"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("agent-notifications-bell-detect"),
     ).toBeInTheDocument();
     expect(
       screen.getByText(I18nKey.CHAT_INTERFACE$AGENT_NOTIFICATIONS_EMPTY_TITLE),
@@ -162,5 +177,48 @@ describe("AgentNotificationsBell", () => {
     expect(
       useAgentNotificationsStore.getState().historyByConversation[conversationId],
     ).toEqual([history[1]]);
+  });
+
+  it("populates recommendations when Scan conversation is clicked", async () => {
+    const user = userEvent.setup();
+
+    const fileEditEvent = {
+      id: "file-edit-1",
+      source: "agent",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      tool_name: "file_editor",
+      tool_call_id: "call-file-edit-1",
+      action: {
+        kind: "FileEditorAction",
+        command: "str_replace",
+        path: "/workspace/project/src/utils/format.ts",
+        file_text: null,
+        old_str: "a",
+        new_str: "b",
+        insert_line: null,
+        view_range: null,
+      },
+    } as OHEvent;
+
+    useEventStore.setState({
+      events: [fileEditEvent],
+      eventIds: new Set(["file-edit-1"]),
+      uiEvents: [fileEditEvent],
+      loadedConversationId: conversationId,
+    });
+
+    renderWithProviders(
+      <AgentNotificationsBell conversationId={conversationId} />,
+    );
+
+    await user.click(screen.getByTestId("agent-notifications-bell"));
+    await user.click(screen.getByTestId("agent-notifications-bell-detect"));
+
+    expect(
+      screen.getByTestId("agent-notifications-bell-item-detected-skill-format"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Format helper"),
+    ).toBeInTheDocument();
   });
 });

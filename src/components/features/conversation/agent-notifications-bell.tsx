@@ -3,9 +3,14 @@ import ReactDOM from "react-dom";
 import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAgentNotifications } from "#/hooks/chat/use-agent-notifications";
+import { useDetectAgentNotifications } from "#/hooks/chat/use-detect-agent-notifications";
 import { usePopoverFixedPlacement } from "#/hooks/use-popover-fixed-placement";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import {
+  displayErrorToast,
+  displaySuccessToast,
+} from "#/utils/custom-toast-handlers";
 import {
   formControlTransitionClassName,
   formControlMutedHoverClassName,
@@ -13,6 +18,7 @@ import {
 import { AgentNotificationsList } from "../chat/agent-notifications-list";
 import { AgentNotificationsTitle } from "../chat/agent-notifications-title";
 import { AgentNotificationsDropdownEmptyState } from "./agent-notifications-dropdown-empty-state";
+import { AgentNotificationsDetectButton } from "./agent-notifications-detect-button";
 
 const DROPDOWN_WIDTH_PX = 400;
 
@@ -38,6 +44,7 @@ export function AgentNotificationsBell({
     conversationId,
     enabled: true,
   });
+  const { detectNow } = useDetectAgentNotifications(conversationId);
 
   const placement = usePopoverFixedPlacement(bellRef, {
     open: isOpen,
@@ -87,6 +94,32 @@ export function AgentNotificationsBell({
     setIsOpen(false);
   };
 
+  const handleDetect = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const result = detectNow();
+    if (result.added > 0) {
+      displaySuccessToast(
+        t(I18nKey.CHAT_INTERFACE$AGENT_NOTIFICATIONS_DETECT_ADDED, {
+          count: result.added,
+        }),
+      );
+      return;
+    }
+
+    if (result.found > 0) {
+      displaySuccessToast(
+        t(I18nKey.CHAT_INTERFACE$AGENT_NOTIFICATIONS_DETECT_UP_TO_DATE),
+      );
+      return;
+    }
+
+    displayErrorToast(
+      t(I18nKey.CHAT_INTERFACE$AGENT_NOTIFICATIONS_DETECT_NONE),
+    );
+  };
+
   return (
     <>
       <button
@@ -132,10 +165,16 @@ export function AgentNotificationsBell({
                 "bg-tertiary p-3 shadow-lg",
               )}
             >
-              <AgentNotificationsTitle
-                className="mb-2"
-                infoTestId="agent-notifications-bell-info"
-              />
+              <div className="mb-3 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <AgentNotificationsTitle infoTestId="agent-notifications-bell-info" />
+                </div>
+                <AgentNotificationsDetectButton
+                  onDetect={handleDetect}
+                  disabled={isCreating}
+                  testId="agent-notifications-bell-detect"
+                />
+              </div>
               {history.length > 0 ? (
                 <AgentNotificationsList
                   agentNotifications={history}
