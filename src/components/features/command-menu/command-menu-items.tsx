@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Bot,
+  GitPullRequest,
   Home,
   Keyboard,
   KeyRound,
@@ -21,6 +22,7 @@ export const COMMAND_MENU_ROUTE = {
   conversations: "/conversations",
   customize: "/customize",
   automations: "/automations",
+  codeReview: "/code-review",
   mcp: "/mcp",
   settings: "/settings",
   agentSettings: "/settings/agents",
@@ -36,6 +38,7 @@ export type CommandMenuItemId =
   | "new-chat"
   | "customize"
   | "automations"
+  | "code-review"
   | "mcp"
   | "settings"
   | "agent-settings"
@@ -100,6 +103,15 @@ export const createCommandMenuItems = ({
     keywordsKey: I18nKey.COMMAND_MENU$AUTOMATIONS_KEYWORDS,
     icon: <Zap size={ICON_SIZE} />,
     to: COMMAND_MENU_ROUTE.automations,
+  },
+  {
+    id: "code-review",
+    group: "navigation",
+    titleKey: I18nKey.COMMAND_MENU$CODE_REVIEW_TITLE,
+    descriptionKey: I18nKey.COMMAND_MENU$CODE_REVIEW_DESCRIPTION,
+    keywordsKey: I18nKey.COMMAND_MENU$CODE_REVIEW_KEYWORDS,
+    icon: <GitPullRequest size={ICON_SIZE} />,
+    to: COMMAND_MENU_ROUTE.codeReview,
   },
   {
     id: "mcp",

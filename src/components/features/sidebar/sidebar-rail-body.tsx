@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
+  GitPullRequest,
   Plus,
   Server,
   Settings,
@@ -204,6 +205,14 @@ export function SidebarRailBody({
           testId="sidebar-automations-link"
           collapsed={collapsed}
           icon={<AutomationsIcon width={ICON_SIZE} height={ICON_SIZE} />}
+        />
+        <SidebarNavLink
+          to="/code-review"
+          label={t(I18nKey.SIDEBAR$CODE_REVIEW)}
+          testId="sidebar-code-review-link"
+          collapsed={collapsed}
+          forceActive={currentPath.startsWith("/code-review")}
+          icon={<GitPullRequest width={ICON_SIZE} height={ICON_SIZE} />}
         />
       </nav>
 

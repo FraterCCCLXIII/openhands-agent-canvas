@@ -53,6 +53,11 @@ const IDENTICAL_VALUE_ALLOWLIST = new Set([
   'SETTINGS$SLACK',
   'VSCODE$TITLE',
   'WORKSPACE$JUPYTER_TAB_LABEL',
+  'CODE_REVIEW$FLAVOR_ITERATE',
+  'CODE_REVIEW$ISSUE_LINKED_PR',
+  'CODE_REVIEW$DIFF_ADDITIONS',
+  'CODE_REVIEW$DIFF_DELETIONS',
+  'CODE_REVIEW$OPEN_ON_GITHUB',
 ]);
 
 // Extract the language codes from the AvailableLanguages array in the i18n index file

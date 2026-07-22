@@ -7,10 +7,20 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  placeholder?: string;
+  testId?: string;
 }
 
-export function SearchInput({ value, onChange, className }: SearchInputProps) {
+export function SearchInput({
+  value,
+  onChange,
+  className,
+  placeholder,
+  testId,
+}: SearchInputProps) {
   const { t } = useTranslation("openhands");
+  const resolvedPlaceholder =
+    placeholder ?? t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER);
 
   return (
     <div
@@ -30,8 +40,9 @@ export function SearchInput({ value, onChange, className }: SearchInputProps) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER)}
-        aria-label={t(I18nKey.AUTOMATIONS$SEARCH_PLACEHOLDER)}
+        placeholder={resolvedPlaceholder}
+        aria-label={resolvedPlaceholder}
+        data-testid={testId}
         className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-white outline-none placeholder:text-tertiary-alt"
       />
     </div>

@@ -1,4 +1,4 @@
-import { AppWindow, Shield } from "lucide-react";
+import { AppWindow, FileCode2, Shield, Webhook } from "lucide-react";
 import KeyIcon from "#/icons/key.svg?react";
 import MemoryIcon from "#/icons/memory_icon.svg?react";
 import CircuitIcon from "#/icons/u-circuit.svg?react";
@@ -56,6 +56,20 @@ export const OSS_NAV_ITEMS: SettingsNavItem[] = [
     to: "/settings/app",
     text: "SETTINGS$NAV_APPLICATION",
     subtitle: "SETTINGS$PAGE_APPLICATION_SUBLINE",
+  },
+  {
+    // Temporary home for #1691 Code Review Hooks / Code Style until those
+    // surfaces return to the top-level Code Review page.
+    icon: <Webhook className="size-4" strokeWidth={2} aria-hidden />,
+    to: "/settings/hooks",
+    text: "SETTINGS$NAV_HOOKS",
+    subtitle: "SETTINGS$PAGE_HOOKS_SUBLINE",
+  },
+  {
+    icon: <FileCode2 className="size-4" strokeWidth={2} aria-hidden />,
+    to: "/settings/code-style",
+    text: "SETTINGS$NAV_CODE_STYLE",
+    subtitle: "SETTINGS$PAGE_CODE_STYLE_SUBLINE",
   },
   {
     icon: <KeyIcon width={16} height={16} />,

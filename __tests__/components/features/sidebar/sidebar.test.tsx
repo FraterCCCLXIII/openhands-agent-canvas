@@ -432,6 +432,7 @@ describe("Sidebar", () => {
     for (const testId of [
       "sidebar-conversations-link",
       "sidebar-automations-link",
+      "sidebar-code-review-link",
       "sidebar-skills-link",
     ]) {
       const link = screen.getByTestId(testId);
@@ -452,6 +453,9 @@ describe("Sidebar", () => {
     );
     expect(screen.getByTestId("sidebar-automations-link")).toHaveTextContent(
       "Automate",
+    );
+    expect(screen.getByTestId("sidebar-code-review-link")).toHaveTextContent(
+      "Code Review",
     );
   });
 });
