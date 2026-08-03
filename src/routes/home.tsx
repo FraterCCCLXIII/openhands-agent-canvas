@@ -21,7 +21,7 @@ function HomeScreen() {
         <LlmNotConfiguredBanner />
       </div>
 
-      <div className="flex flex-1 min-h-0 flex-col items-center justify-center">
+      <div className="flex min-h-0 flex-1 flex-col">
         <HomeChatLauncher />
       </div>
 

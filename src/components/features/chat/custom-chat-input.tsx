@@ -25,6 +25,8 @@ export interface CustomChatInputProps {
   ) => void;
   className?: React.HTMLAttributes<HTMLDivElement>["className"];
   buttonClassName?: React.HTMLAttributes<HTMLButtonElement>["className"];
+  placeholder?: string;
+  containerClassName?: string;
 }
 
 export function CustomChatInput({
@@ -38,6 +40,8 @@ export function CustomChatInput({
   onFilesPaste,
   className = "",
   buttonClassName = "",
+  placeholder,
+  containerClassName,
 }: CustomChatInputProps) {
   const [canSubmit, setCanSubmit] = React.useState(false);
   const {
@@ -196,6 +200,8 @@ export function CustomChatInput({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          placeholder={placeholder}
+          containerClassName={containerClassName}
           onInput={() => {
             handleInput();
             updateSlashMenu();

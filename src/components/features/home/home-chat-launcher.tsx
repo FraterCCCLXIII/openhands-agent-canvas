@@ -16,6 +16,7 @@ import { enqueueHomeTaskPendingMessage } from "#/utils/enqueue-home-task-pending
 import { sendMessageWithAttachments } from "#/utils/send-message-with-attachments";
 import { useNavigation } from "#/context/navigation-context";
 import { useIsCreatingConversation } from "#/hooks/use-is-creating-conversation";
+import { useCreateAutomationInChat } from "#/hooks/use-create-automation-in-chat";
 import { Branch, GitRepository } from "#/types/git";
 import { Provider } from "#/types/settings";
 import { LocalWorkspace } from "#/types/workspace";
@@ -29,10 +30,18 @@ import type { PluginSpec } from "#/api/conversation-service/agent-server-convers
 import { PluginPickerModal } from "#/components/features/plugins/plugin-picker-modal";
 import { PluginPickerTrigger } from "#/components/features/plugins/plugin-picker-trigger";
 import { HomeHeaderTitle } from "./home-header/home-header-title";
+import { HomeComposerModeToggle } from "./home-composer-mode-toggle";
+import {
+  HOME_COMPOSER_MODE,
+  type HomeComposerMode,
+} from "./home-composer-mode";
 import { OpenLauncherButton } from "./open-launcher-button";
 import { OpenWorkspaceDialog } from "./open-workspace-dialog";
 import { OpenRepositoryDialog } from "./open-repository-dialog";
 import { HomeGitControlBarPreview } from "./home-git-control-bar-preview";
+import { PinnedAutomationsDashboard } from "./featured-automations/pinned-automations-dashboard";
+import { RecommendedAutomationsRail } from "./featured-automations/recommended-automations-rail";
+import { RunningAutomationsList } from "./featured-automations/running-automations-list";
 
 export function HomeChatLauncher() {
   const { t } = useTranslation("openhands");
@@ -51,9 +60,14 @@ export function HomeChatLauncher() {
     useState<WorkspaceMode>("local_repo");
   const [selectedPlugins, setSelectedPlugins] = useState<PluginSpec[]>([]);
   const [isPluginPickerOpen, setIsPluginPickerOpen] = useState(false);
+  const [composerMode, setComposerMode] = useState<HomeComposerMode>(
+    HOME_COMPOSER_MODE.code,
+  );
+  const isAutomationMode = composerMode === HOME_COMPOSER_MODE.automation;
 
   const { mutateAsync: createConversation, isPending } =
     useCreateConversation();
+  const createAutomationInChat = useCreateAutomationInChat();
   const isCreatingElsewhere = useIsCreatingConversation();
   const isCreating = isPending || isCreatingElsewhere;
   const { isConfigured: isLlmConfigured, isLoading: isLlmConfigLoading } =
@@ -82,6 +96,14 @@ export function HomeChatLauncher() {
     // create a conversation that can't run (it would fail with a cryptic
     // API-key error on the first turn).
     if (llmBlocked) return;
+
+    // Automation mode launches the existing create-in-chat flow with the
+    // typed prompt so the agent builds the automation in a new conversation.
+    if (isAutomationMode) {
+      if (!trimmed) return;
+      createAutomationInChat(trimmed);
+      return;
+    }
 
     const attachmentSnapshot = {
       images: [...images],
@@ -217,45 +239,96 @@ export function HomeChatLauncher() {
   return (
     <div
       data-testid="home-chat-launcher"
-      className="flex w-full max-w-[800px] flex-col gap-4 md:px-4"
+      className="flex h-full min-h-0 w-full flex-col"
     >
-      <div className="flex w-full justify-center">
-        <HomeHeaderTitle />
-      </div>
+      {isAutomationMode ? <PinnedAutomationsDashboard /> : null}
 
-      <div className="w-full">
-        <CustomChatInput
-          onSubmit={handleSubmitWithModelGuard}
-          onFilesPaste={handleUpload}
-          disabled={isCreating || llmBlocked}
-        />
-      </div>
+      {/* Equal 1fr rows pin the composer on the viewport midpoint. Title lives
+          in the upper half (end-aligned) so it doesn't pull the input down. */}
+      <div
+        data-testid="home-composer-stage"
+        className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+      >
+        <div className="flex min-h-0 flex-col items-center justify-end overflow-y-auto pb-4 pt-8">
+          <div className="flex w-full max-w-[800px] justify-center md:px-4">
+            <HomeHeaderTitle
+              titleKey={
+                isAutomationMode
+                  ? I18nKey.HOME$LETS_START_AUTOMATING
+                  : I18nKey.HOME$LETS_START_BUILDING
+              }
+            />
+          </div>
+        </div>
 
-      <div className="flex items-center justify-start gap-2">
-        {hasSelection ? (
-          <HomeGitControlBarPreview
-            workspace={pendingWorkspace}
-            repository={pendingRepository}
-            branch={pendingBranch}
-            provider={pendingProvider}
-            workspaceMode={workspaceMode}
-            backendKind={backend.kind}
-            onRepoClick={() => setIsDialogOpen(true)}
-            onWorkspaceModeChange={setWorkspaceMode}
-          />
-        ) : (
-          <OpenLauncherButton
-            kind={isLocal ? "local" : "cloud"}
-            onClick={() => setIsDialogOpen(true)}
-            disabled={isCreating || Boolean(workspacesUnsupportedMessage)}
-            disabledTooltip={workspacesUnsupportedMessage}
-          />
-        )}
-        <PluginPickerTrigger
-          count={selectedPlugins.length}
-          onClick={() => setIsPluginPickerOpen(true)}
-          disabled={isCreating}
-        />
+        <div className="flex w-full flex-col items-center">
+          <div className="flex w-full max-w-[800px] flex-col gap-3 md:px-4">
+            {isAutomationMode ? <RecommendedAutomationsRail /> : null}
+
+            <div className="flex w-full justify-center">
+              <HomeComposerModeToggle
+                value={composerMode}
+                onChange={setComposerMode}
+              />
+            </div>
+            <div className="w-full">
+              <CustomChatInput
+                onSubmit={handleSubmitWithModelGuard}
+                onFilesPaste={handleUpload}
+                disabled={isCreating || llmBlocked}
+                placeholder={
+                  isAutomationMode
+                    ? t(I18nKey.HOME$COMPOSER_AUTOMATION_PLACEHOLDER)
+                    : undefined
+                }
+                containerClassName={
+                  isAutomationMode ? "border border-[#3D9B8F]" : undefined
+                }
+              />
+            </div>
+
+            {!isAutomationMode && (
+              <div className="flex items-center justify-start gap-2">
+                {hasSelection ? (
+                  <HomeGitControlBarPreview
+                    workspace={pendingWorkspace}
+                    repository={pendingRepository}
+                    branch={pendingBranch}
+                    provider={pendingProvider}
+                    workspaceMode={workspaceMode}
+                    backendKind={backend.kind}
+                    onRepoClick={() => setIsDialogOpen(true)}
+                    onWorkspaceModeChange={setWorkspaceMode}
+                  />
+                ) : (
+                  <OpenLauncherButton
+                    kind={isLocal ? "local" : "cloud"}
+                    onClick={() => setIsDialogOpen(true)}
+                    disabled={
+                      isCreating || Boolean(workspacesUnsupportedMessage)
+                    }
+                    disabledTooltip={workspacesUnsupportedMessage}
+                  />
+                )}
+                <PluginPickerTrigger
+                  count={selectedPlugins.length}
+                  onClick={() => setIsPluginPickerOpen(true)}
+                  disabled={isCreating}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="min-h-0 overflow-y-auto">
+          {isAutomationMode ? (
+            <div className="mx-auto w-full max-w-[800px] px-4 pb-6 pt-4 md:px-8">
+              <RunningAutomationsList />
+            </div>
+          ) : (
+            <div aria-hidden="true" className="min-h-0" />
+          )}
+        </div>
       </div>
 
       {isLocal ? (

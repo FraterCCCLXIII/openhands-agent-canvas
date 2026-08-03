@@ -8,6 +8,7 @@ import { cn } from "#/utils/utils";
 interface ChatInputFieldProps {
   chatInputRef: React.RefObject<HTMLDivElement | null>;
   disabled?: boolean;
+  placeholder?: string;
   onInput: () => void;
   onPaste: (e: React.ClipboardEvent) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -18,6 +19,7 @@ interface ChatInputFieldProps {
 export function ChatInputField({
   chatInputRef,
   disabled = false,
+  placeholder,
   onInput,
   onPaste,
   onKeyDown,
@@ -31,6 +33,11 @@ export function ChatInputField({
   );
 
   const isPlanMode = conversationMode === "plan";
+  const resolvedPlaceholder =
+    placeholder ??
+    (isPlanMode
+      ? t(I18nKey.COMMON$LET_S_WORK_ON_A_PLAN)
+      : t(I18nKey.SUGGESTIONS$WHAT_TO_BUILD));
 
   React.useEffect(() => {
     if (!disabled) {
@@ -53,11 +60,7 @@ export function ChatInputField({
             disabled && "cursor-not-allowed opacity-50",
           )}
           contentEditable={!disabled}
-          data-placeholder={
-            isPlanMode
-              ? t(I18nKey.COMMON$LET_S_WORK_ON_A_PLAN)
-              : t(I18nKey.SUGGESTIONS$WHAT_TO_BUILD)
-          }
+          data-placeholder={resolvedPlaceholder}
           data-testid="chat-input"
           onInput={onInput}
           onPaste={onPaste}

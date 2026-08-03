@@ -86,19 +86,51 @@ vi.mock("#/components/features/chat/custom-chat-input", () => ({
   CustomChatInput: ({
     onSubmit,
     disabled,
+    placeholder,
   }: {
     onSubmit: (msg: string) => void;
     disabled?: boolean;
+    placeholder?: string;
   }) => (
-    <button
-      type="button"
-      data-testid="stub-chat-submit"
-      disabled={disabled}
-      onClick={() => onSubmit("hello world")}
-    >
-      stub submit
-    </button>
+    <div>
+      {placeholder ? (
+        <span data-testid="stub-chat-placeholder">{placeholder}</span>
+      ) : null}
+      <button
+        type="button"
+        data-testid="stub-chat-submit"
+        disabled={disabled}
+        onClick={() => onSubmit("hello world")}
+      >
+        stub submit
+      </button>
+    </div>
   ),
+}));
+
+const mockCreateAutomationInChat = vi.fn();
+vi.mock("#/hooks/use-create-automation-in-chat", () => ({
+  useCreateAutomationInChat: () => mockCreateAutomationInChat,
+}));
+
+vi.mock("#/components/shared/navigation-link", () => ({
+  NavigationLink: ({
+    children,
+    to,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    to: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
+vi.mock("#/components/features/automations/kebab-menu", () => ({
+  KebabMenu: () => <div data-testid="stub-kebab-menu" />,
 }));
 
 // Stub the selection dialogs. We mirror the real component's contract:
@@ -285,6 +317,7 @@ describe("HomeChatLauncher", () => {
     vi.clearAllMocks();
     mockImages = [];
     mockFiles = [];
+    mockCreateAutomationInChat.mockReset();
     mockUseActiveBackend.mockReturnValue(localBackend);
     mockUseLlmConfigured.mockReturnValue({
       isConfigured: true,
@@ -619,5 +652,48 @@ describe("HomeChatLauncher", () => {
       undefined,
       undefined,
     );
+  });
+
+  it("switches the composer to automation mode and launches create-in-chat on submit", async () => {
+    const createSpy = vi
+      .spyOn(AgentServerConversationService, "createConversation")
+      .mockResolvedValue(makeConversationResponse());
+
+    renderLauncher();
+    const user = userEvent.setup();
+
+    expect(
+      screen.getByTestId("home-composer-mode-code"),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(
+      screen.queryByTestId("recommended-automations-rail"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("running-automations-list"),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId("home-composer-mode-automation"));
+
+    expect(
+      screen.getByTestId("home-composer-mode-automation"),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("HOME$LETS_START_AUTOMATING")).toBeInTheDocument();
+    expect(screen.getByTestId("stub-chat-placeholder")).toHaveTextContent(
+      "HOME$COMPOSER_AUTOMATION_PLACEHOLDER",
+    );
+    expect(
+      screen.queryByTestId("open-workspace-button"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("recommended-automations-rail"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("running-automations-list"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("stub-chat-submit"));
+
+    expect(mockCreateAutomationInChat).toHaveBeenCalledWith("hello world");
+    expect(createSpy).not.toHaveBeenCalled();
   });
 });

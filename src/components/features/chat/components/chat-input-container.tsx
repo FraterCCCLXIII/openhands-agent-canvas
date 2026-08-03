@@ -28,6 +28,8 @@ interface ChatInputContainerProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  placeholder?: string;
+  containerClassName?: string;
   isSlashMenuOpen?: boolean;
   slashItems?: SlashCommandItem[];
   slashSelectedIndex?: number;
@@ -54,6 +56,8 @@ export function ChatInputContainer({
   onKeyDown,
   onFocus,
   onBlur,
+  placeholder,
+  containerClassName,
   isSlashMenuOpen = false,
   slashItems = [],
   slashSelectedIndex = 0,
@@ -69,6 +73,7 @@ export function ChatInputContainer({
       className={cn(
         "bg-[var(--oh-surface)] box-border content-stretch flex flex-col items-start justify-center p-4 relative rounded-[15px] w-full",
         conversationMode === "plan" && "border border-[#597FF4]",
+        containerClassName,
       )}
       onDragOver={(e) => onDragOver(e, disabled)}
       onDragLeave={(e) => onDragLeave(e, disabled)}
@@ -93,6 +98,7 @@ export function ChatInputContainer({
         <ChatInputRow
           chatInputRef={chatInputRef}
           isNewConversationPending={isNewConversationPending}
+          placeholder={placeholder}
           onInput={onInput}
           onPaste={onPaste}
           onKeyDown={onKeyDown}
