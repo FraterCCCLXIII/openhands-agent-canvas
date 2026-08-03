@@ -665,12 +665,6 @@ describe("HomeChatLauncher", () => {
     expect(
       screen.getByTestId("home-composer-mode-code"),
     ).toHaveAttribute("aria-checked", "true");
-    expect(
-      screen.queryByTestId("recommended-automations-rail"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("running-automations-list"),
-    ).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId("home-composer-mode-automation"));
 
@@ -685,11 +679,11 @@ describe("HomeChatLauncher", () => {
       screen.queryByTestId("open-workspace-button"),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId("recommended-automations-rail"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("recommended-automations-rail"),
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId("running-automations-list"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("running-automations-list"),
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId("stub-chat-submit"));
 

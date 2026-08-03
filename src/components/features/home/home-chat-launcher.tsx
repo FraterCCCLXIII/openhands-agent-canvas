@@ -39,9 +39,6 @@ import { OpenLauncherButton } from "./open-launcher-button";
 import { OpenWorkspaceDialog } from "./open-workspace-dialog";
 import { OpenRepositoryDialog } from "./open-repository-dialog";
 import { HomeGitControlBarPreview } from "./home-git-control-bar-preview";
-import { PinnedAutomationsDashboard } from "./featured-automations/pinned-automations-dashboard";
-import { RecommendedAutomationsRail } from "./featured-automations/recommended-automations-rail";
-import { RunningAutomationsList } from "./featured-automations/running-automations-list";
 
 export function HomeChatLauncher() {
   const { t } = useTranslation("openhands");
@@ -241,8 +238,6 @@ export function HomeChatLauncher() {
       data-testid="home-chat-launcher"
       className="flex h-full min-h-0 w-full flex-col"
     >
-      {isAutomationMode ? <PinnedAutomationsDashboard /> : null}
-
       {/* Equal 1fr rows pin the composer on the viewport midpoint. Title lives
           in the upper half (end-aligned) so it doesn't pull the input down. */}
       <div
@@ -263,8 +258,6 @@ export function HomeChatLauncher() {
 
         <div className="flex w-full flex-col items-center">
           <div className="flex w-full max-w-[800px] flex-col gap-3 md:px-4">
-            {isAutomationMode ? <RecommendedAutomationsRail /> : null}
-
             <div className="flex w-full justify-center">
               <HomeComposerModeToggle
                 value={composerMode}
@@ -280,9 +273,6 @@ export function HomeChatLauncher() {
                   isAutomationMode
                     ? t(I18nKey.HOME$COMPOSER_AUTOMATION_PLACEHOLDER)
                     : undefined
-                }
-                containerClassName={
-                  isAutomationMode ? "border border-[#3D9B8F]" : undefined
                 }
               />
             </div>
@@ -320,15 +310,7 @@ export function HomeChatLauncher() {
           </div>
         </div>
 
-        <div className="min-h-0 overflow-y-auto">
-          {isAutomationMode ? (
-            <div className="mx-auto w-full max-w-[800px] px-4 pb-6 pt-4 md:px-8">
-              <RunningAutomationsList />
-            </div>
-          ) : (
-            <div aria-hidden="true" className="min-h-0" />
-          )}
-        </div>
+        <div aria-hidden="true" className="min-h-0" />
       </div>
 
       {isLocal ? (
