@@ -20,7 +20,7 @@ export const settingsListContainerClassName = cn(
 /** Scrollable variant for long settings lists (e.g. secrets). */
 export const settingsListScrollContainerClassName = cn(
   settingsListContainerClassName,
-  "overflow-auto max-h-[min(40vh,22rem)]",
+  "overflow-auto max-h-[min(70vh,39rem)]",
 );
 
 export const settingsListDividerClassName =
@@ -44,13 +44,12 @@ export const settingsListTableRowClassName = cn(
 );
 
 export const settingsListTableHeadClassName = cn(
-  formControlSurfaceClassName,
-  "sticky top-0 z-10 border-b border-[var(--oh-border)]",
+  "sticky top-0 z-10 border-b border-[var(--oh-border)] bg-base-secondary/50",
 );
 
+/** Compact muted column labels — distinct from body rows (h-12 / text-sm). */
 export const settingsListTableHeaderCellClassName = cn(
-  settingsListRowHeightClassName,
-  "px-3 text-left text-sm font-medium align-middle",
+  "h-9 min-h-9 px-4 text-left text-xs font-medium leading-4 text-tertiary-alt align-middle",
 );
 
 export const settingsListTableCellClassName = cn(

@@ -1,18 +1,14 @@
-import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
-
-interface MCPServerConfig {
-  id: string;
-  type: "sse" | "stdio" | "shttp";
-  name?: string;
-  url?: string;
-  api_key?: string;
-  timeout?: number;
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-}
+import {
+  settingsListIconActionButtonClassName,
+  settingsListTableCellClassName,
+  settingsListTableRowClassName,
+} from "#/utils/settings-list-classes";
+import { cn } from "#/utils/utils";
+import EditIcon from "#/icons/u-edit.svg?react";
+import DeleteIcon from "#/icons/u-delete.svg?react";
+import type { MCPServerConfig } from "#/types/mcp-server";
 
 export function MCPServerListItem({
   server,
@@ -58,53 +54,61 @@ export function MCPServerListItem({
     return "";
   };
 
-  const serverName = server.type === "stdio" ? server.name : server.url;
+  const serverName = server.name || server.url || "";
   const serverDescription = getServerDescription(server);
 
   return (
-    <tr
-      data-testid="mcp-server-item"
-      className="grid grid-cols-[minmax(0,0.25fr)_120px_minmax(0,1fr)_120px] gap-4 items-start border-t border-[var(--oh-border-subtle)]"
-    >
+    <tr data-testid="mcp-server-item" className={settingsListTableRowClassName}>
       <td
-        className="px-3 py-2 text-sm text-content-2 truncate min-w-0"
+        className={cn(
+          settingsListTableCellClassName,
+          "truncate text-content-2",
+        )}
         title={serverName}
       >
         {serverName}
       </td>
 
-      <td className="px-3 py-2 text-sm text-content-2 whitespace-nowrap">
+      <td
+        className={cn(
+          settingsListTableCellClassName,
+          "whitespace-nowrap text-content-2",
+        )}
+      >
         {getServerTypeLabel(server.type)}
       </td>
 
       <td
-        className="px-3 py-2 text-sm text-content-2 opacity-80 min-w-0 truncate"
+        className={cn(
+          settingsListTableCellClassName,
+          "truncate text-content-2 opacity-80",
+        )}
         title={serverDescription}
       >
-        <span className="inline-block max-w-full align-bottom">
-          {serverDescription}
-        </span>
+        {serverDescription}
       </td>
 
-      <td className="flex items-start justify-end gap-0.5 whitespace-nowrap px-3 py-2">
-        <button
-          data-testid="edit-mcp-server-button"
-          type="button"
-          onClick={onEdit}
-          aria-label={`Edit ${serverName}`}
-          className="inline-flex cursor-pointer items-center justify-center rounded-md p-1 text-muted transition-colors hover:bg-interactive-hover hover:text-white"
-        >
-          <Pencil aria-hidden className="size-4" strokeWidth={2} />
-        </button>
-        <button
-          data-testid="delete-mcp-server-button"
-          type="button"
-          onClick={onDelete}
-          aria-label={`Delete ${serverName}`}
-          className="inline-flex cursor-pointer items-center justify-center rounded-md p-1 text-muted transition-colors hover:bg-interactive-hover hover:text-white"
-        >
-          <Trash2 aria-hidden className="size-4" strokeWidth={2} />
-        </button>
+      <td className={cn(settingsListTableCellClassName, "text-right")}>
+        <div className="ml-auto flex w-fit items-center justify-end gap-0.5">
+          <button
+            data-testid="edit-mcp-server-button"
+            type="button"
+            onClick={onEdit}
+            aria-label={`Edit ${serverName}`}
+            className={settingsListIconActionButtonClassName}
+          >
+            <EditIcon width={16} height={16} />
+          </button>
+          <button
+            data-testid="delete-mcp-server-button"
+            type="button"
+            onClick={onDelete}
+            aria-label={`Delete ${serverName}`}
+            className={settingsListIconActionButtonClassName}
+          >
+            <DeleteIcon width={16} height={16} />
+          </button>
+        </div>
       </td>
     </tr>
   );

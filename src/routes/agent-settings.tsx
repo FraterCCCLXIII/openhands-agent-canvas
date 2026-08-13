@@ -7,10 +7,14 @@ import { useAgentSettingsSchema } from "#/hooks/query/use-agent-settings-schema"
 import { SettingsDropdownInput } from "#/components/features/settings/settings-dropdown-input";
 import { SettingsInput } from "#/components/features/settings/settings-input";
 import { SettingsSwitch } from "#/components/features/settings/settings-switch";
+import { AgentSettingsInputsSkeleton } from "#/components/features/settings/agent-settings/agent-settings-inputs-skeleton";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { Typography } from "#/ui/typography";
 import { I18nKey } from "#/i18n/declaration";
-import { formControlSwitchDescriptionClassName } from "#/utils/form-control-classes";
+import {
+  formControlSwitchDescriptionClassName,
+  formControlSwitchFieldClassName,
+} from "#/utils/form-control-classes";
 import { cn } from "#/utils/utils";
 import { SettingsFieldSchema } from "#/types/settings";
 import {
@@ -152,7 +156,7 @@ function AgentSettingsScreen() {
     setSubAgentsEnabled(initialSubAgentsEnabled);
   }, [initialSubAgentsEnabled]);
 
-  if (isLoading) return null;
+  if (isLoading) return <AgentSettingsInputsSkeleton />;
 
   const isAcp = agentType === "acp";
   const commandTokens = parseCommand(commandText);
@@ -286,7 +290,7 @@ function AgentSettingsScreen() {
       />
 
       {!isAcp && (
-        <div className="flex flex-col gap-1.5">
+        <div className={formControlSwitchFieldClassName}>
           <SettingsSwitch
             testId="agent-settings-enable-sub-agents"
             isToggled={subAgentsEnabled}

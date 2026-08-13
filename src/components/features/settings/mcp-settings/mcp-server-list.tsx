@@ -1,18 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { MCPServerListItem } from "./mcp-server-list-item";
 import { I18nKey } from "#/i18n/declaration";
-
-interface MCPServerConfig {
-  id: string;
-  type: "sse" | "stdio" | "shttp";
-  name?: string;
-  url?: string;
-  api_key?: string;
-  timeout?: number;
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-}
+import { extensionModuleEmptyStateClassName } from "#/utils/extension-module-card-classes";
+import {
+  settingsListContainerClassName,
+  settingsListTableHeadClassName,
+  settingsListTableHeaderCellClassName,
+} from "#/utils/settings-list-classes";
+import { cn } from "#/utils/utils";
+import type { MCPServerConfig } from "#/types/mcp-server";
 
 interface MCPServerListProps {
   servers: MCPServerConfig[];
@@ -29,7 +25,7 @@ export function MCPServerList({
 
   if (servers.length === 0) {
     return (
-      <div className="border border-[var(--oh-border)] rounded-md p-8 text-center">
+      <div className={extensionModuleEmptyStateClassName}>
         <p className="text-content-2 text-sm">
           {t(I18nKey.SETTINGS$MCP_NO_SERVERS)}
         </p>
@@ -38,20 +34,27 @@ export function MCPServerList({
   }
 
   return (
-    <div className="border border-[var(--oh-border)] rounded-md overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-base-tertiary">
-          <tr className="grid grid-cols-[minmax(0,0.25fr)_120px_minmax(0,1fr)_120px] gap-4 items-start">
-            <th className="px-3 py-2 text-left text-sm font-medium">
+    <div className={settingsListContainerClassName}>
+      <table className="w-full min-w-full table-fixed">
+        <thead className={settingsListTableHeadClassName}>
+          <tr>
+            <th className={cn(settingsListTableHeaderCellClassName, "w-1/5")}>
               {t(I18nKey.SETTINGS$NAME)}
             </th>
-            <th className="px-3 py-2 text-left text-sm font-medium">
+            <th
+              className={cn(settingsListTableHeaderCellClassName, "w-[120px]")}
+            >
               {t(I18nKey.SETTINGS$MCP_SERVER_TYPE)}
             </th>
-            <th className="px-3 py-2 text-left text-sm font-medium">
+            <th className={settingsListTableHeaderCellClassName}>
               {t(I18nKey.SETTINGS$MCP_SERVER_DETAILS)}
             </th>
-            <th className="px-3 py-2 text-right text-sm font-medium">
+            <th
+              className={cn(
+                settingsListTableHeaderCellClassName,
+                "w-[10%] text-right",
+              )}
+            >
               {t(I18nKey.SETTINGS$ACTIONS)}
             </th>
           </tr>
